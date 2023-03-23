@@ -173,7 +173,7 @@ if [ "$boot" == 'uefi' ]; then
     mount /dev/disk/by-label/ROOT /mnt
     mkdir /mnt/boot
     mkdir /mnt/home
-    if [ "$boot" == 'uefi']; then
+    if [ "$boot" == 'uefi' ]; then
         mkdir -p /mnt/{boot/EFI,etc/conf.d}
         mount /dev/disk/by-label/ESP /mnt/boot/efi
     fi
