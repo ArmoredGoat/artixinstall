@@ -174,7 +174,7 @@ if [ "$boot" == 'uefi' ]; then
     mkdir /mnt/boot
     mkdir /mnt/home
     if [ "$boot" == 'uefi' ]; then
-        mkdir -p /mnt/{boot/EFI,etc/conf.d}
+        mkdir -p /mnt/{boot/efi,etc/conf.d}
         mount /dev/disk/by-label/ESP /mnt/boot/efi
     fi
     
@@ -211,7 +211,7 @@ echo "hostname=\'"$hostname"\'" > /mnt/etc/conf.d/hostname
 
 # installing base packages
 #base_devel='db diffutils gc guile libisl libmpc perl autoconf automake bash binutils bison esysusers etmpfiles fakeroot file findutils flex gawk gcc gettext grep groff gzip libtool m4 make pacman pacman-contrib patch pkgconf python sed opendoas texinfo which bc udev'
-basestrap /mnt base base_devel openrc elogind-openrc linux-lts linux-firmware git micro man-db bash-completion
+basestrap /mnt base base-devel openrc elogind-openrc linux-lts linux-firmware git micro man-db bash-completion
 
 # exporting variables
 mkdir /mnt/tempfiles
