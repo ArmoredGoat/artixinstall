@@ -59,7 +59,7 @@ while true; do
     esac      
 done
 # Ask how much swap space should be allocated and convert the value from Gibibyte to Megabyte.
-read -rp "Swap size in GiB: " swap; swap="$(echo "$swap * 1024" | bc )"'M'
+read -rp "Swap size in GiB: " swap; swap="$(( $swap * 1024 ))"'M'
 
 # Ask for hostname and credentials. Ensuring that passwords match.
 read -rp "Hostname: " hostname
@@ -67,8 +67,8 @@ read -rp "Username: " username
 
 userPassword="foo"; userPasswordConf="bar"
 while [[ $userPassword != $userPasswordConf ]]; do
-    read -rsp "Password: " userPassword
-    read -rsp "Confirm userPassword: " userPasswordConf
+    read -rsp "User password: " userPassword
+    read -rsp "Confirm user password: " userPasswordConf
     if [ $userPassword != $userPasswordConf ]; then
         echo "Passwords does not match. Please repeat."
     else
@@ -77,10 +77,10 @@ while [[ $userPassword != $userPasswordConf ]]; do
 done
 
 rootPassword="foo"; rootPasswordConf="bar"
-while [[ $userPassword != $rootPasswordConf ]]; do
-    read -rsp "Password: " rootPassword
-    read -rsp "Confirm userPassword: " rootPasswordConf
-    if [ $userPassword != $rootPasswordConf ]; then
+while [[ $rootPassword != $rootPasswordConf ]]; do
+    read -rsp "Root password: " rootPassword
+    read -rsp "Confirm root password: " rootPasswordConf
+    if [ $rootPassword != $rootPasswordConf ]; then
         echo "Passwords does not match. Please repeat."
     else
         break
@@ -97,14 +97,14 @@ timezone="Europe/Berlin" # Temporarily hard coded
 # Get CPU and threads 
 # TODO Insert reason for detection
 cpu=$(lscpu | grep 'Vendor ID:' | awk 'FNR == 1 {print $3;}')
-threadsMinusOne=$(echo "$(lscpu | grep 'CPU(s):' | awk 'FNR == 1 {print $2;}') - 1" | bc)
+threadsMinusOne=$(( $(lscpu | grep 'CPU(s):' | awk 'FNR == 1 {print $2;}') - 1 ))
 # Get GPU
 gpu=$(lspci | grep 'VGA compatible controller:' | awk 'FNR == 1 {print $5;}')
 if ! ([ "$gpu" == 'NVIDIA' ] || [ "$gpu" == 'Intel' ]); then
     gpu=AMD
 fi
 # Get amount of RAM
-ram=$(echo "$(< /proc/meminfo)" | grep 'MemTotal:' | awk '{print $2;}'); ram=$(echo "$ram / 1000000" | bc)
+ram=$(echo "$(< /proc/meminfo)" | grep 'MemTotal:' | awk '{print $2;}'); ram=$(( $ram / 1000000 ))
 
 #####   END HARDWARE DETECTION      #####
 
