@@ -242,7 +242,7 @@ firmware='linux-firmware sof-firmware'
     # networkmanager-$initSystem    -
     # dhcpcd                        -
     # iwd                           -
-network='networkmanager ''networkmanager-'$initSystem' dhcpcd idw'
+network='networkmanager ''networkmanager-'$initSystem' dhcpcd'
 
 # Editor
     # vim   -
