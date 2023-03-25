@@ -10,222 +10,284 @@ echo "##########################################################################
 echo "Before installation, a few question have to be answered."
 read -n 1 -srp "Press any key to continue."
 
+#####   START MANUAL CONFIGURATION  #####
+
+# List available disks
 printf "\nAvailable disks\n"
 lsblk --tree | grep 'NAME\|disk\|part'
 
-(lsblk --list -d | grep disk | awk '{print NR") /dev/" $1}') > /tmp/diskstemp
-
+# Store available disks in temp file, enumerates them, and display choices
+(lsblk --list -d | grep disk | awk '{print NR") /dev/" $1}') > /tmp/availableDisks
 while IFS= read -r line; do
     echo $line
-done < /tmp/diskstemp
+done < /tmp/availableDisks
 
-linesnumber=$(wc -l < tempfile)
-
-while true
-do
-      read -rp "Which disk shall be partitioned? " disk
-      case $disk in
-            [1-$linesnumber])
-                  disk=$(sed "${disk}q;d" /tmp/diskstemp | awk '{print $2}')
-                  break
-                  ;;
-            *)
-                  echo "Invalid input. Please choose one of the available disks listed above."
-                  ;;
+# Get number of lines of temp file = number of choices
+numberOfDisks=$(wc -l < /tmp/availableDisks)
+# Disk can be selected by entering its number 
+while true; do
+    if [[ "$numberOfDisks" > 1 ]]; then
+        read -rp "Which disk shall be partitioned? [1 - $(numberOfDisks)]" selectedDisk
+    else
+        read -rp "Which disk shall be partitioned? [1]" selectedDisk
+    fi
+      case $selectedDisk in
+        [1-$numberOfDisks])
+            disk=$(sed "${selectedDisk}q;d" /tmp/availableDisks | awk '{print $2}')
+            break
+            ;;
+        *)
+            echo "Invalid input. Please choose one of the available disks listed above by entering its number."
+            ;;
       esac      
 done
 
-read -rp "Swap size in GB: " swap
-
-while true
-do
-      read -n 1 -rp "Do you want to perform a clean install? (y/N)" wipe
-      case $wipe in
-            [yY][eE][sS]|[yY])
-                  wipe='y'
-                  break
-                  ;;
-            [nN][oO]|[nN]|"")
-                  wipe='n'
-                  break
-                  ;;
-            *)
-                  echo "Invalid input..."
-                  ;;
-      esac      
+# Ask for confirmation to wipe selected disk.
+while true; do
+    read -rp "The selected disk will be completely wiped. Do you want to continue? (y/N)" wipe
+    case $wipe in
+        [yY][eE][sS]|[yY])
+            break
+            ;;
+        [nN][oO]|[nN]|"")
+            echo "The installation will be aborted. Exiting process..."
+            exit 0
+            ;;
+        *)
+            echo "Invalid input..."
+            ;;
+    esac      
 done
+# Ask how much swap space should be allocated and convert the value from Gibibyte to Megabyte.
+read -rp "Swap size in GiB: " swap; swap="$(echo "$swap * 1024" | bc )"'M'
 
+# Ask for hostname and credentials. Ensuring that passwords match.
+read -rp "Hostname: " hostname
 read -rp "Username: " username
 
-password="foo"
-passwordConf="bar"
-while [[ $password != $passwordConf ]]; do
-    read -rsp "Password: " password
-    read -rsp "Confirm password: " passwordConf
-    if [ $password != $passwordConf ]; then
+userPassword="foo"; userPasswordConf="bar"
+while [[ $userPassword != $userPasswordConf ]]; do
+    read -rsp "Password: " userPassword
+    read -rsp "Confirm userPassword: " userPasswordConf
+    if [ $userPassword != $userPasswordConf ]; then
         echo "Passwords does not match. Please repeat."
+    else
+        break
     fi
 done
 
-rootpassword="foo"
-rootpasswordConf="bar"
-while [[ $password != $passwordConf ]]; do
-    read -rsp "Password: " rootpassword
-    read -rsp "Confirm password: " rootpasswordConf
-    if [ $password != $passwordConf ]; then
+rootPassword="foo"; rootPasswordConf="bar"
+while [[ $userPassword != $rootPasswordConf ]]; do
+    read -rsp "Password: " rootPassword
+    read -rsp "Confirm userPassword: " rootPasswordConf
+    if [ $userPassword != $rootPasswordConf ]; then
         echo "Passwords does not match. Please repeat."
+    else
+        break
     fi
 done
 
-read -rp "Hostname: " hostname
-
+# TODO Implement selection of timezone.
 timezone="Europe/Berlin" # Temporarily hard coded
 
-#read -r -s -p "Enter your password: "
+#####   END MANUAL CONFIGURATION    #####
 
-##### HARDWARE DETECTION      #####
+#####   START HARDWARE DETECTION    #####
 
+# Get CPU and threads 
+# TODO Insert reason for detection
 cpu=$(lscpu | grep 'Vendor ID:' | awk 'FNR == 1 {print $3;}')
-
-threadsminusone=$(echo "$(lscpu | grep 'CPU(s):' | awk 'FNR == 1 {print $2;}') - 1" | bc)
-
+threadsMinusOne=$(echo "$(lscpu | grep 'CPU(s):' | awk 'FNR == 1 {print $2;}') - 1" | bc)
+# Get GPU
 gpu=$(lspci | grep 'VGA compatible controller:' | awk 'FNR == 1 {print $5;}')
 if ! ([ "$gpu" == 'NVIDIA' ] || [ "$gpu" == 'Intel' ]); then
     gpu=AMD
 fi
-
+# Get amount of RAM
 ram=$(echo "$(< /proc/meminfo)" | grep 'MemTotal:' | awk '{print $2;}'); ram=$(echo "$ram / 1000000" | bc)
 
-# start conditional questions
-if [ "$gpu" == 'Intel' ]; then
-    echo -e '1. libva-intel-driver (intel igpus up to coffee lake)\n2. intel-media-driver (intel igpus/dgpus newer than coffee lake)\n'
-    read -n 1 -rp "va-api driver: " intel_vaapi_driver
-fi
-# stop conditional questions
+#####   END HARDWARE DETECTION      #####
 
-# start variable manipulation
-# Change uppercase characters to lowercase
-wipe=$(echo "$wipe" | tr '[:upper:]' '[:lower:]')
-username=$(echo "$username" | tr '[:upper:]' '[:lower:]')
-hostname=$(echo "$hostname" | tr '[:upper:]' '[:lower:]')
+#####   START CONDITIONAL QUERIES   #####
 
-disk0=$disk
+# Do not know why this is done, yet. Will implement it when I figured it out.
+#if [ "$gpu" == 'Intel' ]; then
+#    echo -e '1. libva-intel-driver (intel igpus up to coffee lake)\n2. intel-media-driver (intel igpus/dgpus newer than coffee lake)\n'
+#    read -n 1 -rp "va-api driver: " intel_vaapi_driver
+#fi
+
+# In case of NVME or SD/MMC device, append 'p' to adress Linux' way of naming partitions.
+baseDisk=$disk
 if [[ "$disk" == /dev/nvme0n* ]] || [[ "$disk" == /dev/mmcblk* ]]; then
     disk="$disk"'p'
 fi
 
-# determine if running as UEFI or BIOS
-# If /sys/firmware/efi exists it is an UEFI boot
+# Determine if UEFI or BIOS boot. If /sys/firmware/efi exists --> UEFI boot
 if [ -d "/sys/firmware/efi" ]; then
     boot='uefi'
 else
     boot='bios'
 fi
 
-# start partitioning
+#####   END CONDITIONAL QUERIES     #####
+
+#####   START VARIABLE MANIPULATION #####
+
+# Change uppercase characters to lowercase for username and hostname
+username=$(echo "$username" | tr '[:upper:]' '[:lower:]')
+hostname=$(echo "$hostname" | tr '[:upper:]' '[:lower:]')
+
+#####   END VARIABLE MANIPULATION   #####
+
+#####   START PARTITIONING          #####
+
+# In case of UEFI boot --> GPT/UEFI partitioning with 1 GiB disk space for boot partition.
+# In case of BIOS boot --> MBR/BIOS partitioning
 if [ "$boot" == 'uefi' ]; then
-    # gpt/uefi partitioning
-    if [ "$wipe" == y ]; then
-        partitions=0
-        wipefs --all --force "$disk0"
-        echo "g
-        n
-        1
+    wipefs --all --force "$baseDisk"
+    echo "g
+    n
+    1
 
-        +1024M
-        t
-        1
-        n
-        2
+    +1024M
+    t
+    1
+    n
+    2
 
-        +8192M
-        t
-        2
-        19
-        n
-        3
+    +$(swap)
+    t
+    2
+    19
+    n
+    3
 
+    
+    w
+    " | fdisk -w always -W always "$baseDisk"
+
+    # Format and label disks
+    mkfs.fat -F 32 "$disk"'1'; fatlabel "$disk"'1' ESP
+    mkswap -L SWAP "$disk"'2'
+    mkfs.ext4 -L ROOT "$disk"'3'
         
-        w
-        " | fdisk -w always -W always "$disk0"
-        #part 1 = boot, part 2 = swap, part 3 = root
-
-        # disk formatting
-        mkfs.fat -F 32 "$disk""$((1 + "$partitions"))"
-        fatlabel "$disk""$((1 + "$partitions"))" ESP
-        mkswap -L SWAP "$disk""$((2 + "$partitions"))"
-        mkfs.ext4 -L ROOT "$disk""$((3 + "$partitions"))"
-
-    else
-        partitions=$(lsblk "$disk0" -o NAME | grep -o '.$' | tail -1)
-        echo "n
-        +1024M
-        t
-        1
-        n
-        w
-        " | fdisk -W always "$disk0"
-    fi
-
-
-    # mounting storage and efi partitions
+    # Mount storage and EFI partitions, and create necessary directories
     swapon /dev/disk/by-label/SWAP
     mount /dev/disk/by-label/ROOT /mnt
-    mkdir /mnt/boot
-    mkdir /mnt/home
-    if [ "$boot" == 'uefi' ]; then
-        mkdir -p /mnt/{boot/efi,etc/conf.d}
-        mount /dev/disk/by-label/ESP /mnt/boot/efi
-    fi
-    
+    mkdir -p /mnt/{boot,boot/efi,etc/conf.d,home}
+    mount /dev/disk/by-label/ESP /mnt/boot/efi
 else
-    # mbr/bios partitioning
-    if [ "$wipe" == y ]; then
-        partitions=0
-        echo "o
-        n
-        p
-        w
-        " | fdisk -w always -W always "$disk0"
-    else
-        partitions=$(lsblk "$disk0" -o NAME | grep -o '.$' | tail -1)
-        echo "n
-        p
-        w
-        " | fdisk -W always "$disk0"
-    fi
+    partitions=0
+    echo "o
+    n
+    p
+    1
 
-    # disk formatting
-    mkfs.ext4 -O fast_commit "$disk""$((1 + "$partitions"))"
+    +$(swap)
+    n
+    p
 
-    # mounting storage (no efi partition, using dos label)
-    mount "$disk""$((1 + "$partitions"))" /mnt
+    -1M
+    w
+    " | fdisk -w always -W always "$baseDisk"
+
+    # Format and label disks
+    mkswap -L SWAP "$disk"'1'
+    mkfs.ext4 -L ROOT "$disk"'2'
+
+    # Mount storage and EFI partitions, and create necessary directories
+    swapon /dev/disk/by-label/SWAP
+    mount /dev/disk/by-label/ROOT /mnt
     mkdir -p /mnt/etc/conf.d
 fi
 
+#####   END PARTITIONING            #####
+
+#####   START BASE INSTALLATION     #####
+
+# Generate filesystem table
 fstabgen -U /mnt >> /mnt/etc/fstab
 
-# setting hostname
+# Set hostname
 echo "$hostname" > /mnt/etc/hostname
 echo "hostname=\'"$hostname"\'" > /mnt/etc/conf.d/hostname
 
-# installing base packages
-#base_devel='db diffutils gc guile libisl libmpc perl autoconf automake bash binutils bison esysusers etmpfiles fakeroot file findutils flex gawk gcc gettext grep groff gzip libtool m4 make pacman pacman-contrib patch pkgconf python sed opendoas texinfo which bc udev'
-basestrap /mnt base base-devel openrc elogind-openrc linux-lts linux-firmware git micro man-db bash-completion
+# Install packages
+# TODO Add explanation to choice of packages
+# Base packages
+    # base          - 
+    # base-devel    - Package group with tools for building (compiling and linking) software
+    #base_devel='db diffutils gc guile libisl libmpc perl autoconf automake bash binutils bison esysusers etmpfiles fakeroot file findutils flex gawk gcc gettext grep groff gzip libtool m4 make pacman pacman-contrib patch pkgconf python sed opendoas texinfo which bc udev'
+basePackages='base base-devel'
 
-# exporting variables
-mkdir /mnt/tempfiles
-echo "$formfactor" > /mnt/tempfiles/formfactor
-echo "$cpu" > /mnt/tempfiles/cpu
-echo "$threadsminusone" > /mnt/tempfiles/threadsminusone
-echo "$gpu" > /mnt/tempfiles/gpu
-echo "$intel_vaapi_driver" > /mnt/tempfiles/intel_vaapi_driver
-echo "$boot" > /mnt/tempfiles/boot
-echo "$disk0" > /mnt/tempfiles/disk
-echo "$username" > /mnt/tempfiles/username
-echo "$password" > /mnt/tempfiles/userpassword
-echo "$rootpassword" > /mnt/tempfiles/rootpassword
-echo "$timezone" > /mnt/tempfiles/timezone
+# Init system
+    # openrc    - 
+initSystem='openrc'
+
+# Login manager
+    # elogind   - 
+loginManager='elogind-'$initSystem
+
+# Linux kernel
+    # linux-lts, zen, ...
+kernel='linux-lts'
+
+# Firmware
+    # linux-firmware    -
+    # sof-firmware      -
+firmware='linux-firmware sof-firmware'
+
+# Network
+    # networkmanager                -
+    # networkmanager-$initSystem    -
+    # dhcpcd                        -
+    # iwd                           -
+network='networkmanager ''networkmanager-'$initSystem' dhcpcd idw'
+
+# Editor
+    # vim   -
+editor='vim'
+
+# Manuals
+    # man-db    -
+    # man-pages -
+    # texinfo   -
+manuals='man-db man-pages texinfo'
+
+# General administration
+    # sudo
+generalAdministration='sudo'
+
+# Filesystem adiminstration
+    # e2fsprogs -
+    # dosfstools    -
+filesystemAdministration='e2fsprogs dosfstools'
+
+# Additional packages
+    # git   -
+    # micro -
+    # bash-completion   -
+additionalPackages='git micro bash-completion'
+
+basestrap /mnt $basePackages $initSystem $loginManager $kernel $firmware $generalAdministration $editor $manuals $network $filesystemAdministration $additionalPackages
+
+#####   END BASE INSTALLATION       #####
+
+#####   START EXPORTING VARIABLES   #####
+
+#echo "$formfactor" > /mnt/tmp/formfactor
+echo "$cpu" > /mnt/tmp/cpu
+echo "$threadsMinusOne" > /mnt/tmp/threadsMinusOne
+echo "$gpu" > /mnt/tmp/gpu
+#echo "$intel_vaapi_driver" > /mnt/tmp/intel_vaapi_driver
+echo "$boot" > /mnt/tmp/boot
+echo "$baseDisk" > /mnt/tmp/disk
+echo "$username" > /mnt/tmp/username
+echo "$userPassword" > /mnt/tmp/userPassword
+echo "$rootPassword" > /mnt/tmp/rootPassword
+echo "$timezone" > /mnt/tmp/timezone
+
+#####   END EXPORTING VARIABLES     #####
 
 #curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/main/chrootInstall.sh -o /mnt/chrootInstall.sh
 #chmod +x /mnt/chrootInstall.sh
