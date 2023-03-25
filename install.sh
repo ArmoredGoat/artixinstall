@@ -145,7 +145,7 @@ hostname=$(echo "$hostname" | tr '[:upper:]' '[:lower:]')
 # In case of BIOS boot --> MBR/BIOS partitioning
 if [ "$boot" == 'uefi' ]; then
     wipefs --all --force "$baseDisk"
-    echo "g
+    echo 'g
     n
     1
 
@@ -155,7 +155,7 @@ if [ "$boot" == 'uefi' ]; then
     n
     2
 
-    +$(swap)
+    +'$swap'
     t
     2
     19
@@ -164,7 +164,7 @@ if [ "$boot" == 'uefi' ]; then
 
     
     w
-    " | fdisk -w always -W always "$baseDisk"
+    ' | fdisk -w always -W always "$baseDisk"
 
     # Format and label disks
     mkfs.fat -F 32 "$disk"'1'; fatlabel "$disk"'1' ESP
@@ -178,18 +178,18 @@ if [ "$boot" == 'uefi' ]; then
     mount /dev/disk/by-label/ESP /mnt/boot/efi
 else
     partitions=0
-    echo "o
+    echo 'o
     n
     p
     1
 
-    +$(swap)
+    +'$swap'
     n
     p
 
     -1M
     w
-    " | fdisk -w always -W always "$baseDisk"
+    ' | fdisk -w always -W always "$baseDisk"
 
     # Format and label disks
     mkswap -L SWAP "$disk"'1'
