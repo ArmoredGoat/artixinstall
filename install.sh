@@ -242,7 +242,7 @@ firmware='linux-firmware sof-firmware'
     # networkmanager-$initSystem    -
     # dhcpcd                        -
     # iwd                           -
-network='networkmanager ''networkmanager-'$initSystem' dhcpcd'
+network='networkmanager-'$initSystem' dhcpcd'
 
 # Editor
     # vim   -
@@ -289,6 +289,6 @@ echo "$timezone" > /mnt/tmp/timezone
 
 #####   END EXPORTING VARIABLES     #####
 
-#curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/main/chrootInstall.sh -o /mnt/chrootInstall.sh
-#chmod +x /mnt/chrootInstall.sh
-#artix-chroot /mnt /chrootInstall.sh
+curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/main/chrootInstall.sh -o /mnt/chrootInstall.sh
+chmod +x /mnt/chrootInstall.sh
+artix-chroot /mnt /chrootInstall.sh
