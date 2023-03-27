@@ -10,6 +10,7 @@ echo "$boot"="$(< /mnt/tmp/boot)"
 echo "$baseDisk"="$(< /mnt/tmp/disk)"
 echo "$username"="$(< /mnt/tmp/username)"
 echo "$userPassword"="$(< /mnt/tmp/userPassword)"
+echo "$setRootPassword"="$(< /mnt/tmp/setRootPassword)"
 echo "$rootPassword"="$(< /mnt/tmp/rootPassword)"
 echo "$timezone"="$(< /mnt/tmp/timezone)"
 
@@ -80,7 +81,8 @@ grub-mkconfig -o /boot/grub/grub.cfg
 
 #####   START USER MANAGEMENT       #####
 
-if [ -n "$rootPassword" ]; then
+# Set root password if given. Otherwise disable access.
+if [ "$setRootPassword" =true ]; then
     echo "$rootpassword
     $rootpassword
     " | passwd
@@ -88,15 +90,32 @@ else
     usermod -p '!' root
 fi
 
+# Create user and set password
 useradd -m "$username"
 echo "$userPassword
 $userPassword
 " | passwd "$username"
 
+# Grant groups to user
 usermod -aG wheel,audio,video,storage "$username"
-
+# Give users in wheel group sudo privileges --> no need for root user
 sed -i '/%wheel ALL=(ALL:ALL) ALL/s/^#//g' /etc/sudoers
 
-
+# set home directory permissions
+mkdir -p /home/"$username"/{.config,.local/share}
+chmod 700 /home/"$username"
+chown "$username":users /home/"$username"/{.config,.local}
+chown "$username":users /home/"$username"/.local/share
+chmod 755 /home/"$username"/{.config,.local/share}
 
 #####   END USER MANAGEMENT         #####
+
+curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/tree/main/configfiles/user-dirs.defaults -o /etc/xdg/user-dirs.defaults
+
+
+# Application configuration
+
+# vim
+curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/tree/main/configfiles/user-dirs.defaults -o /etc/xdg/user-dirs.defaults
+
+
