@@ -78,7 +78,7 @@ done
 
 while true; do
     read -rp "Do you want to set a root password? (y/N)" setRootPassword
-    case setRootPassword in
+    case $setRootPassword in
         [yY][eE][sS]|[yY])
             setRootPassword=true
             rootPassword="foo"; rootPasswordConf="bar"
