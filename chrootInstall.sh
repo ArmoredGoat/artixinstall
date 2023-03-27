@@ -1,18 +1,18 @@
 
 #####   START IMPORTING VARIABLES   #####
 
-#echo "$formfactor"="$(< /mnt/tmp/formfactor)"
-echo "$cpu"="$(< /mnt/tmp/cpu)"
-echo "$threadsMinusOne"="$(< /mnt/tmp/threadsMinusOne)"
-echo "$gpu"="$(< /mnt/tmp/gpu)"
-#echo "$intel_vaapi_driver"="$(< /mnt/tmp/intel_vaapi_driver
-echo "$boot"="$(< /mnt/tmp/boot)"
-echo "$baseDisk"="$(< /mnt/tmp/disk)"
-echo "$username"="$(< /mnt/tmp/username)"
-echo "$userPassword"="$(< /mnt/tmp/userPassword)"
-echo "$setRootPassword"="$(< /mnt/tmp/setRootPassword)"
-echo "$rootPassword"="$(< /mnt/tmp/rootPassword)"
-echo "$timezone"="$(< /mnt/tmp/timezone)"
+#echo "$formfactor"="$(< /tmp/formfactor)"
+echo "$cpu"="$(< /tmp/cpu)"
+echo "$threadsMinusOne"="$(< /tmp/threadsMinusOne)"
+echo "$gpu"="$(< /tmp/gpu)"
+#echo "$intel_vaapi_driver"="$(< /tmp/intel_vaapi_driver
+echo "$boot"="$(< /tmp/boot)"
+echo "$baseDisk"="$(< /tmp/disk)"
+echo "$username"="$(< /tmp/username)"
+echo "$userPassword"="$(< /tmp/userPassword)"
+echo "$setRootPassword"="$(< /tmp/setRootPassword)"
+echo "$rootPassword"="$(< /tmp/rootPassword)"
+echo "$timezone"="$(< /tmp/timezone)"
 
 #####   END IMPORTING VARIABLES     #####
 
@@ -157,13 +157,13 @@ pacman -S alacritty
 # Install AUR helper
 git clone https://aur.archlinux.org/yay-git.git /home/"$username"/git/cloned/yay
 cd /home/"$username"/git/cloned/yay
-makepkg -si
+-u "$username" makepkg -si
 
 # Install browser
 gpg --keyserver hkp://keyserver.ubuntu.com --search-keys 031F7104E932F7BD7416E7F6D2845E1305D6E801   # Import gpg key
 git clone https://aur.archlinux.org/librewolf-bin.git /home/"$username"/git/cloned/librewolf
 cd /home/"$username"/git/cloned/librewolf
-makepkg -si
+-u "$username" makepkg -si
 
 # Application configuration
 
