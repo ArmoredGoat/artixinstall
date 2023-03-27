@@ -1,18 +1,18 @@
 
 #####   START IMPORTING VARIABLES   #####
 
-#echo "$formfactor"="$(< /tmp/formfactor)"
-echo "$cpu"="$(< /tmp/cpu)"
-echo "$threadsMinusOne"="$(< /tmp/threadsMinusOne)"
-echo "$gpu"="$(< /tmp/gpu)"
-#echo "$intel_vaapi_driver"="$(< /tmp/intel_vaapi_driver
-echo "$boot"="$(< /tmp/boot)"
-echo "$baseDisk"="$(< /tmp/disk)"
-echo "$username"="$(< /tmp/username)"
-echo "$userPassword"="$(< /tmp/userPassword)"
-echo "$setRootPassword"="$(< /tmp/setRootPassword)"
-echo "$rootPassword"="$(< /tmp/rootPassword)"
-echo "$timezone"="$(< /tmp/timezone)"
+#echo "$formfactor"="$(< /tempfiles/formfactor)"
+echo "$cpu"="$(< /tempfiles/cpu)"
+echo "$threadsMinusOne"="$(< /tempfiles/threadsMinusOne)"
+echo "$gpu"="$(< /tempfiles/gpu)"
+#echo "$intel_vaapi_driver"="$(< /tempfiles/intel_vaapi_driver
+echo "$boot"="$(< /tempfiles/boot)"
+echo "$baseDisk"="$(< /tempfiles/disk)"
+echo "$username"="$(< /tempfiles/username)"
+echo "$userPassword"="$(< /tempfiles/userPassword)"
+echo "$setRootPassword"="$(< /tempfiles/setRootPassword)"
+echo "$rootPassword"="$(< /tempfiles/rootPassword)"
+echo "$timezone"="$(< /tempfiles/timezone)"
 
 #####   END IMPORTING VARIABLES     #####
 
@@ -145,25 +145,25 @@ pacman -S $wm --needed --noconfirm
 
 #####   END WM INSTALLATION     #####
 
-pacman -S neofetch
+pacman -S neofetch --noconfirm
 
 # TODO Add neofetch configuration
 
 
-pacman -S alacritty
+pacman -S alacritty --noconfirm
 
 # TODO Add alacritty configuration
 
 # Install AUR helper
 git clone https://aur.archlinux.org/yay-git.git /home/"$username"/git/cloned/yay
 cd /home/"$username"/git/cloned/yay
--u "$username" makepkg -si
+sudo -u "$username" makepkg -si
 
 # Install browser
 gpg --keyserver hkp://keyserver.ubuntu.com --search-keys 031F7104E932F7BD7416E7F6D2845E1305D6E801   # Import gpg key
 git clone https://aur.archlinux.org/librewolf-bin.git /home/"$username"/git/cloned/librewolf
 cd /home/"$username"/git/cloned/librewolf
--u "$username" makepkg -si
+sudo -u "$username" makepkg -si
 
 # Application configuration
 

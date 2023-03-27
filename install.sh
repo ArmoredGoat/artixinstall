@@ -17,13 +17,13 @@ printf "\nAvailable disks\n"
 lsblk --tree | grep 'NAME\|disk\|part'
 
 # Store available disks in temp file, enumerates them, and display choices
-(lsblk --list -d | grep disk | awk '{print NR") /dev/" $1}') > /tmp/availableDisks
+(lsblk --list -d | grep disk | awk '{print NR") /dev/" $1}') > /tempfiles/availableDisks
 while IFS= read -r line; do
     echo $line
-done < /tmp/availableDisks
+done < /tempfiles/availableDisks
 
 # Get number of lines of temp file = number of choices
-numberOfDisks=$(wc -l < /tmp/availableDisks)
+numberOfDisks=$(wc -l < /tempfiles/availableDisks)
 # Disk can be selected by entering its number 
 while true; do
     if [[ "$numberOfDisks" > 1 ]]; then
@@ -33,7 +33,7 @@ while true; do
     fi
       case $selectedDisk in
         [1-$numberOfDisks])
-            disk=$(sed "${selectedDisk}q;d" /tmp/availableDisks | awk '{print $2}')
+            disk=$(sed "${selectedDisk}q;d" /tempfiles/availableDisks | awk '{print $2}')
             break
             ;;
         *)
@@ -237,7 +237,7 @@ echo "hostname=\'"$hostname"\'" > /mnt/etc/conf.d/hostname
 # Base packages
     # base          - 
     # base-devel    - Package group with tools for building (compiling and linking) software
-    #base_devel='db diffutils gc guile libisl libmpc perl autoconf automake bash binutils bison esysusers etmpfiles fakeroot file findutils flex gawk gcc gettext grep groff gzip libtool m4 make pacman pacman-contrib patch pkgconf python sed opendoas texinfo which bc udev'
+    #base_devel='db diffutils gc guile libisl libmpc perl autoconf automake bash binutils bison esysusers /tempfilesfiles fakeroot file findutils flex gawk gcc gettext grep groff gzip libtool m4 make pacman pacman-contrib patch pkgconf python sed opendoas texinfo which bc udev'
 basePackages='base base-devel'
 
 # Init system
@@ -295,18 +295,19 @@ basestrap /mnt $basePackages $initSystem $loginManager $kernel $firmware $genera
 
 #####   START EXPORTING VARIABLES   #####
 
-#echo "$formfactor" > /mnt/tmp/formfactor
-echo "$cpu" > /mnt/tmp/cpu
-echo "$threadsMinusOne" > /mnt/tmp/threadsMinusOne
-echo "$gpu" > /mnt/tmp/gpu
-#echo "$intel_vaapi_driver" > /mnt/tmp/intel_vaapi_driver
-echo "$boot" > /mnt/tmp/boot
-echo "$baseDisk" > /mnt/tmp/disk
-echo "$username" > /mnt/tmp/username
-echo "$userPassword" > /mnt/tmp/userPassword
-echo "$setRootPassword" > /mnt/tmp/setRootPassword
-echo "$rootPassword" > /mnt/tmp/rootPassword
-echo "$timezone" > /mnt/tmp/timezone
+mkdir /mnt/tempfiles
+#echo "$formfactor" > /mnt/tempfiles/formfactor
+echo "$cpu" > /mnt/tempfiles/cpu
+echo "$threadsMinusOne" > /mnt/tempfiles/threadsMinusOne
+echo "$gpu" > /mnt/tempfiles/gpu
+#echo "$intel_vaapi_driver" > /mnt/tempfiles/intel_vaapi_driver
+echo "$boot" > /mnt/tempfiles/boot
+echo "$baseDisk" > /mnt/tempfiles/disk
+echo "$username" > /mnt/tempfiles/username
+echo "$userPassword" > /mnt/tempfiles/userPassword
+echo "$setRootPassword" > /mnt/tempfiles/setRootPassword
+echo "$rootPassword" > /mnt/tempfiles/rootPassword
+echo "$timezone" > /mnt/tempfiles/timezone
 
 #####   END EXPORTING VARIABLES     #####
 
