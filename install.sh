@@ -120,7 +120,7 @@ cpu=$(lscpu | grep 'Vendor ID:' | awk 'FNR == 1 {print $3;}')
 threadsMinusOne=$(( $(lscpu | grep 'CPU(s):' | awk 'FNR == 1 {print $2;}') - 1 ))
 # Get GPU
 gpu=$(lspci | grep 'VGA compatible controller:' | awk 'FNR == 1 {print $5;}')
-if ! ([ "$gpu" == 'NVIDIA' ] || [ "$gpu" == 'Intel' ]); then
+if ! ([ "$gpu" == 'NVIDIA' ] || [ "$gpu" == 'Intel' ] || [ "$gpu" == 'VMware' ]); then
     gpu=AMD
 fi
 # Get amount of RAM
