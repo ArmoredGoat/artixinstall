@@ -108,14 +108,70 @@ chown "$username":users /home/"$username"/{.config,.local}
 chown "$username":users /home/"$username"/.local/share
 chmod 755 /home/"$username"/{.config,.local/share}
 
+mkdir -p /home/"$username"/git/{own,cloned}
+
 #####   END USER MANAGEMENT         #####
 
 curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/tree/main/configfiles/user-dirs.defaults -o /etc/xdg/user-dirs.defaults
 
+##### START GRAPHIC DRIVERs INSTALLATION    #####
+
+if [ "$gpu" == 'AMD' ]; then
+    $graphicsDrivers='xf86-video-amdgpu mesa lib32-mesa vulkan-radeon'
+elif [ "$gpu" == 'INTEL' ]; then
+    $graphicsDrivers='xf86-video-intel mesa lib32-mesa vulkan-intel'
+elif [ "$gpu" == 'NVIDIA']; then
+    $graphicsDrivers='xf86-video-nouveau mesa lib32-mesa nvidia-utils'
+elif [ "$gpu" == 'VMware']; then
+    $graphicsDrivers='xf86-video-vmware xf86-input-vmmouse mesa lib32-mesa'
+fi
+
+pacman -S $graphicsDrivers --needed --noconfirm
+
+xorgPackages='xorg xorg-server xorg-xinit'
+
+pacman -S $xorgPackages --needed --noconfirm
+
+#####   END GRAPHIC DRIVERs INSTALLATION    #####
+
+#####   START WM INSTALLATION   #####
+
+# Might switch from awesome to qtile as it is completely written in python
+wm='awesome' # qtile
+
+pacman -S $wm --needed --noconfirm
+
+# TODO Add configuration
+
+#####   END WM INSTALLATION     #####
+
+pacman -S neofetch
+
+# TODO Add neofetch configuration
+
+
+pacman -S alacritty
+
+# TODO Add alacritty configuration
+
+# Install AUR helper
+git clone https://aur.archlinux.org/yay-git.git /home/"$username"/git/cloned/yay
+cd /home/"$username"/git/cloned/yay
+makepkg -si
+
+# Install browser
+gpg --keyserver hkp://keyserver.ubuntu.com --search-keys 031F7104E932F7BD7416E7F6D2845E1305D6E801   # Import gpg key
+git clone https://aur.archlinux.org/librewolf-bin.git /home/"$username"/git/cloned/librewolf
+cd /home/"$username"/git/cloned/librewolf
+makepkg -si
 
 # Application configuration
 
+# Xorg
+
+
+
 # vim
-curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/tree/main/configfiles/user-dirs.defaults -o /etc/xdg/user-dirs.defaults
+#curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/tree/main/configfiles/user-dirs.defaults -o /etc/xdg/user-dirs.defaults
 
 
