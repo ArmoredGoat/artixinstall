@@ -76,16 +76,36 @@ while [[ $userPassword != $userPasswordConf ]]; do
     fi
 done
 
-rootPassword="foo"; rootPasswordConf="bar"
-while [[ $rootPassword != $rootPasswordConf ]]; do
-    read -rsp "Root password: " rootPassword
-    read -rsp "Confirm root password: " rootPasswordConf
-    if [ $rootPassword != $rootPasswordConf ]; then
-        echo "Passwords does not match. Please repeat."
-    else
-        break
-    fi
+while true; do
+    read -rsp "Do you want to set a root password? (y/N)" setRootPassword
+    case setRootPassword in
+        [yY][eE][sS]|[yY])
+            setRootPassword=true
+            rootPassword="foo"; rootPasswordConf="bar"
+            while [[ $rootPassword != $rootPasswordConf ]]; do
+                read -rsp "Root password: " rootPassword
+                read -rsp "Confirm root password: " rootPasswordConf
+                if [ $rootPassword != $rootPasswordConf ]; then
+                    echo "Passwords does not match. Please repeat."
+                else
+                    break
+                fi
+            done
+            break
+            ;;
+        [nN][oO]|[nN]|"")
+            setRootPassword=false
+            echo "No root password will be set."
+            break
+            ;;
+        *)
+            echo "Invalid input..."
+            ;;
+    esac      
 done
+
+
+
 
 # TODO Implement selection of timezone.
 timezone="Europe/Berlin" # Temporarily hard coded
@@ -284,6 +304,7 @@ echo "$boot" > /mnt/tmp/boot
 echo "$baseDisk" > /mnt/tmp/disk
 echo "$username" > /mnt/tmp/username
 echo "$userPassword" > /mnt/tmp/userPassword
+echo "$setRootPassword" > /mnt/tmp/setRootPassword
 echo "$rootPassword" > /mnt/tmp/rootPassword
 echo "$timezone" > /mnt/tmp/timezone
 
