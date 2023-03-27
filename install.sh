@@ -77,7 +77,7 @@ while [[ $userPassword != $userPasswordConf ]]; do
 done
 
 while true; do
-    read -rsp "Do you want to set a root password? (y/N)" setRootPassword
+    read -rp "Do you want to set a root password? (y/N)" setRootPassword
     case setRootPassword in
         [yY][eE][sS]|[yY])
             setRootPassword=true
@@ -121,7 +121,7 @@ threadsMinusOne=$(( $(lscpu | grep 'CPU(s):' | awk 'FNR == 1 {print $2;}') - 1 )
 # Get GPU
 gpu=$(lspci | grep 'VGA compatible controller:' | awk 'FNR == 1 {print $5;}')
 if ! ([ "$gpu" == 'NVIDIA' ] || [ "$gpu" == 'Intel' ] || [ "$gpu" == 'VMware' ]); then
-    gpu=AMD
+    gpu='AMD'
 fi
 # Get amount of RAM
 ram=$(echo "$(< /proc/meminfo)" | grep 'MemTotal:' | awk '{print $2;}'); ram=$(( $ram / 1000000 ))
