@@ -7,13 +7,41 @@ echo "#                                 Last updated at 2023/03/20              
 echo "#        Educationally inspired by https://github.com/rwinkhart/artix-install-script         #"
 echo "##############################################################################################"
 
-echo "Before installation, a few question have to be answered."
+echo -e "\nBefore installation, a few question have to be answered.\n"
 read -n 1 -srp "Press any key to continue."
 
 #####   START MANUAL CONFIGURATION  #####
 
+echo -e "\nAvailable installation types
+
+1) Base installation 
+    Only necessary packages and configuration.
+    In the end you have a working but basic Artix installation.
+2) Customized installation
+    Take over all my configuration and user settings.
+    It is not guaranteed that my configuration is one hundred percent compatible
+    with your system, although this script is designed to be adaptive.
+"
+
+while true; do
+    read -rp $'\nWhich installation would you like to perfom (1-2)? ' installationType
+    case $installationType in
+        1)
+            installationType='base'
+            break
+            ;;
+        2)
+            installationType='custom'
+            break
+            ;;
+        *)
+            echo "Invalid input. Please choose one of the available installation types listed above by entering its number."
+            ;;
+    esac      
+done
+
 # List available disks
-printf "\nAvailable disks\n"
+echo -e "\n\nAvailable disks\n"
 lsblk --tree | grep 'NAME\|disk\|part'
 
 # Store available disks in temp file, enumerates them, and display choices
@@ -27,30 +55,31 @@ numberOfDisks=$(wc -l < /tempfiles/availableDisks)
 # Disk can be selected by entering its number 
 while true; do
     if [[ "$numberOfDisks" > 1 ]]; then
-        read -rp "Which disk shall be partitioned? [1 - $(numberOfDisks)]" selectedDisk
+        read -rp "Which disk shall be partitioned (1 - $(numberOfDisks))? " selectedDisk
     else
-        read -rp "Which disk shall be partitioned? [1]" selectedDisk
+        read -rp "Which disk shall be partitioned (1)? " selectedDisk
     fi
-      case $selectedDisk in
+    case $selectedDisk in
         [1-$numberOfDisks])
             disk=$(sed "${selectedDisk}q;d" /tempfiles/availableDisks | awk '{print $2}')
             break
-            ;;
+            ;;  
         *)
             echo "Invalid input. Please choose one of the available disks listed above by entering its number."
             ;;
-      esac      
+    esac      
 done
 
 # Ask for confirmation to wipe selected disk.
 while true; do
-    read -rp "The selected disk will be completely wiped. Do you want to continue? (y/N)" wipe
+    read -rp "The selected disk will be completely wiped. Do you want to continue (y/N)? " wipe
     case $wipe in
         [yY][eE][sS]|[yY])
             break
             ;;
         [nN][oO]|[nN]|"")
             echo "The installation will be aborted. Exiting process..."
+            read -n 1 -srp "Press any key to exit."
             exit 0
             ;;
         *)
@@ -59,34 +88,44 @@ while true; do
     esac      
 done
 # Ask how much swap space should be allocated and convert the value from Gibibyte to Megabyte.
-read -rp "Swap size in GiB: " swap; swap="$(( $swap * 1024 ))"'M'
+read -rp $'\nSwap size in GiB: ' swap; swap="$(( $swap * 1024 ))"'M'
 
 # Ask for hostname and credentials. Ensuring that passwords match.
-read -rp "Hostname: " hostname
-read -rp "Username: " username
+read -rp $'\nHostname: ' hostname
+read -rp $'\nUsername: ' username
 
 userPassword="foo"; userPasswordConf="bar"
-while [[ $userPassword != $userPasswordConf ]]; do
-    read -rsp "User password: " userPassword
-    read -rsp "Confirm user password: " userPasswordConf
-    if [ $userPassword != $userPasswordConf ]; then
-        echo "Passwords does not match. Please repeat."
+while [ $userPassword != $userPasswordConf ]; do
+    read -rsp $'\nUser password: ' userPassword
+    read -rsp $'\nConfirm user password: ' userPasswordConf
+    if [[ $userPassword != $userPasswordConf && ${#userPassword} < 8 ]]; then
+        echo -e $'\nPasswords does not match AND are too short. Please choose a password with at least 8 characters and try again.'
+    elif [[ $userPassword == $userPasswordConf && ${#userPassword} < 8 ]]; then
+        echo $'\nPassword is too short. Please choose a password with at least 8 characters and try again.'
+        userPassword="foo"; userPasswordConf="bar"
+    elif [[ $userPassword != $userPasswordConf ]]; then
+        echo -e $'\nPasswords does not match. Please try again.'
     else
         break
     fi
 done
 
 while true; do
-    read -rp "Do you want to set a root password? (y/N)" setRootPassword
+    read -rp $'\nDo you want to set a root password (y/N)? ' setRootPassword
     case $setRootPassword in
         [yY][eE][sS]|[yY])
             setRootPassword=true
             rootPassword="foo"; rootPasswordConf="bar"
             while [[ $rootPassword != $rootPasswordConf ]]; do
-                read -rsp "Root password: " rootPassword
-                read -rsp "Confirm root password: " rootPasswordConf
-                if [ $rootPassword != $rootPasswordConf ]; then
-                    echo "Passwords does not match. Please repeat."
+                read -rsp 'Root password: ' rootPassword
+                read -rsp $'\nConfirm root password: ' rootPasswordConf
+                if [[ $rootPassword != $rootPasswordConf && ${#rootPassword} < 8 ]]; then
+                    echo $'\nPasswords does not match AND are too short. Please choose a password with at least 8 characters and try again.'
+                elif [[ $rootPassword == $rootPasswordConf && ${#rootPassword} < 8 ]]; then
+                    echo $'\nPassword is too short. Please choose a password with at least 8 characters and try again.'
+                    rootPassword="foo"; rootPasswordConf="bar"
+                elif [[ $rootPassword != $rootPasswordConf ]]; then
+                    echo $'\nPasswords does not match. Please try again.'
                 else
                     break
                 fi
@@ -103,9 +142,6 @@ while true; do
             ;;
     esac      
 done
-
-
-
 
 # TODO Implement selection of timezone.
 timezone="Europe/Berlin" # Temporarily hard coded
