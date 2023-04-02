@@ -13,7 +13,8 @@ echo "$userPassword"="$(< /tempfiles/userPassword)"
 echo "$setRootPassword"="$(< /tempfiles/setRootPassword)"
 echo "$rootPassword"="$(< /tempfiles/rootPassword)"
 echo "$timezone"="$(< /tempfiles/timezone)"
-
+echo "$username"
+read -n 1
 #####   END IMPORTING VARIABLES     #####
 
 #####   START CONFIGURATION         #####
