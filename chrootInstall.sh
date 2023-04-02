@@ -32,10 +32,6 @@ ln -sf /usr/share/zoneinfo/"$timezone" /etc/localtime
 # Generate locales
 locale-gen
 
-# Activate NTP daemon to synchronize computer's real-time clock
-rc-service ntpd start
-#  sv up ntpd   s6-rc -u change ntpd   dinitctl start ntpd
-
 # Configure clock settings
 hwclock --systohc --utc
 
