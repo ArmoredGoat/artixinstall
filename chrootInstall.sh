@@ -2,17 +2,17 @@
 #####   START IMPORTING VARIABLES   #####
 
 #echo "$formfactor"="$(< /tempfiles/formfactor)"
-echo "$cpu"="$(< /tempfiles/cpu)"
-echo "$threadsMinusOne"="$(< /tempfiles/threadsMinusOne)"
-echo "$gpu"="$(< /tempfiles/gpu)"
-#echo "$intel_vaapi_driver"="$(< /tempfiles/intel_vaapi_driver
-echo "$boot"="$(< /tempfiles/boot)"
-echo "$baseDisk"="$(< /tempfiles/disk)"
-echo "$username"="$(< /tempfiles/username)"
-echo "$userPassword"="$(< /tempfiles/userPassword)"
-echo "$setRootPassword"="$(< /tempfiles/setRootPassword)"
-echo "$rootPassword"="$(< /tempfiles/rootPassword)"
-echo "$timezone"="$(< /tempfiles/timezone)"
+"$cpu"="$(< /tempfiles/cpu)"
+"$threadsMinusOne"="$(< /tempfiles/threadsMinusOne)"
+"$gpu"="$(< /tempfiles/gpu)"
+#"$intel_vaapi_driver"="$(< /tempfiles/intel_vaapi_driver
+"$boot"="$(< /tempfiles/boot)"
+"$baseDisk"="$(< /tempfiles/disk)"
+"$username"="$(< /tempfiles/username)"
+"$userPassword"="$(< /tempfiles/userPassword)"
+"$setRootPassword"="$(< /tempfiles/setRootPassword)"
+"$rootPassword"="$(< /tempfiles/rootPassword)"
+"$timezone"="$(< /tempfiles/timezone)"
 echo "$username"
 read -n 1
 #####   END IMPORTING VARIABLES     #####
