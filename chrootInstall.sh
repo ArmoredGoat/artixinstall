@@ -112,7 +112,7 @@ mkdir -p /home/"$username"/git/{own,cloned}
 
 
 #####   END USER MANAGEMENT         #####
-if [[ "$installationType" == "custom"]]; then
+if [[ "$installationType" == "custom" ]]; then
     curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/tree/main/configfiles/user-dirs.defaults -o /etc/xdg/user-dirs.defaults
 
     ##### START GRAPHIC DRIVERs INSTALLATION    #####
