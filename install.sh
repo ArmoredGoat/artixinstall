@@ -40,6 +40,8 @@ while true; do
     esac      
 done
 
+mkdir /tempfiles
+
 # List available disks
 echo -e "\n\nAvailable disks\n"
 lsblk --tree | grep 'NAME\|disk\|part'
