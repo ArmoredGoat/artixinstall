@@ -143,11 +143,6 @@ while true; do
     esac      
 done
 
-# TODO Implement selection of timezone.
-timezone="Europe/Berlin" # Temporarily hard coded
-
-#! bin/bash
-
 echo "1) Africa"
 echo "2) America"
 echo "3) Asia"
@@ -157,9 +152,8 @@ echo "6) Europe"
 echo "7) Pacific"
 echo "8) Etc"
 
-read -rp "Please enter your region's number (1-8): " regionNumber
-
 while true; do
+    read -rp "Please enter your region's number (1-8): " regionNumber
     case $regionNumber in
         1)
             region='Africa'
@@ -199,28 +193,47 @@ while true; do
     esac
 done
 
-echo $region
-
-ls /usr/share/zoneinfo/$region > /tempfiles/regionCities
-numberOfCities=$(wc -l < /tempfiles/regionCities)
+ls /usr/share/zoneinfo/$region > ./tempfiles/regionCities
+numberOfCities="$(wc -l < ./tempfiles/regionCities)"
 
 ls /usr/share/zoneinfo/$region | awk '{print NR") " $0}' | column
 
 while true; do
-    if [[ "$numberofCities" > 1 ]]; then
-        read -rp "Please enter your cities' number (1 - $(numberOfCities)): " cityNumber
+    if [[ "$numberOfCities" > "1" ]]; then
+        read -rp "Please enter your cities' number (1 - $numberOfCities): " cityNumber
     else
         read -rp "Please enter your cities' number (1): " cityNumber
     fi
-    case $cityNumber in
-        [1-$numberOfCities])
-            city=$(sed "${cityNumber}q;d" /tempfiles/regionCities)
-            break
-            ;;
-        *)
-            echo 'Invalid input. Please choose one of the available cities listed above by entering its number.'
+    if (( 1 <= $cityNumber && $cityNumber <= $numberOfCities )); then
+        city=$(sed "${cityNumber}q;d" ./tempfiles/regionCities)
+        break
+    else
+        echo 'Invalid input. Please choose one of the available cities listed above by entering its number.'
+    fi 
+done
 
-read -n 1
+if [ -d /usr/share/zoneinfo/$region/$city ]; then
+    ls /usr/share/zoneinfo/$region/$city > ./tempfiles/regionSubCities
+    numberOfSubCities="$(wc -l < ./tempfiles/regionCities)"
+
+    ls /usr/share/zoneinfo/$region/$city | awk '{print NR") " $0}' | column
+
+    while true; do
+        if [[ "$numberOfSubCities" > "1" ]]; then
+            read -rp "Please enter your cities' number (1 - $numberOfSubCities): " subCityNumber
+        else
+            read -rp "Please enter your cities' number (1): " subCityNumber
+        fi
+        if (( 1 <= $subCityNumber && $subCityNumber <= $numberOfCities )); then
+            subCity=$(sed "${subCityNumber}q;d" ./tempfiles/regionSubCities)
+            break
+        else
+            echo 'Invalid input. Please choose one of the available cities listed above by entering its number.'
+        fi 
+    done
+fi
+
+timezone="$region/$city/$subCity"
 
 #####   END MANUAL CONFIGURATION    #####
 
