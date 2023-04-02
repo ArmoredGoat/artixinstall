@@ -120,9 +120,9 @@ if [ "$gpu" == 'AMD' ]; then
     $graphicsDrivers='xf86-video-amdgpu mesa lib32-mesa vulkan-radeon'
 elif [ "$gpu" == 'INTEL' ]; then
     $graphicsDrivers='xf86-video-intel mesa lib32-mesa vulkan-intel'
-elif [ "$gpu" == 'NVIDIA']; then
+elif [ "$gpu" == 'NVIDIA' ]; then
     $graphicsDrivers='xf86-video-nouveau mesa lib32-mesa nvidia-utils'
-elif [ "$gpu" == 'VMware']; then
+elif [ "$gpu" == 'VMware' ]; then
     $graphicsDrivers='xf86-video-vmware xf86-input-vmmouse mesa lib32-mesa'
 fi
 
@@ -160,7 +160,8 @@ cd /home/"$username"/git/cloned/yay
 sudo -u "$username" makepkg -si
 
 # Install browser
-gpg --keyserver hkp://keyserver.ubuntu.com --search-keys 031F7104E932F7BD7416E7F6D2845E1305D6E801   # Import gpg key
+echo "1
+" | gpg --keyserver hkp://keyserver.ubuntu.com --search-keys 031F7104E932F7BD7416E7F6D2845E1305D6E801   # Import gpg key
 git clone https://aur.archlinux.org/librewolf-bin.git /home/"$username"/git/cloned/librewolf
 cd /home/"$username"/git/cloned/librewolf
 sudo -u "$username" makepkg -si
