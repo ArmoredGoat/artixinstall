@@ -13,8 +13,7 @@ userPassword="$(< /tempfiles/userPassword)"
 setRootPassword="$(< /tempfiles/setRootPassword)"
 rootPassword="$(< /tempfiles/rootPassword)"
 timezone="$(< /tempfiles/timezone)"
-echo $username
-read -n 1
+
 #####   END IMPORTING VARIABLES     #####
 
 #####   START CONFIGURATION         #####
@@ -24,10 +23,10 @@ read -n 1
 sed -i '/en_US.UTF-8 UTF-8/s/^#//g' /etc/locale.gen
 
 # Set desired locale systemwide
-echo 'LANG=¨en_US.UTF-8"' > /etc/locale.conf
+echo 'export LANG=¨en_US.UTF-8"' > /etc/locale.conf
 # Set collation rules (rules for sorting and regular expresions)
 # C - dotfiles first, followed by uppercase and lowercase filenames
-echo 'LC_COLLATE="C"' >> /etc/locale.conf
+echo 'export LC_COLLATE="C"' >> /etc/locale.conf
 # Set time zone
 ln -sf /usr/share/zoneinfo/"$timezone" /etc/localtime
 # Generate locales
@@ -79,7 +78,7 @@ grub-mkconfig -o /boot/grub/grub.cfg
 #####   START USER MANAGEMENT       #####
 
 # Set root password if given. Otherwise disable access.
-if [ "$setRootPassword" =true ]; then
+if [ "$setRootPassword" = true ]; then
     echo "$rootpassword
     $rootpassword
     " | passwd
@@ -88,24 +87,24 @@ else
 fi
 
 # Create user and set password
-useradd -m $username
+useradd -m "$username"
 echo "$userPassword
 $userPassword
-" | passwd $username
+" | passwd "$username"
 
 # Grant groups to user
-usermod -aG wheel,audio,video,storage $username
+usermod -aG wheel,audio,video,storage "$username"
 # Give users in wheel group sudo privileges --> no need for root user
 sed -i '/%wheel ALL=(ALL:ALL) ALL/s/^#//g' /etc/sudoers
 
 # set home directory permissions
-mkdir -p /home/$username/{.config,.local/share}
-chmod 700 /home/$username
-chown $username:users /home/$username/{.config,.local}
-chown $username:users /home/$username/.local/share
-chmod 755 /home/$username/{.config,.local/share}
+mkdir -p /home/"$username"/{.config,.local/share}
+chmod 700 /home/"$username"
+chown "$username":users /home/"$username"/{.config,.local}
+chown "$username":users /home/"$username"/.local/share
+chmod 755 /home/"$username"/{.config,.local/share}
 
-mkdir -p /home/$username/git/{own,cloned}
+mkdir -p /home/"$username"/git/{own,cloned}
 
 
 #####   END USER MANAGEMENT         #####
@@ -201,6 +200,10 @@ if [[ "$installationType" == "custom" ]]; then
     additionalPackages='git micro bash-completion sof-firmware'
 fi
 
+# finishing up + cleaning
+rm -rf /chrootInstall.sh /tempfiles
+echo -e "\n##############################################################################################"
+echo "#                                   Installation completed                                   #"
+echo "#            Please poweroff and remove installation media before powering back on           #"
+echo -e "##############################################################################################\n"
 exit
-umount -R /mnt
-reboot
