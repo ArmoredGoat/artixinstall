@@ -146,6 +146,82 @@ done
 # TODO Implement selection of timezone.
 timezone="Europe/Berlin" # Temporarily hard coded
 
+#! bin/bash
+
+echo "1) Africa"
+echo "2) America"
+echo "3) Asia"
+echo "4) Atlantic"
+echo "5) Australia"
+echo "6) Europe"
+echo "7) Pacific"
+echo "8) Etc"
+
+read -rp "Please enter your region's number (1-8): " regionNumber
+
+while true; do
+    case $regionNumber in
+        1)
+            region='Africa'
+            break
+            ;;
+        2)
+            region='America'
+            break
+            ;;
+        3)
+            region='Asia'
+            break
+            ;;
+        4)
+            region='Atlantic'
+            break
+            ;;
+        5)
+            region='Australia'
+            break
+            ;;
+        6)
+            region='Europe'
+            break
+            ;;
+        7)
+            region='Pacific'
+            break
+            ;;
+        8)
+            region='Etc'
+            break
+            ;;
+        *)
+            echo 'Invalid input. Please choose one of the available regions listed above by entering its number.'
+            ;;
+    esac
+done
+
+echo $region
+
+ls /usr/share/zoneinfo/$region > /tempfiles/regionCities
+numberOfCities=$(wc -l < /tempfiles/regionCities)
+
+ls /usr/share/zoneinfo/$region | awk '{print NR") " $0}' | column
+
+while true; do
+    if [[ "$numberofCities" > 1 ]]; then
+        read -rp "Please enter your cities' number (1 - $(numberOfCities)): " cityNumber
+    else
+        read -rp "Please enter your cities' number (1): " cityNumber
+    fi
+    case $cityNumber in
+        [1-$numberOfCities])
+            city=$(sed "${cityNumber}q;d" /tempfiles/regionCities)
+            break
+            ;;
+        *)
+            echo 'Invalid input. Please choose one of the available cities listed above by entering its number.'
+
+read -n 1
+
 #####   END MANUAL CONFIGURATION    #####
 
 #####   START HARDWARE DETECTION    #####
