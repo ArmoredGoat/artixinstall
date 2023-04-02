@@ -356,6 +356,10 @@ fstabgen -U /mnt >> /mnt/etc/fstab
 echo "$hostname" > /mnt/etc/hostname
 echo "hostname=\'"$hostname"\'" > /mnt/etc/conf.d/hostname
 
+# Activate NTP daemon to synchronize computer's real-time clock
+rc-service ntpd start
+#  sv up ntpd   s6-rc -u change ntpd   dinitctl start ntpd
+
 # Install packages
 # TODO Add explanation to choice of packages
 # Base packages
