@@ -1,23 +1,46 @@
 #! /bin/bash
 
-loadkeys us
-echo "##############################################################################################"
-echo "#                          ArmoredGoat's Artix Installation Script                           #"
-echo "#                                 Last updated at 2023/03/20                                 #"
-echo "#        Educationally inspired by https://github.com/rwinkhart/artix-install-script         #"
-echo "##############################################################################################"
+#####   START COLORS    #####
 
-echo -e "\nBefore installation, a few question have to be answered.\n"
+# Reset
+Color_Off='\033[0m'       # Text Reset
+
+# Regular Colors
+Black='\033[0;30m'        # Black
+Red='\033[0;31m'          # Red
+Green='\033[0;32m'        # Green
+Yellow='\033[0;33m'       # Yellow
+Blue='\033[0;34m'         # Blue
+Purple='\033[0;35m'       # Purple
+Cyan='\033[0;36m'         # Cyan
+White='\033[0;37m'        # White
+
+#####   END COLORS      #####
+
+# Create directory for storing temp files/variables
+mkdir /tempfiles
+
+loadkeys us
+echo -e "${Cyan}################################################################################"
+echo -e "#                   ArmoredGoat's Artix Installation Script                    #"
+echo -e "#                          Last updated at 2023/03/20                          #"
+echo -e "# Educationally inspired by https://github.com/rwinkhart/artix-install-script  #"
+echo -e "################################################################################${Color_Off}"
+
+echo -e "\nBefore installation, a few questions have to be answered.\n"
 read -n 1 -srp "Press any key to continue."
 
 #####   START MANUAL CONFIGURATION  #####
 
-echo -e "\nAvailable installation types
+echo -e "\n\n${Purple}################################ CONFIGURATION #################################${Color_Off} "
 
-1) Base installation 
+echo -e "\n                    ${Blue}########## INSTALLATION TYPE ##########${Color_Off}                     \n"
+
+echo -e "${Green}1) Base installation${Color_Off} 
     Only necessary packages and configuration.
     In the end you have a working but basic Artix installation.
-2) Customized installation
+
+${Green}2) Customized installation${Color_Off} 
     Take over all my configuration and user settings.
     It is not guaranteed that my configuration is one hundred percent compatible
     with your system, although this script is designed to be adaptive.
@@ -35,15 +58,14 @@ while true; do
             break
             ;;
         *)
-            echo "Invalid input. Please choose one of the available installation types listed above by entering its number."
+            echo -e "${Red}Invalid input.${Color_Off} Please choose one of the available installation types listed above by entering its number."
             ;;
     esac      
 done
 
-mkdir /tempfiles
-
+echo -e "\n                       ${Blue}########## PARTITIONING ##########${Color_Off}                       \n"
+echo -e "                           ${Blue}##### DISK SELECTION #####${Color_Off}                           \n"
 # List available disks
-echo -e "\n\nAvailable disks\n"
 lsblk --tree | grep 'NAME\|disk\|part'
 
 # Store available disks in temp file, enumerates them, and display choices
@@ -57,37 +79,40 @@ numberOfDisks=$(wc -l < /tempfiles/availableDisks)
 # Disk can be selected by entering its number 
 while true; do
     if [[ "$numberOfDisks" > "1" ]]; then
-        read -rp "Which disk shall be partitioned (1 - $(numberOfDisks))? " selectedDisk
+        read -rp $'\nWhich disk shall be partitioned (1-$(numberOfDisks))? ' selectedDisk
     else
-        read -rp "Which disk shall be partitioned (1)? " selectedDisk
+        read -rp $'\nWhich disk shall be partitioned (1)? ' selectedDisk
     fi
     if (( 1 <= $selectedDisk && $selectedDisk <= $selectedDisk )); then
             disk=$(sed "${selectedDisk}q;d" /tempfiles/availableDisks | awk '{print $2}')
             break
         else
-            echo "Invalid input. Please choose one of the available disks listed above by entering its number."
+            echo -e "${Red}Invalid input.${Color_Off} Please choose one of the available disks listed above by entering its number."
     fi    
 done
 
 # Ask for confirmation to wipe selected disk.
 while true; do
-    read -rp "The selected disk will be completely wiped. Do you want to continue (y/N)? " wipe
+    read -rp $'The selected disk will be completely wiped. Do you want to continue (y/N)? ' wipe
     case $wipe in
         [yY][eE][sS]|[yY])
             break
             ;;
         [nN][oO]|[nN]|"")
-            echo "The installation will be aborted. Exiting process..."
-            read -n 1 -srp "Press any key to exit."
+            echo -e "\nThe installation will be aborted. Exiting process..."
+            read -n 1 -srp $"\nPress any key to exit."
             exit 0
             ;;
         *)
-            echo "Invalid input..."
+            echo -e "${Red}Invalid input...${Color_Off}"
             ;;
     esac      
 done
+
+echo -e "\n                             ${Blue}##### SWAP SPACE #####${Color_Off}                             \n"
+
 # Ask how much swap space should be allocated and convert the value from Gibibyte to Megabyte.
-read -rp $'\nSwap size in GiB: ' swap; swap="$(( $swap * 1024 ))"'M'
+read -rp $'Swap size in GiB: ' swap; swap="$(( $swap * 1024 ))"'M'
 
 # Ask for hostname and credentials. Ensuring that passwords match.
 read -rp $'\nHostname: ' hostname
@@ -232,7 +257,11 @@ if [ -d /usr/share/zoneinfo/$region/$city ]; then
     done
 fi
 
-timezone="$region/$city/$subCity"
+if [ $subCity ]; then
+    timezone="$region/$city/$subCity"
+else
+    timezone="$region/$city"
+fi
 
 #####   END MANUAL CONFIGURATION    #####
 
