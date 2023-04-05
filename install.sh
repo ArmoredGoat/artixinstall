@@ -15,26 +15,60 @@ Purple='\033[0;35m'       # Purple
 Cyan='\033[0;36m'         # Cyan
 White='\033[0;37m'        # White
 
+# \r jumps to beginning of line
+# \033 marks beginning of escape sequence
+# [1A moves one line up
+# [0K erase from cursor to right end
+ERASE_CURR="\r\033[0K"
+ERASE_PREV="\r\033[1A\033[0K" 
+MOVE_CURSOR_UP="\033[1A"
+
+CHECK_MARK="\033[0;32m\xE2\x9C\x94\033[0m"
+CROSS_MARK="\033[0;31m\xE2\x9C\x96\033[0m"
+QUEST_MARK="\033[0;33m\xE2\x9D\x94\033[0m"
+EXCLA_MARK="\033[0;33m\xE2\x9D\x95\033[0m"
+
 #####   END COLORS      #####
+
+delete_term_lines () {
+    local ERASE_CURR="\r\033[0K"
+    local ERASE_PREV="\r\033[1A\033[0K"
+    local ERASE_STRING=""
+    if [[ $2 ]]; then
+        ERASE_STRING+="${ERASE_CURR}"
+    fi
+    for (( i=0; i < $1; i++ )); do
+        ERASE_STRING+="${ERASE_PREV}"
+    done
+    echo -e "${ERASE_STRING}"
+}
 
 # Create directory for storing temp files/variables
 mkdir /tempfiles
 
 loadkeys us
-echo -e "${Cyan}################################################################################"
-echo -e "#                   ArmoredGoat's Artix Installation Script                    #"
-echo -e "#                          Last updated at 2023/03/20                          #"
-echo -e "# Educationally inspired by https://github.com/rwinkhart/artix-install-script  #"
-echo -e "################################################################################${Color_Off}"
+echo -e "${Cyan}###############################################################\
+#################"
+echo -e "#                   ArmoredGoat's Artix Installation Script           \
+         #"
+echo -e "#                          Last updated at 2023/03/20                 \
+         #"
+echo -e "# Educationally inspired by https://github.com/rwinkhart/artix-install\
+-script  #"
+echo -e "######################################################################\
+##########${Color_Off}"
 
 echo -e "\nBefore installation, a few questions have to be answered.\n"
 read -n 1 -srp "Press any key to continue."
+delete_term_lines 3
 
 #####   START MANUAL CONFIGURATION  #####
 
-echo -e "\n\n${Purple}################################ CONFIGURATION #################################${Color_Off} "
+echo -e "${Purple}################################ CONFIGURATION ##############\
+###################${Color_Off} "
 
-echo -e "\n                    ${Blue}########## INSTALLATION TYPE ##########${Color_Off}                     \n"
+echo -e "\n                    ${Blue}########## INSTALLATION TYPE ##########\
+${Color_Off}                     \n"
 
 echo -e "${Green}1) Base installation${Color_Off} 
     Only necessary packages and configuration.
@@ -44,32 +78,46 @@ ${Green}2) Customized installation${Color_Off}
     Take over all my configuration and user settings.
     It is not guaranteed that my configuration is one hundred percent compatible
     with your system, although this script is designed to be adaptive.
+
 "
 
 while true; do
-    read -rp $'\nWhich installation would you like to perfom (1-2)? ' installationType
+    read -rp $'\r\033[1A\033[0K\033[0;33m\xE2\x9D\x94\033[0m    Which installation would you like to perfom (1-2)? ' installationType
     case $installationType in
         1)
+            delete_term_lines 11
+            #delete_term_lines 2
             installationType='base'
+            echo -e "${CHECK_MARK}    Installation type '${installationType}' \
+set!" 
             break
             ;;
         2)
+            delete_term_lines 11
+            #delete_term_lines 2
             installationType='custom'
+            echo -e "${CHECK_MARK}    Installation type '${installationType}' \
+set!" 
             break
             ;;
         *)
-            echo -e "${Red}Invalid input.${Color_Off} Please choose one of the available installation types listed above by entering its number."
+            delete_term_lines 2
+            echo -e "${CROSS_MARK}    Invalid input..."
+            sleep 2
             ;;
     esac      
 done
 
-echo -e "\n                       ${Blue}########## PARTITIONING ##########${Color_Off}                       \n"
-echo -e "                           ${Blue}##### DISK SELECTION #####${Color_Off}                           \n"
+echo -e "\n                       ${Blue}########## PARTITIONING ##########\
+${Color_Off}                       \n"
+echo -e "                           ${Blue}##### DISK SELECTION #####\
+${Color_Off}                           \n"
 # List available disks
 lsblk --tree | grep 'NAME\|disk\|part'
 
 # Store available disks in temp file, enumerates them, and display choices
-(lsblk --list -d | grep disk | awk '{print NR") /dev/" $1}') > /tempfiles/availableDisks
+(lsblk --list -d | grep disk | awk '{print NR") /dev/" $1}') > \
+/tempfiles/availableDisks
 while IFS= read -r line; do
     echo $line
 done < /tempfiles/availableDisks
@@ -79,15 +127,18 @@ numberOfDisks=$(wc -l < /tempfiles/availableDisks)
 # Disk can be selected by entering its number 
 while true; do
     if [[ "$numberOfDisks" > "1" ]]; then
-        read -rp $'\nWhich disk shall be partitioned (1-$(numberOfDisks))? ' selectedDisk
+        read -rp $'\nWhich disk shall be partitioned (1-$(numberOfDisks))? ' \
+        selectedDisk
     else
         read -rp $'\nWhich disk shall be partitioned (1)? ' selectedDisk
     fi
     if (( 1 <= $selectedDisk && $selectedDisk <= $selectedDisk )); then
-            disk=$(sed "${selectedDisk}q;d" /tempfiles/availableDisks | awk '{print $2}')
+            disk=$(sed "${selectedDisk}q;d" /tempfiles/availableDisks | \
+            awk '{print $2}')
             break
         else
-            echo -e "${Red}Invalid input.${Color_Off} Please choose one of the available disks listed above by entering its number."
+            echo -e "${Red}Invalid input.${Color_Off} Please choose one of the \
+available disks listed above by entering its number."
     fi    
 done
 
@@ -109,48 +160,94 @@ while true; do
     esac      
 done
 
-echo -e "\n                             ${Blue}##### SWAP SPACE #####${Color_Off}                             \n"
+echo -e "\n                             ${Blue}##### SWAP SPACE #####\
+${Color_Off}                             "
 
 # Ask how much swap space should be allocated and convert the value from Gibibyte to Megabyte.
-read -rp $'Swap size in GiB: ' swap; swap="$(( $swap * 1024 ))"'M'
+echo -e "\n${EXCLA_MARK}    Setting size of swap space..."
+
+read -rp $'\nSwap size in GiB: ' swap
+delete_term_lines 4
+echo -e "${CHECK_MARK}    ${swap} GiB swap space set!"
+
+echo -e "\n                      ${Blue}##### HOST SETTINGS #####${Color_Off}                       "
 
 # Ask for hostname and credentials. Ensuring that passwords match.
-read -rp $'\nHostname: ' hostname
-read -rp $'\nUsername: ' username
+echo -e "\n${EXCLA_MARK}    Setting hostname..."
 
+read -rp $'\nHostname: ' hostname
+delete_term_lines 4
+echo -e "${CHECK_MARK}    Hostname '${hostname}' set!"
+
+echo -e "\n                      ${Blue}##### USER SETTINGS #####${Color_Off}                       "
+
+echo -e "\n${EXCLA_MARK}    Setting username..."
+
+read -rp $'\nUsername: ' username
+delete_term_lines 4
+echo -e "${CHECK_MARK}    Username '${username}' set!"
+
+echo -e "\n${EXCLA_MARK}    Setting user password..."
 userPassword="foo"; userPasswordConf="bar"
 while [ $userPassword != $userPasswordConf ]; do
     read -rsp $'\nUser password: ' userPassword
-    read -rsp $'\nConfirm user password: ' userPasswordConf
+    read -rsp $'\r\033[0KConfirm user password: ' userPasswordConf
     if [[ $userPassword != $userPasswordConf && ${#userPassword} < 8 ]]; then
-        echo -e $'\nPasswords does not match AND are too short. Please choose a password with at least 8 characters and try again.'
+        delete_term_lines 0 1 1
+        echo -e "${CROSS_MARK}    Passwords do not match AND are too short (at least 8 characters)."
+        sleep 3
+        delete_term_lines 2 1 1
     elif [[ $userPassword == $userPasswordConf && ${#userPassword} < 8 ]]; then
-        echo $'\nPassword is too short. Please choose a password with at least 8 characters and try again.'
+        delete_term_lines 0 1 1
+        echo -e "${CROSS_MARK}    Passwords are too short (at least 8 characters)."
         userPassword="foo"; userPasswordConf="bar"
+        sleep 3
+        delete_term_lines 2 1 1
     elif [[ $userPassword != $userPasswordConf ]]; then
-        echo -e $'\nPasswords does not match. Please try again.'
+        delete_term_lines 0 1 1
+        echo -e "${CROSS_MARK}    Passwords do not match."
+        sleep 3
+        delete_term_lines 2 1 1
     else
+        # Erase all ouput done due to entering root password and confirm that password is set
+        delete_term_lines 3 1
+        echo -e "${CHECK_MARK}    User password set."
         break
     fi
 done
-
+echo "
+"
 while true; do
-    read -rp $'\nDo you want to set a root password (y/N)? ' setRootPassword
+    read -rp $'\r\033[1A\033[0K\033[0;33m\xE2\x9D\x94\033[0m    Do you want to set a root password (y/N)? ' setRootPassword
     case $setRootPassword in
         [yY][eE][sS]|[yY])
+            delete_term_lines 1 0 1
+            echo -e "${EXCLA_MARK}    Setting root password..."
             setRootPassword=true
             rootPassword="foo"; rootPasswordConf="bar"
             while [[ $rootPassword != $rootPasswordConf ]]; do
-                read -rsp 'Root password: ' rootPassword
-                read -rsp $'\nConfirm root password: ' rootPasswordConf
+                read -rsp $'\nRoot password: ' rootPassword
+                read -rsp $'\r\033[0KConfirm root password: ' rootPasswordConf
                 if [[ $rootPassword != $rootPasswordConf && ${#rootPassword} < 8 ]]; then
-                    echo $'\nPasswords does not match AND are too short. Please choose a password with at least 8 characters and try again.'
+                    delete_term_lines 0 1 1
+                    echo -e "${CROSS_MARK}    Passwords do not match AND are too short (at least 8 characters)."
+                    sleep 3
+                    delete_term_lines 2 1 1
                 elif [[ $rootPassword == $rootPasswordConf && ${#rootPassword} < 8 ]]; then
-                    echo $'\nPassword is too short. Please choose a password with at least 8 characters and try again.'
+                    delete_term_lines 0 1 1
+                    echo -e "${CROSS_MARK}    Passwords are too short (at least 8 characters)."
                     rootPassword="foo"; rootPasswordConf="bar"
+                    sleep 3
+                    delete_term_lines 2 1 1
                 elif [[ $rootPassword != $rootPasswordConf ]]; then
-                    echo $'\nPasswords does not match. Please try again.'
+                    delete_term_lines 0 1 1
+                    echo -e "${CROSS_MARK}    Passwords do not match."
+                    sleep 3
+                    delete_term_lines 2 1 1
                 else
+                    # Erase all ouput done due to entering root password and confirm that password is set
+                    delete_term_lines 3 1
+                    echo -e "${CHECK_MARK}    Root password set."
                     break
                 fi
             done
@@ -158,64 +255,43 @@ while true; do
             ;;
         [nN][oO]|[nN]|"")
             setRootPassword=false
-            echo "No root password will be set."
+            delete_term_lines 2
+            echo -e "${CHECK_MARK}    No root password set."
             break
             ;;
         *)
-            echo "Invalid input..."
+            delete_term_lines 2
+            echo -e "${CROSS_MARK}    Invalid input..."
+            sleep 2
             ;;
     esac      
 done
 
-echo "1) Africa"
-echo "2) America"
-echo "3) Asia"
-echo "4) Atlantic"
-echo "5) Australia"
-echo "6) Europe"
-echo "7) Pacific"
-echo "8) Etc"
+echo -e "\n                      ${Blue}##### TIME SETTINGS #####${Color_Off}                       "
+
+echo -e "\n${EXCLA_MARK}    Setting time zone...\n"
+
+echo "1) Africa
+2) America
+3) Asia
+4) Atlantic
+5) Australia
+6) Europe
+7) Pacific
+8) Etc"
+numberOfRegions="$(wc -l < ./tempfiles/regions)"
 
 while true; do
-    read -rp "Please enter your region's number (1-8): " regionNumber
-    case $regionNumber in
-        1)
-            region='Africa'
-            break
-            ;;
-        2)
-            region='America'
-            break
-            ;;
-        3)
-            region='Asia'
-            break
-            ;;
-        4)
-            region='Atlantic'
-            break
-            ;;
-        5)
-            region='Australia'
-            break
-            ;;
-        6)
-            region='Europe'
-            break
-            ;;
-        7)
-            region='Pacific'
-            break
-            ;;
-        8)
-            region='Etc'
-            break
-            ;;
-        *)
-            echo 'Invalid input. Please choose one of the available regions listed above by entering its number.'
-            ;;
-    esac
+    read -rp "Please enter your region's number (1-$numberOfRegions): " regionNumber
+    if (( 1 <= $regionNumber && $regionNumber <= $numberOfRegions )); then
+        region=$((sed "${regionNumber}q;d" ./tempfiles/regions) | awk '{print $2}')
+        break
+    else
+        echo 'Invalid input. Please choose one of the available regions listed above by entering its number.'
+    fi
 done
+delete_term_lines 10 1
+echo -e "${CHECK_MARK}    Username '${region}' set!"
 
 ls /usr/share/zoneinfo/$region > /tempfiles/regionCities
 numberOfCities="$(wc -l < /tempfiles/regionCities)"
@@ -309,12 +385,14 @@ fi
 # Change uppercase characters to lowercase for username and hostname
 username=$(echo "$username" | tr '[:upper:]' '[:lower:]')
 hostname=$(echo "$hostname" | tr '[:upper:]' '[:lower:]')
+# Convert size of swap space from gibibyte to megabyte
+swap="$(( $swap * 1024 ))"'M'
 
 #####   END VARIABLE MANIPULATION   #####
 
 #####   START PARTITIONING          #####
 
-# In case of UEFI boot --> GPT/UEFI partitioning with 1 GiB disk space for boot partition.
+# In case of UEFI boot --> GPT/UEFI partitioning with 1 GiB disk space for boot partition
 # In case of BIOS boot --> MBR/BIOS partitioning
 if [ "$boot" == 'uefi' ]; then
     wipefs --all --force "$baseDisk"
