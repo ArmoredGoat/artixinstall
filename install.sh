@@ -458,6 +458,13 @@ ram=$(echo "$(< /proc/meminfo)" | grep 'MemTotal:' | awk '{print $2;}'); ram=$((
 
 #####   END HARDWARE DETECTION      #####
 
+#####   START SOFTWARE DETECTION    #####
+
+# Detect init system by getting process with pid 1
+initSystem=$(ps -p 1 -o comm=)
+
+#####   END SOFTWARE DETECTION    #####
+
 #####   START CONDITIONAL QUERIES   #####
 
 # Do not know why this is done, yet. Will implement it when I figured it out.
@@ -575,10 +582,6 @@ rc-service ntpd start
     # base-devel    - Package group with tools for building (compiling and linking) software
     #base_devel='db diffutils gc guile libisl libmpc perl autoconf automake bash binutils bison esysusers /tempfilesfiles fakeroot file findutils flex gawk gcc gettext grep groff gzip libtool m4 make pacman pacman-contrib patch pkgconf python sed opendoas texinfo which bc udev'
 basePackages='base base-devel'
-
-# Init system
-    # openrc    - 
-initSystem='openrc'
 
 # Login manager
     # elogind   - 
