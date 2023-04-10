@@ -1,14 +1,33 @@
-# ArixInstall - an interactive Artix installation script (WIP)
+# ArtixInstall - an interactive Artix installation script
+
+(Work in progress)
 
 ## About this project
 
 ### What does this script do?
 
-This script is written to provide an automated but interactive process to install Artix Linux on any 
+This script is written to provide an automated yet interactive process to install Artix Linux on any modern machine. It is written in bash and do not rely on any other ressources other then these already installed in the live iso. Of course, an internet connection is also required.
+
+In the process, the user can choose between two installation types
+
+1. Base installation
+    - Only necessary packages and configuration
+    - In the end, you have a working but basic Artix install
+    - Additional packages: nano, manuals and tools for file system management
+
+2. Custom installation (not implemented yet)
+    - Take over all my configuration, packages and user settings
+    - (will talk more about that when it's finished...)
+    
+ Either installation will wipe and use an entire disk. Please be aware of that so that you don't delete any data by accident.
+ 
+ The installation process is be pretty straight forward. Just follow the instructions and enter your information and within minutes, you have your Artix up and running.
 
 ### Why did I write this script?
 
 First of all, this is my first more complex bash script and GitHub project. I started this project to learn bash scripting and working with git as I plan to become a DevOps after my training as an IT specialist for system integration. Furthermore, I wanted to have an ever ongoing project which keeps getting better and more versatile the more I learn about bash scripting, linux and system administration. Therefore, I am grateful for any tips and tricks provided.
+
+The second reason for this script is that I want to do some tinkering with my Artix installation and want to reinstall it easily if I happen to crash it beyond repair.
 
 Maybe this script will inspire other users who are also new to Arch/Artix to write their own scripts or help to improve this one.
 
@@ -23,6 +42,8 @@ Maybe this script will inspire other users who are also new to Arch/Artix to wri
 **Lower priority**
 
 - Add support for other init systems (only for base installation; might implement in distant future if not to complicated)
+- Add option to not use a full disk and rather add partitions
+- Add possibility to select which kernel will be installed
 - Add possibility to select which packages will be installed for the base installation
 
 **Permanently ongoing**
