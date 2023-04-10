@@ -99,12 +99,19 @@ set!"
             break
             ;;
         2)
-            delete_term_lines 11
-            
-            installationType='custom'
-            echo -e "${CHECK_MARK}    Installation type '${installationType}' \
-set!" 
-            break
+#            delete_term_lines 11
+#            
+#            installationType='custom'
+#            echo -e "${CHECK_MARK}    Installation type '${installationType}' \
+#set!" 
+#            break
+            delete_term_lines 2
+
+            echo -e "${CROSS_MARK}    Not available yet. Please choose Base \
+Installation"
+            sleep 2
+
+            delete_term_lines 2 0 1
             ;;
         *)
             delete_term_lines 2
@@ -568,8 +575,8 @@ fi
 fstabgen -U /mnt >> /mnt/etc/fstab
 
 # Set hostname
-echo "$hostname" > /mnt/etc/hostname
-echo "hostname=\'"$hostname"\'" > /mnt/etc/conf.d/hostname
+echo $hostname > /mnt/etc/hostname
+echo "hostname='$hostname'" > /mnt/etc/conf.d/hostname
 
 # Activate NTP daemon to synchronize computer's real-time clock
 rc-service ntpd start
@@ -581,26 +588,26 @@ rc-service ntpd start
     # base          - 
     # base-devel    - Package group with tools for building (compiling and linking) software
     #base_devel='db diffutils gc guile libisl libmpc perl autoconf automake bash binutils bison esysusers /tempfilesfiles fakeroot file findutils flex gawk gcc gettext grep groff gzip libtool m4 make pacman pacman-contrib patch pkgconf python sed opendoas texinfo which bc udev'
-basePackages='base base-devel'
+basePackages="base base-devel"
 
 # Login manager
     # elogind   - 
-loginManager='elogind-'$initSystem
+loginManager="elogind-"$initSystem
 
 # Linux kernel
     # linux-lts, zen, ...
-kernel='linux-lts'
+kernel="linux-lts"
 
 # Firmware
     # linux-firmware    -
     # sof-firmware      -
-firmware='linux-firmware'
+firmware="linux-firmware"
 
 # Network
     # networkmanager                -
     # networkmanager-$initSystem    -
     # dhcpcd                        -
-network='networkmanager-'$initSystem' dhcpcd'
+network="networkmanager-$initSystem dhcpcd"
 
 basestrap /mnt $basePackages $initSystem $loginManager $kernel $firmware $manuals $network
 
