@@ -7,10 +7,11 @@
 
 #####   HISTORY CUSTOMIZATION   #####
 
-export HISTTIMEFORMAT="%F %T "  # Add date and time formatting to bash history
-export HISTCONTROL=ignoredups   # Ignore duplicate commands in bash history
-export HISTSIZE=-1              # Disable command limit of bash history
-export HISTFILESIZE=-1          # Disable size limit of bash history file
+HISTFILE=~/.bash_history.$HOSTNAME  # Guard history getting truncated to default 500 lines if bash --norc is run
+HISTTIMEFORMAT="%F %T "             # Add date and time formatting to bash history
+HISTCONTROL=ignoredups              # Ignore duplicate commands in bash history
+HISTSIZE=-1                         # Disable command limit of bash history
+HISTFILESIZE=-1                     # Disable size limit of bash history file
 
 shopt -s histappend             # Set bash history to append instead of overwriting
 
