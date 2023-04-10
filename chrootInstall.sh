@@ -15,8 +15,37 @@ Purple='\033[0;35m'       # Purple
 Cyan='\033[0;36m'         # Cyan
 White='\033[0;37m'        # White
 
+# \r jumps to beginning of line
+# \033 marks beginning of escape sequence
+# [1A moves one line up
+# [0K erase from cursor to right end
+ERASE_CURR="\r\033[0K"
+ERASE_PREV="\r\033[1A\033[0K" 
+
+
+CHECK_MARK="\033[0;32m\xE2\x9C\x94\033[0m"
+CROSS_MARK="\033[0;31m\xE2\x9C\x96\033[0m"
+QUEST_MARK=$'\033[0;33m\xE2\x9D\x94\033[0m'
+EXCLA_MARK="\033[0;33m\xE2\x9D\x95\033[0m"
+
 #####   END COLORS      #####
 
+delete_term_lines () {
+    local ERASE_CURR="\r\033[0K"
+    local ERASE_PREV="\r\033[1A\033[0K"
+    local MOVE_CURSOR_UP="\033[1A"
+    local ERASE_STRING=""
+    if [[ $2 ]]; then
+        ERASE_STRING+="${ERASE_CURR}"
+    fi
+    for (( i=0; i < $1; i++ )); do
+        ERASE_STRING+="${ERASE_PREV}"
+    done
+    if [[ $3 ]]; then
+        ERASE_STRING+="${MOVE_CURSOR_UP}"
+    fi
+    echo -e "${ERASE_STRING}"
+}
 
 #####   START IMPORTING VARIABLES   #####
 
@@ -47,7 +76,7 @@ echo 'export LANG="en_US.UTF-8"' > /etc/locale.conf
 # C - dotfiles first, followed by uppercase and lowercase filenames
 echo 'export LC_COLLATE="C"' >> /etc/locale.conf
 # Set time zone
-ln -sf /usr/share/zoneinfo/"$timezone" /etc/localtime
+ln -sf /usr/share/zoneinfo/$timezone /etc/localtime
 # Generate locales
 locale-gen
 
@@ -65,7 +94,7 @@ rc-update add NetworkManager
     # grub - 
     # efibootmgr - 
     # os-prober - Detection of other installed operating systems
-pacman -S grub efibootmgr os-prober --noconfirm
+pacman -Syu grub efibootmgr os-prober --noconfirm
 
 # Check if BIOS or UEFI boot and install grub accordingly
 if [ "$boot" == 'uefi' ]; then
@@ -127,7 +156,13 @@ mkdir -p /home/"$username"/git/{own,cloned}
 
 
 #####   END USER MANAGEMENT         #####
-if [[ "$installationType" == "custom" ]]; then
+
+if [[ $installationType == "base "]]; then 
+
+baseInstallationPackages="nano man-db man-pages texinfo e2fsprogs dosfstools"
+pacman -Syu $baseInstallationPackages
+
+elif [[ $installationType == "custom" ]]
     curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/tree/main/configfiles/user-dirs.defaults -o /etc/xdg/user-dirs.defaults
 
     ##### START GRAPHIC DRIVERs INSTALLATION    #####
@@ -142,11 +177,11 @@ if [[ "$installationType" == "custom" ]]; then
         $graphicsDrivers='xf86-video-vmware xf86-input-vmmouse mesa lib32-mesa'
     fi
 
-    pacman -S $graphicsDrivers --needed --noconfirm
+    pacman -Syu $graphicsDrivers --needed --noconfirm
 
     xorgPackages='xorg xorg-server xorg-xinit'
 
-    pacman -S $xorgPackages --needed --noconfirm
+    pacman -Syu $xorgPackages --needed --noconfirm
 
     #####   END GRAPHIC DRIVERs INSTALLATION    #####
 
@@ -155,18 +190,18 @@ if [[ "$installationType" == "custom" ]]; then
     # Might switch from awesome to qtile as it is completely written in python
     wm='awesome' # qtile
 
-    pacman -S $wm --needed --noconfirm
+    pacman -Syu $wm --needed --noconfirm
 
     # TODO Add configuration
 
     #####   END WM INSTALLATION     #####
 
-    pacman -S neofetch --noconfirm
+    pacman -Syu neofetch --noconfirm
 
     # TODO Add neofetch configuration
 
 
-    pacman -S alacritty --noconfirm
+    pacman -Syu kitty --noconfirm
 
     # TODO Add alacritty configuration
 
