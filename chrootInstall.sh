@@ -157,7 +157,7 @@ mkdir -p /home/"$username"/git/{own,cloned}
 
 #####   END USER MANAGEMENT         #####
 
-if [[ $installationType == "base "]]; then 
+if [[ $installationType == "base" ]]; then 
 
 baseInstallationPackages="nano man-db man-pages texinfo e2fsprogs dosfstools"
 pacman -Syu $baseInstallationPackages
