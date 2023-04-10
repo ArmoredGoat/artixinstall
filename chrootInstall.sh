@@ -152,9 +152,6 @@ chown "$username":users /home/"$username"/{.config,.local}
 chown "$username":users /home/"$username"/.local/share
 chmod 755 /home/"$username"/{.config,.local/share}
 
-mkdir -p /home/"$username"/git/{own,cloned}
-
-
 #####   END USER MANAGEMENT         #####
 
 if [[ $installationType == "base" ]]; then 
@@ -163,6 +160,10 @@ baseInstallationPackages="nano man-db man-pages texinfo e2fsprogs dosfstools"
 pacman -Syu $baseInstallationPackages
 
 elif [[ $installationType == "custom" ]]; then
+    # Create directory for git repositories
+    mkdir -p /home/"$username"/git/{own,cloned}
+
+
     curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/tree/main/configfiles/user-dirs.defaults -o /etc/xdg/user-dirs.defaults
 
     ##### START GRAPHIC DRIVERs INSTALLATION    #####
