@@ -462,8 +462,8 @@ fi
 
 echo -e "${CHECK_MARK}    Time zone ${timezone} set."
 
-echo -e "${Purple}##############################    CONFIRMATION   ############\
-###################${Color_Off}"
+echo -e "\n${Purple}##############################    CONFIRMATION   ##########\
+#####################${Color_Off}"
 
 # Ask for confirmation to continue with installation
 while true; do
