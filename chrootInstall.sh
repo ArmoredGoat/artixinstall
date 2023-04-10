@@ -162,7 +162,7 @@ if [[ $installationType == "base" ]]; then
 baseInstallationPackages="nano man-db man-pages texinfo e2fsprogs dosfstools"
 pacman -Syu $baseInstallationPackages
 
-elif [[ $installationType == "custom" ]]
+elif [[ $installationType == "custom" ]]; then
     curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/tree/main/configfiles/user-dirs.defaults -o /etc/xdg/user-dirs.defaults
 
     ##### START GRAPHIC DRIVERs INSTALLATION    #####
