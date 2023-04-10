@@ -1,51 +1,4 @@
-#! /bin/bash
 
-#####   START COLORS    #####
-
-# Reset
-Color_Off='\033[0m'       # Text Reset
-
-# Regular Colors
-Black='\033[0;30m'        # Black
-Red='\033[0;31m'          # Red
-Green='\033[0;32m'        # Green
-Yellow='\033[0;33m'       # Yellow
-Blue='\033[0;34m'         # Blue
-Purple='\033[0;35m'       # Purple
-Cyan='\033[0;36m'         # Cyan
-White='\033[0;37m'        # White
-
-# \r jumps to beginning of line
-# \033 marks beginning of escape sequence
-# [1A moves one line up
-# [0K erase from cursor to right end
-ERASE_CURR="\r\033[0K"
-ERASE_PREV="\r\033[1A\033[0K" 
-
-
-CHECK_MARK="\033[0;32m\xE2\x9C\x94\033[0m"
-CROSS_MARK="\033[0;31m\xE2\x9C\x96\033[0m"
-QUEST_MARK=$'\033[0;33m\xE2\x9D\x94\033[0m'
-EXCLA_MARK="\033[0;33m\xE2\x9D\x95\033[0m"
-
-#####   END COLORS      #####
-
-delete_term_lines () {
-    local ERASE_CURR="\r\033[0K"
-    local ERASE_PREV="\r\033[1A\033[0K"
-    local MOVE_CURSOR_UP="\033[1A"
-    local ERASE_STRING=""
-    if [[ $2 ]]; then
-        ERASE_STRING+="${ERASE_CURR}"
-    fi
-    for (( i=0; i < $1; i++ )); do
-        ERASE_STRING+="${ERASE_PREV}"
-    done
-    if [[ $3 ]]; then
-        ERASE_STRING+="${MOVE_CURSOR_UP}"
-    fi
-    echo -e "${ERASE_STRING}"
-}
 
 # Create directory for storing temp files/variables
 if [[ ! -d /tempfiles ]]; then
@@ -467,8 +420,9 @@ ram=$(echo "$(< /proc/meminfo)" | grep 'MemTotal:' | awk '{print $2;}'); ram=$((
 
 #####   START SOFTWARE DETECTION    #####
 
+# THAT'S NOT WORKING, SUBSTITUTE FOR INTERACTIVE MENU
 # Detect init system by getting process with pid 1
-initSystem=$(ps -p 1 -o comm=)
+#initSystem=$(ps -p 1 -o comm=)
 
 #####   END SOFTWARE DETECTION    #####
 
@@ -589,6 +543,8 @@ rc-service ntpd start
     # base-devel    - Package group with tools for building (compiling and linking) software
     #base_devel='db diffutils gc guile libisl libmpc perl autoconf automake bash binutils bison esysusers /tempfilesfiles fakeroot file findutils flex gawk gcc gettext grep groff gzip libtool m4 make pacman pacman-contrib patch pkgconf python sed opendoas texinfo which bc udev'
 basePackages="base base-devel"
+
+initSystem="openrc"
 
 # Login manager
     # elogind   - 
