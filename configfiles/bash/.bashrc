@@ -45,3 +45,8 @@ runningTerms=$(ps a | awk '{print $2}' | grep -vi "tty*" | uniq | wc -l);
 if [ $runningTerms -eq 1 ]; then
      neofetch
 fi
+
+##########  VARIABLES
+
+export EDITOR=nvim
+export VISUAL=nvim
