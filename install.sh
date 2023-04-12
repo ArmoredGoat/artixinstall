@@ -556,11 +556,16 @@ swap="$(( $swap * 1024 ))"'M'
 
 ##########   START PARTITIONING
 
+swapDevice=$(cat /proc/swaps | grep "partition" | awk '{print $1}')
+if [[ $swapDevice ]]; then
+    swapoff $swapDevice
+fi
+
 # In case of UEFI boot --> GPT/UEFI partitioning with 1 GiB disk space 
 # for boot partition
 # In case of BIOS boot --> MBR/BIOS partitioning
 if [ "$boot" == 'uefi' ]; then
-    wipefs --all --force "$baseDisk"
+    wipefs --all --force $baseDisk
     echo 'g
     n
     1
@@ -580,16 +585,20 @@ if [ "$boot" == 'uefi' ]; then
 
     
     w
-    ' | fdisk -w always -W always "$baseDisk"
+    ' | fdisk -w always -W always $baseDisk
 
     # Format and label disks
-    mkfs.fat -F 32 "$disk"'1'; fatlabel "$disk"'1' ESP
+    mkfs.fat -F 32 "$disk"'1'
+    fatlabel "$disk"'1' ESP
+    
     mkswap -L SWAP "$disk"'2'
+    
     mkfs.ext4 -L ROOT "$disk"'3'
         
     # Mount storage and EFI partitions, and create necessary directories
     swapon /dev/disk/by-label/SWAP
     mount /dev/disk/by-label/ROOT /mnt
+    
     mkdir -p /mnt/{boot,boot/efi,etc/conf.d,home}
     mount /dev/disk/by-label/ESP /mnt/boot/efi
 else
@@ -609,11 +618,13 @@ else
 
     # Format and label disks
     mkswap -L SWAP "$disk"'1'
+    
     mkfs.ext4 -L ROOT "$disk"'2'
 
     # Mount storage and EFI partitions, and create necessary directories
     swapon /dev/disk/by-label/SWAP
     mount /dev/disk/by-label/ROOT /mnt
+    
     mkdir -p /mnt/etc/conf.d
 fi
 
