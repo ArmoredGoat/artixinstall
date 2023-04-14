@@ -93,31 +93,22 @@ ${green}2) Customized installation${colorOff}
     with your system, although this script is designed to be adaptive."
 
 while true; do
-    read -p $'\n'$squareYellowRead"    Which installation would you like to perfom (1-\
-2)? " installationType
+    read -p $'\n'$squareYellowRead"    Which installation would you like to \
+perfom (1-2)? " installationType
     case $installationType in
         1)
             delete_term_lines 11
 
             installationType='base'
-            echo -e "${squareGreen}    Installation type '${installationType}' \
-set!" 
+            
             break
             ;;
         2)
-#            delete_term_lines 11
-#            
-#            installationType='custom'
-#            echo -e "${squareGreen}    Installation type '${installationType}' \
-#set!" 
-#            break
-            delete_term_lines 2
-
-            echo -e "${squareRed}    Not available yet. Please choose Base \
-Installation"
-            sleep 2
-
-            delete_term_lines 2 0 1
+            delete_term_lines 11
+            
+            installationType='custom'
+            
+            break
             ;;
         *)
             delete_term_lines 2
@@ -129,6 +120,8 @@ Installation"
             ;;
     esac      
 done
+
+echo -e "${squareGreen}    Installation type '${installationType}' set!"
 
 echo -e "\n          ${blue}####################    PARTITIONING   ############\
 ########${colorOff}"
@@ -156,8 +149,8 @@ while true; do
         read -p $'\n'$squareYellowRead"    Which disk shall be partitioned (1-\
 $numberOfDisks)? " selectedDisk
     else
-        read -p $'\n'$squareYellowRead"    Which disk shall be partitioned (1)? " \
-        selectedDisk
+        read -p $'\n'$squareYellowRead"    Which disk shall be partitioned (1)?\
+ " selectedDisk
     fi
     if (( 1 <= $selectedDisk && $selectedDisk <= $numberOfDisks )); then
             disk=$(sed "${selectedDisk}q;d" /tempfiles/availableDisks | \
@@ -180,8 +173,8 @@ done
 
 # Ask for confirmation to wipe selected disk.
 while true; do
-    read -p $'\n'$squareYellowRead"   ${disk} will be completely wiped. Do you want \
-to continue (y/N)? " wipe
+    read -p $'\n'$squareYellowRead"   ${disk} will be completely wiped. Do you \
+want to continue (y/N)? " wipe
     case $wipe in
         [yY][eE][sS]|[yY])
             delete_term_lines 2 0 1
@@ -218,8 +211,8 @@ read -rp $'\nSwap size in GiB: ' swap
 delete_term_lines 4
 echo -e "${squareGreen}    ${swap} GiB swap space set!"
 
-echo -e "\n          ${blue}####################  SYSTEM SETTINGS  #############\
-#######${colorOff}"
+echo -e "\n          ${blue}####################  SYSTEM SETTINGS  ############\
+########${colorOff}"
 
 echo -e "\n                    ${blue}##########   HOST SETTINGS   ##########\
 ${colorOff}"
@@ -274,7 +267,8 @@ characters)."
 done
 
 while true; do
-    read -p $'\n'$squareYellowRead"    Do you want to set a root password (y/N)? " setRootPassword
+    read -p $'\n'$squareYellowRead"    Do you want to set a root password (y/N)\
+? " setRootPassword
     case $setRootPassword in
         [yY][eE][sS]|[yY])
             delete_term_lines 1 0 1
@@ -285,15 +279,18 @@ while true; do
                 read -rsp $'\nRoot password: ' rootPassword
                 delete_term_lines 0 1 1
                 read -rsp $'Confirm root password: ' rootPasswordConf
-                if [[ $rootPassword != $rootPasswordConf && ${#rootPassword} < 8 ]]; then
+                if [[ $rootPassword != $rootPasswordConf && \
+                ${#rootPassword} < 8 ]]; then
                     delete_term_lines 0 1 1
                     echo -e "${squareRed}    Passwords do not match AND are \
 too short (at least 8 characters)."
                     sleep 3
                     delete_term_lines 2 1 1
-                elif [[ $rootPassword == $rootPasswordConf && ${#rootPassword} < 8 ]]; then
+                elif [[ $rootPassword == $rootPasswordConf && \
+                ${#rootPassword} < 8 ]]; then
                     delete_term_lines 0 1 1
-                    echo -e "${squareRed}    Passwords are too short (at least 8 characters)."
+                    echo -e "${squareRed}    Passwords are too short (at least \
+8 characters)."
                     rootPassword="foo"; rootPasswordConf="bar"
                     sleep 3
                     delete_term_lines 2 1 1
@@ -342,7 +339,7 @@ echo "1) Africa
 numberOfRegions="$(wc -l < /tempfiles/regions)"
 
 while true; do
-    read -p $'\n'$squareYellowRead"    Please enter your region's number (1 - \
+    read -p $'\n'$squareYellowRead"    Please enter your region's number (1-\
 $numberOfRegions): " regionNumber
     if (( 1 <= $regionNumber && $regionNumber <= $numberOfRegions )); then
         region=$((sed "${regionNumber}q;d" /tempfiles/regions) | \
@@ -379,7 +376,7 @@ numberOfOutputLines=$(wc -l < /tempfiles/output)
 
 while true; do
     if [[ $numberOfCities > "1" ]]; then
-        read -p $'\n'$squareYellowRead"    Please enter your cities' number (1 - \
+        read -p $'\n'$squareYellowRead"    Please enter your cities' number (1-\
 $numberOfCities): " cityNumber
     else
         read -p $'\n'$squareYellowRead"    Please enter your cities' number \
@@ -421,11 +418,11 @@ if [[ -d /usr/share/zoneinfo/$region/$city ]]; then
 
     while true; do
         if [[ "$numberOfSubCities" > "1" ]]; then
-            read -p $'\n'$squareYellowRead"    Please enter your cities' number (1 - \
-$numberOfSubCities): " subCityNumber
+            read -p $'\n'$squareYellowRead"    Please enter your cities' number\ 
+ (1-$numberOfSubCities): " subCityNumber
         else
-            read -p $'\n'$squareYellowRead"    Please enter your cities' number \
-(1): " subCityNumber
+            read -p $'\n'$squareYellowRead"    Please enter your cities' number\
+ (1): " subCityNumber
         fi
         if (( 1 <= $subCityNumber && $subCityNumber <= $numberOfCities )); then
             subCity=$(sed "${subCityNumber}q;d" /tempfiles/regionSubCities | \
@@ -466,8 +463,8 @@ echo -e "\n${purple}##############################    CONFIRMATION   ##########\
 
 # Ask for confirmation to continue with installation
 while true; do
-    read -p $'\n'$squareYellowRead"   Do you want to proceed the installation with \
-the given information (y/N)? " proceed
+    read -p $'\n'$squareYellowRead"   Do you want to proceed the installation \
+with the given information (y/N)? " proceed
     case $proceed in
         [yY][eE][sS]|[yY])
             delete_term_lines 2 0 1
@@ -500,14 +497,17 @@ done
 # Get CPU and threads 
 # TODO Insert reason for detection
 cpu=$(lscpu | grep 'Vendor ID:' | awk 'FNR == 1 {print $3;}')
-threadsMinusOne=$(( $(lscpu | grep 'CPU(s):' | awk 'FNR == 1 {print $2;}') - 1 ))
+threadsMinusOne=$(( $(lscpu | grep 'CPU(s):' | \
+awk 'FNR == 1 {print $2;}') - 1 ))
 # Get GPU
 gpu=$(lspci | grep 'VGA compatible controller:' | awk 'FNR == 1 {print $5;}')
-if ! ([ "$gpu" == 'NVIDIA' ] || [ "$gpu" == 'Intel' ] || [ "$gpu" == 'VMware' ]); then
+if ! ([ "$gpu" == 'NVIDIA' ] || [ "$gpu" == 'Intel' ] || \
+[ "$gpu" == 'VMware' ]); then
     gpu='AMD'
 fi
 # Get amount of RAM
-ram=$(echo "$(< /proc/meminfo)" | grep 'MemTotal:' | awk '{print $2;}'); ram=$(( $ram / 1000000 ))
+ram=$(echo "$(< /proc/meminfo)" | grep 'MemTotal:' | awk '{print $2;}')
+ram=$(( $ram / 1000000 ))
 
 ##########   END HARDWARE DETECTION
 
@@ -523,11 +523,13 @@ ram=$(echo "$(< /proc/meminfo)" | grep 'MemTotal:' | awk '{print $2;}'); ram=$((
 
 # Do not know why this is done, yet. Will implement it when I figured it out.
 #if [ "$gpu" == 'Intel' ]; then
-#    echo -e '1. libva-intel-driver (intel igpus up to coffee lake)\n2. intel-media-driver (intel igpus/dgpus newer than coffee lake)\n'
+#    echo -e '1. libva-intel-driver (intel igpus up to coffee lake)\n2. \
+#intel-media-driver (intel igpus/dgpus newer than coffee lake)\n'
 #    read -n 1 -rp "va-api driver: " intel_vaapi_driver
 #fi
 
-# In case of NVME or SD/MMC device, append 'p' to adress Linux' way of naming partitions.
+# In case of NVME or SD/MMC device, append 'p' to adress Linux' 
+#way of naming partitions.
 baseDisk=$disk
 if [[ "$disk" == /dev/nvme0n* ]] || [[ "$disk" == /dev/mmcblk* ]]; then
     disk="$disk"'p'
@@ -554,7 +556,13 @@ swap="$(( $swap * 1024 ))"'M'
 
 ##########   START PARTITIONING
 
-# In case of UEFI boot --> GPT/UEFI partitioning with 1 GiB disk space for boot partition
+swapDevice=$(cat /proc/swaps | grep "partition" | awk '{print $1}')
+if [[ $swapDevice ]]; then
+    swapoff $swapDevice
+fi
+
+# In case of UEFI boot --> GPT/UEFI partitioning with 1 GiB disk space 
+# for boot partition
 # In case of BIOS boot --> MBR/BIOS partitioning
 if [ "$boot" == 'uefi' ]; then
     wipefs --all --force $baseDisk
@@ -580,13 +588,17 @@ if [ "$boot" == 'uefi' ]; then
     ' | fdisk -w always -W always $baseDisk
 
     # Format and label disks
-    mkfs.fat -F 32 "$disk"'1'; fatlabel "$disk"'1' ESP
+    mkfs.fat -F 32 "$disk"'1'
+    fatlabel "$disk"'1' ESP
+    
     mkswap -L SWAP "$disk"'2'
+    
     mkfs.ext4 -L ROOT "$disk"'3'
         
     # Mount storage and EFI partitions, and create necessary directories
     swapon /dev/disk/by-label/SWAP
     mount /dev/disk/by-label/ROOT /mnt
+    
     mkdir -p /mnt/{boot,boot/efi,etc/conf.d,home}
     mount /dev/disk/by-label/ESP /mnt/boot/efi
 else
@@ -606,11 +618,13 @@ else
 
     # Format and label disks
     mkswap -L SWAP "$disk"'1'
+    
     mkfs.ext4 -L ROOT "$disk"'2'
 
     # Mount storage and EFI partitions, and create necessary directories
     swapon /dev/disk/by-label/SWAP
     mount /dev/disk/by-label/ROOT /mnt
+    
     mkdir -p /mnt/etc/conf.d
 fi
 
@@ -633,8 +647,13 @@ rc-service ntpd start
 # TODO Add explanation to choice of packages
 # Base packages
     # base          - 
-    # base-devel    - Package group with tools for building (compiling and linking) software
-    #base_devel='db diffutils gc guile libisl libmpc perl autoconf automake bash binutils bison esysusers /tempfilesfiles fakeroot file findutils flex gawk gcc gettext grep groff gzip libtool m4 make pacman pacman-contrib patch pkgconf python sed opendoas texinfo which bc udev'
+    # base-devel    - Package group with tools for building 
+    #                 (compiling and linking) software
+    #base_devel="db diffutils gc guile libisl libmpc perl autoconf \
+    # automake bash binutils bison esysusers /tempfilesfiles fakeroot \
+    # file findutils flex gawk gcc gettext grep groff gzip libtool m4 \
+    # make pacman pacman-contrib patch pkgconf python sed opendoas texinfo \
+    # which bc udev"
 basePackages="base base-devel"
 
 initSystem="openrc"
@@ -658,7 +677,8 @@ firmware="linux-firmware"
     # dhcpcd                        -
 network="networkmanager-$initSystem dhcpcd"
 
-basestrap /mnt $basePackages $initSystem $loginManager $kernel $firmware $network
+basestrap /mnt $basePackages $initSystem $loginManager $kernel $firmware \
+$network
 
 ##########   END BASE INSTALLATION
 
@@ -680,6 +700,7 @@ echo "$timezone" > /mnt/tempfiles/timezone
 
 ##########   END EXPORTING VARIABLES
 
-curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/main/chrootInstall.sh -o /mnt/chrootInstall.sh
+curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/main/\
+chrootInstall.sh -o /mnt/chrootInstall.sh
 chmod +x /mnt/chrootInstall.sh
 artix-chroot /mnt /chrootInstall.sh
