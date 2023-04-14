@@ -557,7 +557,7 @@ swap="$(( $swap * 1024 ))"'M'
 # In case of UEFI boot --> GPT/UEFI partitioning with 1 GiB disk space for boot partition
 # In case of BIOS boot --> MBR/BIOS partitioning
 if [ "$boot" == 'uefi' ]; then
-    wipefs --all --force "$baseDisk"
+    wipefs --all --force $baseDisk
     echo 'g
     n
     1
@@ -577,7 +577,7 @@ if [ "$boot" == 'uefi' ]; then
 
     
     w
-    ' | fdisk -w always -W always "$baseDisk"
+    ' | fdisk -w always -W always $baseDisk
 
     # Format and label disks
     mkfs.fat -F 32 "$disk"'1'; fatlabel "$disk"'1' ESP
@@ -602,7 +602,7 @@ else
 
     -1M
     w
-    ' | fdisk -w always -W always "$baseDisk"
+    ' | fdisk -w always -W always $baseDisk
 
     # Format and label disks
     mkswap -L SWAP "$disk"'1'
