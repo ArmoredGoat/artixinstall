@@ -566,34 +566,34 @@ fi
 # In case of BIOS boot --> MBR/BIOS partitioning
 if [ "$boot" == 'uefi' ]; then
     wipefs --all --force $baseDisk
-    echo 'g
-    n
-    1
-
-    +1024M
-    t
-    1
-    n
-    2
-
-    +'$swap'
-    t
-    2
-    19
-    n
-    3
-
-    
-    w
-    ' | fdisk -w always -W always $baseDisk
+    echo 'g # Create new GPT disklabel
+    n # New partition
+    1 # Partition number 1
+      # Default - start at beginning of disk 
+    +1024M  # 1 GiB boot partition
+    t # Set type of partiton
+    1 # Set type to 'EFI System'
+    n # New partition
+    2 # Partition number 2
+      # Default - start at beginning of remaining disk 
+    +'$swap' # Partiton size equal to given swap value
+    t # Set type of partiton
+    2 # Select partition 2
+    19 # Set type to 'Linux Swap'
+    n # New partition
+    3 # Partition number 3
+      # Default - start at beginning of remaining disk
+      # Default - use remaining disk space
+    w # Write the partition table
+    ' | sfdisk -w always -W always $baseDisk
 
     # Format and label disks
-    mkfs.fat -F 32 "$disk"'1'
-    fatlabel "$disk"'1' ESP
+    mkfs.fat -F 32 $disk'1'
+    fatlabel $disk'1' ESP
     
-    mkswap -L SWAP "$disk"'2'
+    mkswap -L SWAP $disk'2'
     
-    mkfs.ext4 -L ROOT "$disk"'3'
+    mkfs.ext4 -L ROOT $disk'3'
         
     # Mount storage and EFI partitions, and create necessary directories
     swapon /dev/disk/by-label/SWAP
@@ -603,23 +603,23 @@ if [ "$boot" == 'uefi' ]; then
     mount /dev/disk/by-label/ESP /mnt/boot/efi
 else
     partitions=0
-    echo 'o
-    n
-    p
-    1
-
-    +'$swap'
-    n
-    p
-
-    -1M
-    w
+    echo 'o # Clear in memory partition table
+    n # New partition
+    p # Primary partition
+    1 # Partition number 1
+      # Default - start at beginning of disk 
+    +'$swap' # Partiton size equal to given swap value
+    n # New partition
+    p # Primary partition
+      # Default - start at beginning of disk 
+    -1M # Use remaining disk space minus 1 M
+    w # Write the partition table
     ' | fdisk -w always -W always $baseDisk
 
     # Format and label disks
-    mkswap -L SWAP "$disk"'1'
+    mkswap -L SWAP $disk'1'
     
-    mkfs.ext4 -L ROOT "$disk"'2'
+    mkfs.ext4 -L ROOT $disk'2'
 
     # Mount storage and EFI partitions, and create necessary directories
     swapon /dev/disk/by-label/SWAP
