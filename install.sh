@@ -693,6 +693,7 @@ echo "$threadsMinusOne" > /mnt/tempfiles/threadsMinusOne
 echo "$gpu" > /mnt/tempfiles/gpu
 #echo "$intel_vaapi_driver" > /mnt/tempfiles/intel_vaapi_driver
 echo "$boot" > /mnt/tempfiles/boot
+echo "$installationType" > /mnt/tempfiles/installationType
 echo "$baseDisk" > /mnt/tempfiles/disk
 echo "$username" > /mnt/tempfiles/username
 echo "$userPassword" > /mnt/tempfiles/userPassword
