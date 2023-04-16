@@ -199,6 +199,11 @@ elif [[ $installationType == 'custom' ]]; then
         # Download pacman.conf with additional repositories and access to the Arch repositories
         curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/development/configfiles/pacman/pacman.conf -o /etc/pacman.conf
 
+        
+        if [[ ! -d /etc/pacman.d ]]; then
+            mkdir /etc/pacman.d
+        fi
+
         # Get recent mirror lists
         curl https://raw.githubusercontent.com/archlinux/svntogit-packages/packages/pacman-mirrorlist/trunk/mirrorlist -O /etc/pacman.d/mirrorlist-arch
 
@@ -239,7 +244,10 @@ elif [[ $installationType == 'custom' ]]; then
 
         pacman -Syu xdg-user-dirs --needed --noconfirm
 
-        mkdir /etc/xdg
+        if [[ ! -d /etc/xdg ]]; then
+            mkdir /etc/xdg
+        fi
+
         curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/development/configfiles/xdg/user-dirs.defaults -o /etc/xdg/user-dirs.defaults
 
         mkdir /home/"$username"/{downloads,documents/{music,public,desktop,templates,pictures,videos}}
@@ -383,9 +391,9 @@ elif [[ $installationType == 'custom' ]]; then
         rc-update sddm add
 
         # Create directory for sddm config files
-        mkdir /etc/sddm.conf.d
-
-
+        if [[ ! -d /etc/sddm.conf.d ]]; then
+            mkdir /etc/sddm.conf.d
+        fi
 
 
     ### WINDOW MANAGER
