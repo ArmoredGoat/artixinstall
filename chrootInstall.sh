@@ -205,7 +205,7 @@ elif [[ $installationType == 'custom' ]]; then
         fi
 
         # Get recent mirror lists
-        curl https://raw.githubusercontent.com/archlinux/svntogit-packages/packages/pacman-mirrorlist/trunk/mirrorlist -O /etc/pacman.d/mirrorlist-arch
+        curl https://raw.githubusercontent.com/archlinux/svntogit-packages/packages/pacman-mirrorlist/trunk/mirrorlist -o /etc/pacman.d/mirrorlist-arch
 
         # Uncomment every mirror temporarily to download reflector
         sed -i 's/^#Server/Server/' /etc/pacman.d/mirrorlist-arch
