@@ -230,20 +230,16 @@ elif [[ $installationType == "custom" ]]; then
 
         source /home/"$username"/.bashrc
 
+        pacman -Syu bash-completion --needed --noconfirm
 
+    ### XDG
 
-    # Create directory for git repositories
-    mkdir -p /home/"$username"/git/{own,cloned}
-    chmod 755 /home/"$username"/git/{own,cloned}
+        pacman -Syu xdg-user-dirs --needed --noconfirm
 
+        mkdir /etc/xdg
+        curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/development/configfiles/xdg/user-dirs.defaults -o /etc/xdg/user-dirs.defaults
 
-
-    mkdir /etc/xdg
-    curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/development/configfiles/user-dirs.defaults -o /etc/xdg/user-dirs.defaults
-
-    mkdir /home/"$username"/{downloads,documents/{music,public,desktop,templates,pictures,videos}}
-
-    pacman -Syu bash-completion --needed --noconfirm
+        mkdir /home/"$username"/{downloads,documents/{music,public,desktop,templates,pictures,videos}}
 
     ### CRON
 
@@ -291,6 +287,17 @@ elif [[ $installationType == "custom" ]]; then
         rc-update add local
         rc-service local start
 
+    ### GRUB
+
+        # Disable grub delay to speed up boot process
+        # If grub menu is needed, press ESC while booting
+
+        # Find and replace 'menu' with 'hidden'
+        sed -i 's/GRUB_TIMEOUT_STYLE=menu/GRUB_TIMEOUT_STYLE=hidden/g' /etc/default/grub
+
+        # Update grub config
+        grub-mkconfig -o /boot/grub/grub.cfg
+        
     ### EDITOR
         
         pacman -Syu neovim --needed --noconfirm
@@ -303,11 +310,23 @@ elif [[ $installationType == "custom" ]]; then
 
         pacman -Syu git 
 
+        # Create directory for git repositories
+        mkdir -p /home/"$username"/git/{own,cloned}
+        chmod 755 /home/"$username"/git/{own,cloned}
+
     ### AUR HELPER
     
         runuser -l "$username" -c "git clone https://aur.archlinux.org/yay-git.git \
         /home/$username/git/cloned/yay && cd /home/$username/git/cloned/yay && \
         makepkg -siS --noconfirm"
+
+        # Generate development package database for *-git packages that were
+        # installed without yay
+        yay -Y --gendb
+        # Check for development packages updates
+        yay -Syu --devel
+        # Enable development packages updates permanently
+        yay -Y --devel --save
 
     ### BROWSER
 
@@ -318,9 +337,18 @@ elif [[ $installationType == "custom" ]]; then
         pacman -Syu neofetch --needed --noconfirm
         #TODO Add neofetch configuration
 
-    ### FIRMWARE
+    ### FIRMWARE & FUNCTIONALITY
 
         pacman -Syu sof-firmware --needed --noconfirm
+
+        if [[ $cpu == 'AuthenticAMD' ]]; then
+            microcodePackage='amd-ucode'
+        elif [[ $cpu == 'Intel' ]]; then
+            microcodePackage='intel-ucode'
+        fi 
+
+        # https://averagelinuxuser.com/arch-linux-after-install/#7-install-microcode
+        pacman -Syu $microcodePackage --needed --noconfirm
 
     ### GRAPHIC DRIVERS
 
@@ -342,6 +370,20 @@ elif [[ $installationType == "custom" ]]; then
         pacman -Syu xorg xorg-server xorg-xinit --needed --noconfirm
 
         cp /etc/X11/xinit/xinitrc /home/"$username"/.xinitrc
+
+    ### LOGIN MANAGER
+
+        # sddm
+        pacman -Syu sddm sddm-openrc --needed --noconfirm
+
+        # Enable sddm to start at boot
+        rc-update sddm add
+
+        # Create directory for sddm config files
+        mkdir /etc/sddm.conf.d
+
+
+
 
     ### WINDOW MANAGER
 
