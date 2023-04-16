@@ -569,21 +569,20 @@ if [ "$boot" == 'uefi' ]; then
     echo 'g # Create new GPT disklabel
     n # New partition
     1 # Partition number 1
-      # Default - start at beginning of disk 
+
     +1024M  # 1 GiB boot partition
     t # Set type of partiton
     1 # Set type to 'EFI System'
     n # New partition
     2 # Partition number 2
-      # Default - start at beginning of remaining disk 
+
     +'$swap' # Partiton size equal to given swap value
     t # Set type of partiton
     2 # Select partition 2
     19 # Set type to 'Linux Swap'
     n # New partition
     3 # Partition number 3
-      # Default - start at beginning of remaining disk
-      # Default - use remaining disk space
+
     w # Write the partition table
     ' | fdisk -w always -W always $baseDisk
 
@@ -607,11 +606,11 @@ else
     n # New partition
     p # Primary partition
     1 # Partition number 1
-      # Default - start at beginning of disk 
+
     +'$swap' # Partiton size equal to given swap value
     n # New partition
     p # Primary partition
-      # Default - start at beginning of disk 
+
     -1M # Use remaining disk space minus 1 M
     w # Write the partition table
     ' | fdisk -w always -W always $baseDisk
