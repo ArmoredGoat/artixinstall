@@ -9,6 +9,8 @@ colorOff='\033[0m'       # Text Reset
 blue='\033[0;34m'         # blue
 purple='\033[0;35m'       # purple
 cyan='\033[0;36m'         # cyan
+red='\033[0;31m'          # red
+green='\033[0;32m'        # green
 
 ##########  END COLORS
 
@@ -181,15 +183,15 @@ pacman -Syu $manuals $generalAdministration $filesystemAdministration --needed -
 
 ##########  START INSTALLATION TYPE SPEFIFIC INSTALLATION AND CONFIGURATION
 
-if [[ $installationType == "base" ]]; then 
+if [[ $installationType == 'base' ]]; then 
 
     # Editor
         # nano  -
-    editor="nano"
+    editor='nano'
 
     pacman -Syu $editor --needed --noconfirm
 
-elif [[ $installationType == "custom" ]]; then
+elif [[ $installationType == 'custom' ]]; then
 
     ### PACMAN
 
