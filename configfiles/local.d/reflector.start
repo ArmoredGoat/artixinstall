@@ -1,0 +1,2 @@
+#! /bin/bash
+reflector --save /etc/pacman.d/mirrorlist-arch --country Germany --protocol https --latest 5
