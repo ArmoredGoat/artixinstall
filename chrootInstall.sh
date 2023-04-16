@@ -191,47 +191,44 @@ if [[ $installationType == "base" ]]; then
 
 elif [[ $installationType == "custom" ]]; then
 
-    ### CRON
-
-    pacman -Syu cronie cronie-openrc --needed --noconfirm
-    rc-update add cronie
-    rc-service sshd cronie
-
-    ### SSH
-
-    pacman -Syu openssh openssh-openrc --needed --noconfirm
-    rc-update add sshd
-    rc-service sshd start
-
-    ### UFW
-
-
     ### PACMAN
 
-    # Download pacman.conf with additional repositories and access to the Arch repositories
-    curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/development/configfiles/pacman/pacman.conf -o /etc/pacman.conf
+        # Download pacman.conf with additional repositories and access to the Arch repositories
+        curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/development/configfiles/pacman/pacman.conf -o /etc/pacman.conf
 
-    # Get recent mirror lists
-    curl https://raw.githubusercontent.com/archlinux/svntogit-packages/packages/pacman-mirrorlist/trunk/mirrorlist -O /etc/pacman.d/mirrorlist-arch
+        # Get recent mirror lists
+        curl https://raw.githubusercontent.com/archlinux/svntogit-packages/packages/pacman-mirrorlist/trunk/mirrorlist -O /etc/pacman.d/mirrorlist-arch
 
-    # Uncomment every mirror temporarily to download reflector
-    sed -i 's/^#Server/Server/' /etc/pacman.d/mirrorlist-arch
+        # Uncomment every mirror temporarily to download reflector
+        sed -i 's/^#Server/Server/' /etc/pacman.d/mirrorlist-arch
 
-    # reflector -
-    pacman -Syu reflector
+        # Install and enable support of Arch repositories
+        pacman -Syu artix-archlinux-support
+        # Retrieve keys
+        pacman-key --populate archlinx
 
-    reflector --save /etc/pacman.d/mirrorlist-arch --country Germany --protocol https --latest 5
+        ### REFLECTOR
 
-    ## TODO add reflector to cron
+            # reflector -
+            pacman -Syu reflector
 
+            # Run reflector to select the best five servers for my country
+            reflector --save /etc/pacman.d/mirrorlist-arch --country Germany --protocol https --latest 5
+
+            # Add file reflector.start to local.d directory to run reflector at start without systemd
+            curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/development/configfiles/local.d/reflector.start -o /etc/local.d/reflector.start
+            # Make reflector.start executable
+            chmod +x /etc/local.d/reflector.start
+
+    #TODO add paccache to cron
 
     ### BASH
 
-    curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/development/configfiles/bash/.bashrc -o /home/"$username"/.bashrc
+        curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/development/configfiles/bash/.bashrc -o /home/"$username"/.bashrc
 
-    curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/development/configfiles/bash/.bash_aliases -o /home/"$username"/.bash_aliases
+        curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/development/configfiles/bash/.bash_aliases -o /home/"$username"/.bash_aliases
 
-    source /home/"$username"/.bashrc
+        source /home/"$username"/.bashrc
 
 
 
@@ -246,103 +243,125 @@ elif [[ $installationType == "custom" ]]; then
 
     mkdir /home/"$username"/{downloads,documents/{music,public,desktop,templates,pictures,videos}}
 
+    pacman -Syu bash-completion --needed --noconfirm
+
+    ### CRON
+
+        pacman -Syu cronie cronie-openrc --needed --noconfirm
+        rc-update add cronie
+        rc-service cronie start
+
+    ### SSH
+
+        pacman -Syu openssh openssh-openrc --needed --noconfirm
+        rc-update add sshd
+        rc-service sshd start
+
+    ### FIREWALL
+
+        # ufw - 
+        pacman -Syu ufw ufw-openrc --needed --noconfirm
+        
+        # Start and enable ufw
+        rc-update add ufw
+        ufw enable
+        rc-service ufw start
+
+        # Disable any traffic by default
+        ufw default deny
+
+        # Limit SSH connections
+        ufw limit ssh
+
+        # Allow traffic from home network and specific ports/protocols
+        ufw allow from 192.168.1.0/24
+        ufw allow out 53
+        ufw allow out http
+        ufw allow out https
+
+        #TODO If email client is used, add ports of outgoing servers
+        # https://askubuntu.com/questions/448836/how-do-i-with-ufw-deny-all-outgoing-ports-excepting-the-ones-i-need
+
+        # Reload ufw
+        ufw reload
+
+    ### LOCAL
     
+        # Make sure that local service is running
+        rc-update add local
+        rc-service local start
 
+    ### EDITOR
+        
+        pacman -Syu neovim --needed --noconfirm
+
+    ### TERMINAL EMULATOR
+
+        pacman -Syu kitty -needed --noconfirm
+
+    ### GIT
+
+        pacman -Syu git 
+
+    ### AUR HELPER
     
+        runuser -l "$username" -c "git clone https://aur.archlinux.org/yay-git.git \
+        /home/$username/git/cloned/yay && cd /home/$username/git/cloned/yay && \
+        makepkg -siS --noconfirm"
 
-    pacman -Syu neovim git man-db man-pages texinfo sudo e2fsprogs dosfstools git micro bash-completion sof-firmware
+    ### BROWSER
 
-    pacman -Syu artix-archlinux-support
-    pacman-key --populate archlinx
+        pacman -Syu firefox-esr --needed --noconfirm
 
-    ##### START GRAPHIC DRIVERs INSTALLATION    #####
+    ### NEOFETCH
 
-    if [ "$gpu" == 'AMD' ]; then
-        $graphicsDrivers='xf86-video-amdgpu mesa lib32-mesa vulkan-radeon'
-    elif [ "$gpu" == 'INTEL' ]; then
-        $graphicsDrivers='xf86-video-intel mesa lib32-mesa vulkan-intel'
-    elif [ "$gpu" == 'NVIDIA' ]; then
-        $graphicsDrivers='xf86-video-nouveau mesa lib32-mesa nvidia-utils'
-    elif [ "$gpu" == 'VMware' ]; then
-        $graphicsDrivers='xf86-video-vmware xf86-input-vmmouse mesa lib32-mesa'
-    fi
+        pacman -Syu neofetch --needed --noconfirm
+        #TODO Add neofetch configuration
 
-    pacman -Syu $graphicsDrivers --needed --noconfirm
+    ### FIRMWARE
 
-    xorgPackages='xorg xorg-server xorg-xinit'
+        pacman -Syu sof-firmware --needed --noconfirm
 
-    pacman -Syu $xorgPackages --needed --noconfirm
+    ### GRAPHIC DRIVERS
 
-    cp /etc/X11/xinit/xinitrc /home/"$username"/.xinitrc
+        # Install drivers depending on detected gpu
+        if [ "$gpu" == 'AMD' ]; then
+            $graphicsDrivers='xf86-video-amdgpu mesa lib32-mesa vulkan-radeon'
+        elif [ "$gpu" == 'INTEL' ]; then
+            $graphicsDrivers='xf86-video-intel mesa lib32-mesa vulkan-intel'
+        elif [ "$gpu" == 'NVIDIA' ]; then
+            $graphicsDrivers='xf86-video-nouveau mesa lib32-mesa nvidia-utils'
+        elif [ "$gpu" == 'VMware' ]; then
+            $graphicsDrivers='xf86-video-vmware xf86-input-vmmouse mesa lib32-mesa'
+        fi
 
-    pacman -Syu neovim
+        pacman -Syu $graphicsDrivers --needed --noconfirm
 
-    # openssh openssh-openrc rc-update add sshd rc-service sshd start
+    ### DISPLAY SERVER
+
+        pacman -Syu xorg xorg-server xorg-xinit --needed --noconfirm
+
+        cp /etc/X11/xinit/xinitrc /home/"$username"/.xinitrc
+
+    ### WINDOW MANAGER
+
+        pacman -Syu qtile nitrogen picom --needed --noconfirm
+
+        #TODO Add configuration
+
+    ### YOUTUBE TUI
     
-
-    #####   END GRAPHIC DRIVERs INSTALLATION    #####
-
-    #####   START WM INSTALLATION   #####
-
-    # Might switch from awesome to qtile as it is completely written in python
-
-    pacman -Syu qtile nitrogen picom --needed --noconfirm
-    pacman -Syu firefox-esr
-
-    # TODO Add configuration
-
-    #####   END WM INSTALLATION     #####
-
-    pacman -Syu neofetch --noconfirm
-
-    # TODO Add neofetch configuration
-
-
-    pacman -Syu kitty --noconfirm
-
-    # TODO Add alacritty configuration
-
-    # Install AUR helper
-    runuser -l "$username" -c "git clone https://aur.archlinux.org/yay-git.git \
-    /home/$username/git/cloned/yay && cd /home/$username/git/cloned/yay && \
-    makepkg -siS --noconfirm"
-
-    # Install browser
-    echo "1
-    " | gpg --keyserver hkp://keyserver.ubuntu.com --search-keys 031F7104E932F7BD7416E7F6D2845E1305D6E801   # Import gpg key
-    git clone https://aur.archlinux.org/librewolf-bin.git /home/"$username"/git/cloned/librewolf
-    cd /home/"$username"/git/cloned/librewolf
-    sudo -u "$username" makepkg -si
-
-    # Application configuration
-
-    # Xorg
-
-    pacman -Syu jq mpv fzf yt-dlp imv
-    git clone 
+        #pacman -Syu jq mpv fzf yt-dlp imv
+        #git clone 
     
-
-
-    # vim
-    #curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/tree/development/configfiles/user-dirs.defaults -o /etc/xdg/user-dirs.defaults
-
-    # $filesystemAdministration $additionalPackages $generalAdministration $editor
-
-    # Editor
-        # vim   -
-    editor='neovim'
-
-    # Additional packages
-        # git   -
-        # micro -
-        # bash-completion   -
-    additionalPackages=''
 fi
 
 ##########  END INSTALLATION TYPE SPEFIFIC INSTALLATION AND CONFIGURATION
 
-# finishing up + cleaning
+# Finish up and remove (temporary) files
+
 rm -rf /chrootInstall.sh /tempfiles
+
 echo -e "\n##############################################################################################"
 echo -e "#                                   ${Green}Installation completed                                   ${Color_Off}#"
 echo -e "#            Please poweroff and ${Red}remove installation media${Color_Off} before powering back on           #"
