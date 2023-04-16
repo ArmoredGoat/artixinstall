@@ -700,7 +700,7 @@ echo "$timezone" > /mnt/tempfiles/timezone
 
 ##########   END EXPORTING VARIABLES
 
-curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/main/\
+curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/development/\
 chrootInstall.sh -o /mnt/chrootInstall.sh
 chmod +x /mnt/chrootInstall.sh
 artix-chroot /mnt /chrootInstall.sh
