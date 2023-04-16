@@ -585,7 +585,7 @@ if [ "$boot" == 'uefi' ]; then
       # Default - start at beginning of remaining disk
       # Default - use remaining disk space
     w # Write the partition table
-    ' | sfdisk -w always -W always $baseDisk
+    ' | fdisk -w always -W always $baseDisk
 
     # Format and label disks
     mkfs.fat -F 32 $disk'1'
