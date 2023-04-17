@@ -269,28 +269,33 @@ elif [[ $installationType == 'custom' ]]; then
         # ufw - 
         pacman -Syu ufw ufw-openrc --needed --noconfirm
         
-        # Start and enable ufw
+        # Enable ufw to start on boot
         rc-update add ufw
-        ufw enable
-        rc-service ufw start
 
         # Disable any traffic by default
         ufw default deny
 
+        # Activate logging
+        ufw logging low
+
         # Limit SSH connections
-        ufw limit ssh
+        ufw limit ssh comment 'Limit Connections On SSH Port'
 
         # Allow traffic from home network and specific ports/protocols
         ufw allow from 192.168.1.0/24
-        ufw allow out 53
-        ufw allow out http
-        ufw allow out https
+        
+        ufw allow in 25,53,80,123,143,443,465,587,993/tcp comment 'Standard Incomming Ports'
+        ufw allow out 22,25,53,80,123,143,443,587,993/tcp comment 'Standard Outgoing Ports'
+        ufw allow in 53,123/udp comment 'Allow NTP and DNS in'
+        ufw allow out 53,123/udp comment 'Allow NTP and DNS out'
 
+        # https://hackspoiler.de/ufw-linux-server-firewall-skript/
+        #TODO Explain ports
         #TODO If email client is used, add ports of outgoing servers
         # https://askubuntu.com/questions/448836/how-do-i-with-ufw-deny-all-outgoing-ports-excepting-the-ones-i-need
 
         # Reload ufw
-        ufw reload
+        ufw --force enable
 
     ### LOCAL
     
