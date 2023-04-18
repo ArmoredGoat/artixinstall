@@ -324,7 +324,7 @@ if [ "$boot" == 'uefi' ]; then
     mount "$disk"'3' /mnt
     
     mkdir -p /mnt/{boot,boot/efi,etc/conf.d,home}
-    mount /dev/disk/by-label/ESP /mnt/boot/efi
+    mount  "$disk"'1' /mnt/boot/efi
 else
     partitions=0
     echo 'o
@@ -353,11 +353,5 @@ else
 fi
 
 ##########   END PARTITIONING
-
-echo $disk
-
-ls /dev/disk/by-label/
-
-echo "$disk"'1'
 
 lsblk
