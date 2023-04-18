@@ -101,7 +101,7 @@ rc-update add NetworkManager
     # grub - 
     # efibootmgr - 
     # os-prober - Detection of other installed operating systems
-pacman -Syu grub efibootmgr os-prober --noconfirm
+pacman -Syu grub efibootmgr os-prober --needed --noconfirm
 
 # Check if BIOS or UEFI boot and install grub accordingly
 if [ "$boot" == 'uefi' ]; then
@@ -211,14 +211,14 @@ elif [[ $installationType == 'custom' ]]; then
         sed -i 's/^#Server/Server/' /etc/pacman.d/mirrorlist-arch
 
         # Install and enable support of Arch repositories
-        pacman -Syu artix-archlinux-support
+        pacman -Syu artix-archlinux-support --needed --noconfirm
         # Retrieve keys
         pacman-key --populate archlinx
 
         ### REFLECTOR
 
             # reflector -
-            pacman -Syu reflector
+            pacman -Syu reflector --needed --noconfirm
 
             # Run reflector to select the best five servers for my country
             reflector --save /etc/pacman.d/mirrorlist-arch --country Germany --protocol https --latest 5
@@ -320,11 +320,11 @@ elif [[ $installationType == 'custom' ]]; then
 
     ### TERMINAL EMULATOR
 
-        pacman -Syu kitty -needed --noconfirm
+        pacman -Syu kitty --needed --noconfirm
 
     ### GIT
 
-        pacman -Syu git 
+        pacman -Syu git --needed --noconfirm
 
         # Create directory for git repositories
         mkdir -p /home/"$username"/git/{own,cloned}
