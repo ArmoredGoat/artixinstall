@@ -154,9 +154,7 @@ sed -i '/%wheel ALL=(ALL:ALL) ALL/s/^#//g' /etc/sudoers
 
 # set home directory permissions
 mkdir -p /home/"$username"/{.config,.local/share}
-chmod 700 /home/"$username"
-chown "$username":users /home/"$username"/{.config,.local}
-chown "$username":users /home/"$username"/.local/share
+chmod 750 /home/"$username"
 chmod 755 /home/"$username"/{.config,.local/share}
 
 ##########  END USER MANAGEMENT
@@ -199,7 +197,6 @@ elif [[ $installationType == 'custom' ]]; then
         # Download pacman.conf with additional repositories and access to the Arch repositories
         curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/development/configfiles/pacman/pacman.conf -o /etc/pacman.conf
 
-        
         if [[ ! -d /etc/pacman.d ]]; then
             mkdir /etc/pacman.d
         fi
@@ -249,6 +246,7 @@ elif [[ $installationType == 'custom' ]]; then
         fi
 
         curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/development/configfiles/xdg/user-dirs.defaults -o /etc/xdg/user-dirs.defaults
+        chmod +x /etc/xdg/user-dirs.defaults
 
         mkdir /home/"$username"/{downloads,documents/{music,public,desktop,templates,pictures,videos}}
 
@@ -386,6 +384,7 @@ elif [[ $installationType == 'custom' ]]; then
         pacman -Syu xorg xorg-server xorg-xinit --needed --noconfirm
 
         cp /etc/X11/xinit/xinitrc /home/"$username"/.xinitrc
+        chmod +x /home/"$username"/.xinitrc
 
     ### LOGIN MANAGER
 
@@ -393,13 +392,15 @@ elif [[ $installationType == 'custom' ]]; then
         pacman -Syu sddm sddm-openrc --needed --noconfirm
 
         # Enable sddm to start at boot
-        rc-update sddm add
+        rc-update add sddm
 
         # Create directory for sddm config files
         if [[ ! -d /etc/sddm.conf.d ]]; then
             mkdir /etc/sddm.conf.d
         fi
 
+        curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/development/configfiles/sddm/default.conf -o /etc/sddm.conf.d/default.conf
+        chmod +x /etc/sddm.conf.d/default.conf
 
     ### WINDOW MANAGER
 
@@ -413,6 +414,9 @@ elif [[ $installationType == 'custom' ]]; then
         #git clone 
     
 fi
+
+# Change ownership of all installed files above from root to user.
+chown -R "$username":"$username" /home/"$username"
 
 ##########  END INSTALLATION TYPE SPEFIFIC INSTALLATION AND CONFIGURATION
 
