@@ -568,26 +568,36 @@ fi
 # In case of BIOS boot --> MBR/BIOS partitioning
 if [ "$boot" == 'uefi' ]; then
     wipefs --all --force "$baseDisk"
-    echo 'g
-    n
-    1
 
-    +1024M
-    t
-    1
-    n
-    2
+    # To create partitions programatically (rather than manually)
+    # the following is going to simulate the manual input to fdisk.
+    # sed strips off all comments so that documentation can be included
+    # without interfering with the input.
+    # Blank lines (commented as "Defualt") will send an empty
+    # line terminated with a newline to take the fdisk default.
+sed -e 's/\s*\([\+0-9a-zA-Z]*\).*/\1/' << EOF | fdisk w always -W always "$baseDisk"
+    g # Create new GPT disklabel
+    n # New partition
+    1 # Partition number 1
+      # Default - Start at beginning of disk
+    +1024M # 1 GiB boot parttion
+    t # Set type of partiton
+    1 # Set type to 'EFI System'
+    n # New partition
+    2 # Partition number 2
+      # Default - Start at beginning of remaining disk
+    +'$swap' # Partiton size equal to given swap value
+    t # Set type of partiton
+    2 # Select partition 2
+    19 # Set type to 'Linux Swap'
+    n # New partition
+    3 # Partition number 3
+      # Default - start at beginning of remaining disk
+      # Default - use remaining disk space
+    w # Write the partition table
+    q # Quit fdisk
+EOF
 
-    +'$swap'
-    t
-    2
-    19
-    n
-    3
-
-
-    w
-    ' | fdisk -w always -W always "$baseDisk"
 
     # Format and label disks
     mkfs.fat -F 32 "$disk"'1'
