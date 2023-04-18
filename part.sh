@@ -337,8 +337,8 @@ else
       # Default - Start at beginning of disk
     +$swap # Partiton size equal to given swap value
     n # New partition
-    2 # Partition number 1
     p # Primary partition
+    2 # Partition number 1
       # Default - start at beginning of remaining disk
     -1M # Use remaining disk space minus 1 M
     w # Write partition table
