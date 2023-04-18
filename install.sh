@@ -567,7 +567,7 @@ fi
 # for boot partition
 # In case of BIOS boot --> MBR/BIOS partitioning
 if [ "$boot" == 'uefi' ]; then
-    wipefs --all --force $baseDisk
+    wipefs --all --force "$baseDisk"
     echo 'g
     n
     1
@@ -598,11 +598,11 @@ if [ "$boot" == 'uefi' ]; then
     mkfs.ext4 -L ROOT "$disk"'3'
         
     # Mount storage and EFI partitions, and create necessary directories
-    swapon /dev/disk/by-label/SWAP
-    mount /dev/disk/by-label/ROOT /mnt
+    swapon "$disk"'2'
+    mount "$disk"'3' /mnt
     
     mkdir -p /mnt/{boot,boot/efi,etc/conf.d,home}
-    mount /dev/disk/by-label/ESP /mnt/boot/efi
+    mount  "$disk"'1' /mnt/boot/efi
 else
     partitions=0
     echo 'o
@@ -624,8 +624,8 @@ else
     mkfs.ext4 -L ROOT "$disk"'2'
 
     # Mount storage and EFI partitions, and create necessary directories
-    swapon /dev/disk/by-label/SWAP
-    mount /dev/disk/by-label/ROOT /mnt
+    swapon "$disk"'1'
+    mount "$disk"'2' /mnt
     
     mkdir -p /mnt/etc/conf.d
 fi
