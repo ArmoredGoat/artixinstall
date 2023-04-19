@@ -235,6 +235,8 @@ elif [[ $installationType == 'custom' ]]; then
 
         source /home/"$username"/.bashrc
 
+        chmod +x /home/"$username"/.bash*
+
         pacman -Syu bash-completion --needed --noconfirm
 
     ### XDG
@@ -246,7 +248,6 @@ elif [[ $installationType == 'custom' ]]; then
         fi
 
         curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/development/configfiles/xdg/user-dirs.defaults -o /etc/xdg/user-dirs.defaults
-        chmod +x /etc/xdg/user-dirs.defaults
 
         mkdir /home/"$username"/{downloads,documents/{music,public,desktop,templates,pictures,videos}}
 
@@ -400,7 +401,6 @@ elif [[ $installationType == 'custom' ]]; then
         fi
 
         curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/development/configfiles/sddm/default.conf -o /etc/sddm.conf.d/default.conf
-        chmod +x /etc/sddm.conf.d/default.conf
 
     ### WINDOW MANAGER
 
