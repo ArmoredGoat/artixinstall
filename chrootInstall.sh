@@ -266,27 +266,27 @@ elif [[ $installationType == 'custom' ]]; then
     ### FIREWALL
 
         # ufw - 
-        pacman -Syu ufw ufw-openrc --needed --noconfirm
+        #pacman -Syu ufw ufw-openrc --needed --noconfirm
         
         # Enable ufw to start on boot
-        rc-update add ufw
+        #rc-update add ufw
 
         # Disable any traffic by default
-        ufw default deny
+        #ufw default deny
 
         # Activate logging
-        ufw logging low
+        #ufw logging low
 
         # Limit SSH connections
-        ufw limit ssh comment 'Limit Connections On SSH Port'
+        #ufw limit ssh comment 'Limit Connections On SSH Port'
 
         # Allow traffic from home network and specific ports/protocols
-        ufw allow from 192.168.1.0/24
+        #ufw allow from 192.168.1.0/24
         
-        ufw allow in 25,53,80,123,143,443,465,587,993/tcp comment 'Standard Incomming Ports'
-        ufw allow out 22,25,53,80,123,143,443,587,993/tcp comment 'Standard Outgoing Ports'
-        ufw allow in 53,123/udp comment 'Allow NTP and DNS in'
-        ufw allow out 53,123/udp comment 'Allow NTP and DNS out'
+        #ufw allow in 25,53,80,123,143,443,465,587,993/tcp comment 'Standard Incomming Ports'
+        #ufw allow out 22,25,53,80,123,143,443,587,993/tcp comment 'Standard Outgoing Ports'
+        #ufw allow in 53,123/udp comment 'Allow NTP and DNS in'
+        #ufw allow out 53,123/udp comment 'Allow NTP and DNS out'
 
         # https://hackspoiler.de/ufw-linux-server-firewall-skript/
         #TODO Explain ports
@@ -294,7 +294,7 @@ elif [[ $installationType == 'custom' ]]; then
         # https://askubuntu.com/questions/448836/how-do-i-with-ufw-deny-all-outgoing-ports-excepting-the-ones-i-need
 
         # Reload ufw
-        ufw --force enable
+        #ufw --force enable
 
     ### LOCAL
     
@@ -390,17 +390,17 @@ elif [[ $installationType == 'custom' ]]; then
     ### LOGIN MANAGER
 
         # sddm
-        pacman -Syu sddm sddm-openrc --needed --noconfirm
+        #pacman -Syu sddm sddm-openrc --needed --noconfirm
 
         # Enable sddm to start at boot
-        rc-update add sddm
+        #rc-update add sddm
 
         # Create directory for sddm config files
-        if [[ ! -d /etc/sddm.conf.d ]]; then
-            mkdir /etc/sddm.conf.d
-        fi
+        #if [[ ! -d /etc/sddm.conf.d ]]; then
+        #    mkdir /etc/sddm.conf.d
+        #fi
 
-        curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/development/configfiles/sddm/default.conf -o /etc/sddm.conf.d/default.conf
+        #curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/development/configfiles/sddm/default.conf -o /etc/sddm.conf.d/default.conf
 
     ### WINDOW MANAGER
 
