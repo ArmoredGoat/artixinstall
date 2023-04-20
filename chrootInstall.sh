@@ -400,7 +400,7 @@ elif [[ $installationType == 'custom' ]]; then
             mkdir /etc/sddm.conf.d
         fi
 
-        curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/development/configfiles/sddm/default.conf -o /etc/sddm.conf.d/default.conf
+        #curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/development/configfiles/sddm/default.conf -o /etc/sddm.conf.d/default.conf
 
     ### WINDOW MANAGER
 
