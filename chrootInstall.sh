@@ -390,6 +390,7 @@ elif [[ $installationType == 'custom' ]]; then
         # Get config files repository and store them in their corresponding directory
         curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/development/configfiles/xorg/.xinitrc -o /home/"$username"/.xinitrc
         chmod +x /home/"$username"/.xinitrc
+        curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/development/configfiles/xorg/xorg.conf -o /etc/X11/xorg.conf
 
     ### LOGIN MANAGER
 
