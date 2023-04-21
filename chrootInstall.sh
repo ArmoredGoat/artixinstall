@@ -194,7 +194,7 @@ elif [[ $installationType == 'custom' ]]; then
 
     ### PACMAN
 
-        # Get config files repository and store them in their corresponding directory
+        # Get config files repository and store them in corresponding directory
         # Download pacman.conf with additional repositories and access to the Arch repositories
         curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/development/configfiles/pacman/pacman.conf -o /etc/pacman.conf
 
@@ -221,7 +221,7 @@ elif [[ $installationType == 'custom' ]]; then
             # Run reflector to select the best five servers for my country
             reflector --save /etc/pacman.d/mirrorlist-arch --country Germany --protocol https --latest 5
 
-            # Get config files repository and store them in their corresponding directory
+            # Get config files repository and store them in corresponding directory
             # Add file reflector.start to local.d directory to run reflector at start without systemd
             curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/development/configfiles/local.d/reflector.start -o /etc/local.d/reflector.start
             # Make reflector.start executable
@@ -231,7 +231,7 @@ elif [[ $installationType == 'custom' ]]; then
 
     ### BASH
 
-        # Get config files repository and store them in their corresponding directory
+        # Get config files repository and store them in corresponding directory
         curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/development/configfiles/bash/.bashrc -o /home/"$username"/.bashrc
         curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/development/configfiles/bash/.bash_aliases -o /home/"$username"/.bash_aliases
 
@@ -249,7 +249,7 @@ elif [[ $installationType == 'custom' ]]; then
             mkdir /etc/xdg
         fi
 
-        # Get config files repository and store them in their corresponding directory
+        # Get config files repository and store them in corresponding directory
         curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/development/configfiles/xdg/user-dirs.defaults -o /etc/xdg/user-dirs.defaults
 
         mkdir /home/"$username"/{downloads,documents/{music,public,desktop,templates,pictures,videos}}
@@ -311,7 +311,8 @@ elif [[ $installationType == 'custom' ]]; then
         # If grub menu is needed, press ESC while booting
 
         # Find and replace 'menu' with 'hidden'
-        sed -i 's/GRUB_TIMEOUT_STYLE=menu/GRUB_TIMEOUT_STYLE=hidden/g' /etc/default/grub
+        sed -i 's/GRUB_TIMEOUT_STYLE=menu/GRUB_TIMEOUT_STYLE=hidden/g' \
+        /etc/default/grub
 
         # Update grub config
         grub-mkconfig -o /boot/grub/grub.cfg
@@ -324,6 +325,22 @@ elif [[ $installationType == 'custom' ]]; then
 
         pacman -Syu kitty --needed --noconfirm
 
+        ## General configuration
+        # Get config files repository and store them in corresponding directory
+        curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/development/configfiles/kitty/kitty.conf -o /home/"$username"/.config/kitty/kitty.conf
+        ## Configure theme
+        if [[ ! -d /home/"$username"/.config/kitty/themes ]]; then
+            mkdir -p /home/"$username"/.config/kitty/themes
+        fi
+
+        # Download them from https://github.com/kovidgoyal/kitty-themes
+        curl https://raw.githubusercontent.com/kovidgoyal/kitty-themes/master/\
+        themes/Earthsong.conf \
+        -o /home/"$username"/.config/kitty/themes/Earthsong.conf
+        ln -s /home/"$username"/.config/kitty/themes/Earthsong.conf \
+            /home/"$username"/.config/kitty/theme.conf
+
+
     ### GIT
 
         pacman -Syu git --needed --noconfirm
@@ -334,9 +351,9 @@ elif [[ $installationType == 'custom' ]]; then
 
     ### AUR HELPER
     
-        runuser -l "$username" -c "git clone https://aur.archlinux.org/yay-git.git \
+        runuser -l "$username" -c "git clone https://aur.archlinux.org/yay.git \
         /home/$username/git/cloned/yay && cd /home/$username/git/cloned/yay && \
-        makepkg -siS --noconfirm"
+        makepkg -si --noconfirm"
 
         # Generate development package database for *-git packages that were
         # installed without yay
@@ -365,7 +382,7 @@ elif [[ $installationType == 'custom' ]]; then
             microcodePackage='intel-ucode'
         fi 
 
-        # https://averagelinuxuser.com/arch-linux-after-install/#7-install-microcode
+        #https://averagelinuxuser.com/arch-linux-after-install/#7-install-microcode
         pacman -Syu $microcodePackage --needed --noconfirm
 
     ### GRAPHIC DRIVERS
@@ -387,7 +404,7 @@ elif [[ $installationType == 'custom' ]]; then
 
         pacman -Syu xorg xorg-server xorg-xinit --needed --noconfirm
 
-        # Get config files repository and store them in their corresponding directory
+        # Get config files repository and store them in corresponding directory
         curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/development/configfiles/xorg/.xinitrc -o /home/"$username"/.xinitrc
         chmod +x /home/"$username"/.xinitrc
         curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/development/configfiles/xorg/xorg.conf -o /etc/X11/xorg.conf
@@ -405,10 +422,10 @@ elif [[ $installationType == 'custom' ]]; then
 
         # Create directory for sddm config files
         if [[ ! -d /etc/lightdm ]]; then
-            mkdir /etc/lightdm
+            mkdir -p /etc/lightdm
         fi
 
-        # Get config files repository and store them in their corresponding directory
+        # Get config files repository and store them in corresponding directory
         curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/development/configfiles/lightdm/lightdm.conf -o /etc/lightdm/ligthdm.conf
         curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/development/configfiles/lightdm/lightdm-gtk-greeter.conf -o /etc/lightdm/ligthdm-gtk-greeter.conf
         curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/development/configfiles/lightdm/users.conf -o /etc/lightdm/users.conf
@@ -417,6 +434,12 @@ elif [[ $installationType == 'custom' ]]; then
     ### WINDOW MANAGER
 
         pacman -Syu qtile nitrogen picom --needed --noconfirm
+
+        if [[ ! -d /home/"$username"/.config/backgrounds ]]; then
+            mkdir -p /home/"$username"/.config/backgrounds
+        fi
+
+
 
         #TODO Add configuration
 
