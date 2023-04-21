@@ -194,6 +194,7 @@ elif [[ $installationType == 'custom' ]]; then
 
     ### PACMAN
 
+        # Get config files repository and store them in their corresponding directory
         # Download pacman.conf with additional repositories and access to the Arch repositories
         curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/development/configfiles/pacman/pacman.conf -o /etc/pacman.conf
 
@@ -220,6 +221,7 @@ elif [[ $installationType == 'custom' ]]; then
             # Run reflector to select the best five servers for my country
             reflector --save /etc/pacman.d/mirrorlist-arch --country Germany --protocol https --latest 5
 
+            # Get config files repository and store them in their corresponding directory
             # Add file reflector.start to local.d directory to run reflector at start without systemd
             curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/development/configfiles/local.d/reflector.start -o /etc/local.d/reflector.start
             # Make reflector.start executable
@@ -229,8 +231,8 @@ elif [[ $installationType == 'custom' ]]; then
 
     ### BASH
 
+        # Get config files repository and store them in their corresponding directory
         curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/development/configfiles/bash/.bashrc -o /home/"$username"/.bashrc
-
         curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/development/configfiles/bash/.bash_aliases -o /home/"$username"/.bash_aliases
 
         source /home/"$username"/.bashrc
@@ -247,6 +249,7 @@ elif [[ $installationType == 'custom' ]]; then
             mkdir /etc/xdg
         fi
 
+        # Get config files repository and store them in their corresponding directory
         curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/development/configfiles/xdg/user-dirs.defaults -o /etc/xdg/user-dirs.defaults
 
         mkdir /home/"$username"/{downloads,documents/{music,public,desktop,templates,pictures,videos}}
@@ -384,23 +387,31 @@ elif [[ $installationType == 'custom' ]]; then
 
         pacman -Syu xorg xorg-server xorg-xinit --needed --noconfirm
 
+        # Get config files repository and store them in their corresponding directory
         curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/development/configfiles/xorg/.xinitrc -o /home/"$username"/.xinitrc
         chmod +x /home/"$username"/.xinitrc
 
     ### LOGIN MANAGER
 
-        # sddm
-        pacman -Syu sddm sddm-openrc --needed --noconfirm
+        # lightdm
+        # lightdm-openrc
+        # lightdm-gtk-greeter
+        # light-locker
+        pacman -Syu lightdm lightdm-openrc light-locker lightdm-gtk-greeter --needed --noconfirm
 
         # Enable sddm to start at boot
-        rc-update add sddm
+        rc-update add lightdm
 
         # Create directory for sddm config files
-        if [[ ! -d /etc/sddm.conf.d ]]; then
-            mkdir /etc/sddm.conf.d
+        if [[ ! -d /etc/lightdm ]]; then
+            mkdir /etc/lightdm
         fi
 
-        #curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/development/configfiles/sddm/default.conf -o /etc/sddm.conf.d/default.conf
+        # Get config files repository and store them in their corresponding directory
+        curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/development/configfiles/lightdm/lightdm.conf -o /etc/lightdm/ligthdm.conf
+        curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/development/configfiles/lightdm/lightdm-gtk-greeter.conf -o /etc/lightdm/ligthdm-gtk-greeter.conf
+        curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/development/configfiles/lightdm/users.conf -o /etc/lightdm/users.conf
+        curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/development/configfiles/lightdm/Xsession -o /etc/lightdm/Xsession
 
     ### WINDOW MANAGER
 
