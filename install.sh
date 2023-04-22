@@ -563,8 +563,8 @@ if [[ $swapDevice ]]; then
     swapoff $swapDevice
 fi
 
-for mountedPart in $(mount | grep "^$baseDisk" | awk '{print $3}'); do
-    unmount -fl $mountedPart
+for mountPoint in $(mount | grep "^$baseDisk" | awk '{print $3}'); do
+    umount -fl $mountPoint
 done
 
 # In case of UEFI boot --> GPT/UEFI partitioning with 1 GiB disk space 
