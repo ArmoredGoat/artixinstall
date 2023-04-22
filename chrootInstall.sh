@@ -211,7 +211,7 @@ elif [[ $installationType == 'custom' ]]; then
         # Install and enable support of Arch repositories
         pacman -Syu artix-archlinux-support --needed --noconfirm
         # Retrieve keys
-        pacman-key --populate archlinx
+        pacman-key --populate archlinux
 
         ### REFLECTOR
 
