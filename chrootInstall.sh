@@ -110,7 +110,7 @@ if [ "$boot" == 'uefi' ]; then
     # TODO Learn about bootloader-id
 fi
 if [ "$boot" == 'bios' ]; then
-    grub-install --target=i386-pc "$disk"
+    grub-install --recheck $baseDisk
 fi
 
 # TODO Learn what the heck is going on right here...
