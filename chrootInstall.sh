@@ -62,7 +62,7 @@ gpu="$(< /tempfiles/gpu)"
 #"$intel_vaapi_driver"="$(< /tempfiles/intel_vaapi_driver
 boot="$(< /tempfiles/boot)"
 installationType="$(< /tempfiles/installationType)"
-baseDisk="$(< /tempfiles/disk)"
+baseDisk="$(< /tempfiles/baseDisk)"
 username="$(< /tempfiles/username)"
 userPassword="$(< /tempfiles/userPassword)"
 setRootPassword="$(< /tempfiles/setRootPassword)"
@@ -110,7 +110,7 @@ if [ "$boot" == 'uefi' ]; then
     # TODO Learn about bootloader-id
 fi
 if [ "$boot" == 'bios' ]; then
-    grub-install --recheck $baseDisk
+    grub-install --target=i386-pc --recheck $baseDisk
 fi
 
 # TODO Learn what the heck is going on right here...
