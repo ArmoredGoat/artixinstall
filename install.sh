@@ -580,26 +580,26 @@ if [ "$boot" == 'uefi' ]; then
     # Blank lines (commented as "Defualt") will send an empty
     # line terminated with a newline to take the fdisk default.
     sed -e 's/\s*\([\+0-9a-zA-Z]*\).*/\1/' << EOF | fdisk -w always -W always "$baseDisk"
-        g      # Create new GPT disklabel
-        n      # New partition
-        1      # Partition number 1
-               # Default - Start at beginning of disk
-        +1024M # 1 GiB boot parttion
-        t      # Set type of partiton
-        1      # Set type to 'EFI System'
-        n      # New partition
-        2      # Partition number 2
-               # Default - Start at beginning of remaining disk
-        +$swap # Partiton size equal to given swap value
-        t      # Set type of partiton
-        2      # Select partition 2
-        19     # Set type to 'Linux Swap'
-        n      # New partition
-        3      # Partition number 3
-               # Default - start at beginning of remaining disk
-               # Default - use remaining disk space
-        w      # Write partition table
-        q      # Quit fdisk
+        g       # Create new GPT disklabel
+        n       # New partition
+        1       # Partition number 1
+                # Default - Start at beginning of disk
+        +1024M  # 1 GiB boot parttion
+        t       # Set type of partiton
+        1       # Set type to 'EFI System'
+        n       # New partition
+        2       # Partition number 2
+                # Default - Start at beginning of remaining disk
+        +$swap  # Partiton size equal to given swap value
+        t       # Set type of partiton
+        2       # Select partition 2
+        19      # Set type to 'Linux Swap'
+        n       # New partition
+        3       # Partition number 3
+                # Default - start at beginning of remaining disk
+                # Default - use remaining disk space
+        w       # Write partition table
+        q       # Quit fdisk
 EOF
 
     # Format and label disks
@@ -619,25 +619,26 @@ EOF
 else
     wipefs --all --force "$baseDisk"
     sed -e 's/\s*\([\+0-9a-zA-Z]*\).*/\1/' << EOF | fdisk -w always -W always "$baseDisk"
-    g      # Create new GPT disklabel
-    n # New partition
-    1 # Partition number 1
-      # Default - Start at beginning of disk
-    +1M
-    t
-    4
-    n
-    2
-
-    +$swap # Partiton size equal to given swap value
-    t # Set type of partiton
-    19 # Set type to 'Linux swap / Solaris'
-    n # New partition
-    3
-      # Default - start at beginning of remaining disk
-
-    w # Write partition table
-    q # Quit fdisk
+    g       # Create new GPT disklabel
+    n       # New partition
+    1       # Partition number 1
+            # Default - Start at beginning of disk
+    +1M     # 1 MB BIOS boot partition
+    t       # Set type of partiton
+    4       # Set type to 'BIOS boot'
+    n       # New partition
+    2       # Partition number 2
+            # Default - Start at beginning of remaining disk
+    +$swap  # Partiton size equal to given swap value
+    t       # Set type of partiton
+    2       # Select partition 2
+    19      # Set type to 'Linux Swap'
+    n       # New partition
+    3       # Partition number 3
+            # Default - start at beginning of remaining disk
+            # Default - use remaining disk space
+    w       # Write partition table
+    q       # Quit fdisk
 EOF
 
     # Format and label disks
