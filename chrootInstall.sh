@@ -461,6 +461,27 @@ rm -rf /chrootInstall.sh /tempfiles
 
 echo -e "\n##############################################################################################"
 echo -e "#                                   ${Green}Installation completed                                   ${Color_Off}#"
-echo -e "#            Please poweroff and ${Red}remove installation media${Color_Off} before powering back on           #"
-echo -e "##############################################################################################\n"
-exit
+echo -e "#                Make sure to ${Red}remove installation media${Color_Off} before powering back on              #"
+echo -e "##############################################################################################"
+
+
+while true; do
+    read -n 1 -sp $'\n'"Press RETURN to reboot the system now or any other key \
+to exit the script without rebooting." reboot
+    case $reboot in
+        "")
+            delete_term_lines 1 1
+
+            exit            # Exit chroot environment
+            umount -R /mnt  # Unmounts disk
+            reboot
+            
+            break
+            ;;
+        *)
+            delete_term_lines 1 1
+
+            break
+            ;;
+    esac      
+done
