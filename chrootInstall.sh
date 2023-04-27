@@ -472,7 +472,6 @@ to exit the script without rebooting." reboot
         "")
             delete_term_lines 1 1
 
-            exit            # Exit chroot environment
             umount -R /mnt  # Unmounts disk
             reboot
             
