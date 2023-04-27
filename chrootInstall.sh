@@ -116,7 +116,7 @@ fi
 # TODO Learn what the heck is going on right here...
 
 #cp /usr/share/locale/en\@quot/LC_MESSAGES/grub.mo /boot/grub/locale/en.mo
-#curl https://raw.githubusercontent.com/rwinkhart/artix-install-script/development/config-files/grub -o /etc/default/grub
+#curl https://raw.githubusercontent.com/rwinkhart/artix-install-script/iss005/config-files/grub -o /etc/default/grub
 #if [ "$gpu" == 'NVIDIA' ]; then
 #    echo "GRUB_CMDLINE_LINUX_DEFAULT=\"loglevel=3 quiet nowatchdog retbleed=off mem_sleep_default=deep nohz_full=1-"$threadsminusone" nvidia-drm.modeset=1\"" >> /etc/default/grub
 #elif [ "$gpu" == 'AMD' ]; then
@@ -196,7 +196,7 @@ elif [[ $installationType == 'custom' ]]; then
 
         # Get config files repository and store them in corresponding directory
         # Download pacman.conf with additional repositories and access to the Arch repositories
-        curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/development/configfiles/pacman/pacman.conf -o /etc/pacman.conf
+        curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/iss005/configfiles/pacman/pacman.conf -o /etc/pacman.conf
 
         if [[ ! -d /etc/pacman.d ]]; then
             mkdir -p /etc/pacman.d
@@ -223,7 +223,7 @@ elif [[ $installationType == 'custom' ]]; then
 
             # Get config files repository and store them in corresponding directory
             # Add file reflector.start to local.d directory to run reflector at start without systemd
-            curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/development/configfiles/local.d/reflector.start -o /etc/local.d/reflector.start
+            curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/iss005/configfiles/local.d/reflector.start -o /etc/local.d/reflector.start
             # Make reflector.start executable
             chmod +x /etc/local.d/reflector.start
 
@@ -232,8 +232,8 @@ elif [[ $installationType == 'custom' ]]; then
     ### BASH
 
         # Get config files repository and store them in corresponding directory
-        curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/development/configfiles/bash/.bashrc -o /home/"$username"/.bashrc
-        curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/development/configfiles/bash/.bash_aliases -o /home/"$username"/.bash_aliases
+        curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/iss005/configfiles/bash/.bashrc -o /home/"$username"/.bashrc
+        curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/iss005/configfiles/bash/.bash_aliases -o /home/"$username"/.bash_aliases
 
         source /home/"$username"/.bashrc
 
@@ -250,7 +250,7 @@ elif [[ $installationType == 'custom' ]]; then
         fi
 
         # Get config files repository and store them in corresponding directory
-        curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/development/configfiles/xdg/user-dirs.defaults -o /etc/xdg/user-dirs.defaults
+        curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/iss005/configfiles/xdg/user-dirs.defaults -o /etc/xdg/user-dirs.defaults
 
         mkdir -p /home/"$username"/{downloads,documents/{music,public,desktop,templates,pictures,videos}}
 
@@ -327,7 +327,7 @@ elif [[ $installationType == 'custom' ]]; then
 
         ## General configuration
         # Get config files repository and store them in corresponding directory
-        curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/development/configfiles/kitty/kitty.conf \
+        curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/iss005/configfiles/kitty/kitty.conf \
         -o /home/"$username"/.config/kitty/kitty.conf
         ## Configure theme
         if [[ ! -d /home/"$username"/.config/kitty/themes ]]; then
@@ -405,9 +405,9 @@ elif [[ $installationType == 'custom' ]]; then
         pacman -Syu xorg xorg-server xorg-xinit --needed --noconfirm
 
         # Get config files repository and store them in corresponding directory
-        curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/development/configfiles/xorg/.xinitrc -o /home/"$username"/.xinitrc
+        curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/iss005/configfiles/xorg/.xinitrc -o /home/"$username"/.xinitrc
         chmod +x /home/"$username"/.xinitrc
-        curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/development/configfiles/xorg/xorg.conf -o /etc/X11/xorg.conf
+        curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/iss005/configfiles/xorg/xorg.conf -o /etc/X11/xorg.conf
 
     ### LOGIN MANAGER
 
@@ -426,10 +426,10 @@ elif [[ $installationType == 'custom' ]]; then
         fi
 
         # Get config files repository and store them in corresponding directory
-        curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/development/configfiles/lightdm/lightdm.conf -o /etc/lightdm/ligthdm.conf
-        curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/development/configfiles/lightdm/lightdm-gtk-greeter.conf -o /etc/lightdm/ligthdm-gtk-greeter.conf
-        curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/development/configfiles/lightdm/users.conf -o /etc/lightdm/users.conf
-        curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/development/configfiles/lightdm/Xsession -o /etc/lightdm/Xsession
+        curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/iss005/configfiles/lightdm/lightdm.conf -o /etc/lightdm/ligthdm.conf
+        curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/iss005/configfiles/lightdm/lightdm-gtk-greeter.conf -o /etc/lightdm/ligthdm-gtk-greeter.conf
+        curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/iss005/configfiles/lightdm/users.conf -o /etc/lightdm/users.conf
+        curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/iss005/configfiles/lightdm/Xsession -o /etc/lightdm/Xsession
 
     ### WINDOW MANAGER
 
