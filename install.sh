@@ -730,3 +730,28 @@ curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/development/\
 chrootInstall.sh -o /mnt/chrootInstall.sh
 chmod +x /mnt/chrootInstall.sh
 artix-chroot /mnt /chrootInstall.sh
+
+echo -e "\n##############################################################################################"
+echo -e "#                                   ${Green}Installation completed                                   ${Color_Off}#"
+echo -e "#                Make sure to ${Red}remove installation media${Color_Off} before powering back on              #"
+echo -e "##############################################################################################"
+
+while true; do
+    read -n 1 -sp $'\n'"Press RETURN to reboot the system now or any other key \
+to exit the script without rebooting." reboot
+    case $reboot in
+        "")
+            delete_term_lines 1 1
+
+            umount -R /mnt  # Unmounts disk
+            reboot
+            
+            break
+            ;;
+        *)
+            delete_term_lines 1 1
+
+            break
+            ;;
+    esac      
+done
