@@ -327,6 +327,10 @@ elif [[ $installationType == 'custom' ]]; then
 
         pacman -Syuq kitty --needed --noconfirm
 
+        if [[ ! -d /home/"$username"/.config/kitty ]]; then
+            mkdir -p /home/"$username"/.config/kitty
+        fi
+
         ## General configuration
         # Get config files repository and store them in corresponding directory
         curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/iss005/configfiles/kitty/kitty.conf \
