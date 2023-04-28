@@ -382,7 +382,7 @@ elif [[ $installationType == 'custom' ]]; then
 
     ### AUDIO
 
-        pacman -Rdd jack2
+        pacman -Rdd jack2 --noconfirm
         pacman -Syuq pipewire lib32-pipewire pipewire-audio pipewire-alsa pipewire-pulse pipewire-jack pipewire-docs wireplumber pavucontrol --needed --noconfirm
 
         if [[ ! -d /home/"$username"/.config/pipewire ]]; then
