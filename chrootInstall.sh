@@ -151,6 +151,8 @@ $userPassword
 usermod -aG wheel,audio,video,storage "$username"
 # Give users in wheel group sudo privileges --> no need for root user
 sed -i '/%wheel ALL=(ALL:ALL) ALL/s/^#//g' /etc/sudoers
+# Disable sudo password prompts for this user
+echo "$username ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
 
 # set home directory permissions
 mkdir -p /home/"$username"/{.config,.local/share}
@@ -348,6 +350,7 @@ elif [[ $installationType == 'custom' ]]; then
         # Create directory for git repositories
         mkdir -p /home/"$username"/git/{own,cloned}
         chmod 755 /home/"$username"/git/{own,cloned}
+        chown -R "$username":"$username" /home/"$username"/git/{own,cloned}
 
     ### AUR HELPER
     
@@ -357,11 +360,11 @@ elif [[ $installationType == 'custom' ]]; then
 
         # Generate development package database for *-git packages that were
         # installed without yay
-        yay -Y --gendb
+        runuser -l "$username" -c "yay -Y --gendb --noconfirm"
         # Check for development packages updates
-        yay -Syu --devel
+        runuser -l "$username" -c "yay -Syu --devel --noconfirm"
         # Enable development packages updates permanently
-        yay -Y --devel --save
+        runuser -l "$username" -c "yay -Y --devel --save --noconfirm"
 
     ### BROWSER
 
