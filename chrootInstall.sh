@@ -363,8 +363,9 @@ elif [[ $installationType == 'custom' ]]; then
         runuser -l "$username" -c "yay -Y --gendb --noconfirm"
         # Check for development packages updates
         runuser -l "$username" -c "yay -Syu --devel --noconfirm"
-        # Enable development packages updates permanently
-        runuser -l "$username" -c "yay -Y --devel --save --noconfirm"
+        # Enable development packages updates and combined upgrades permanently
+        runuser -l "$username" -c "yay -Y --devel --combinedupgrade /
+        --batchinstall --save --noconfirm"
 
     ### BROWSER
 
