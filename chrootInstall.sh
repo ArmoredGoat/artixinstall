@@ -376,6 +376,16 @@ elif [[ $installationType == 'custom' ]]; then
         pacman -Syu neofetch --needed --noconfirm
         #TODO Add neofetch configuration
 
+    ### AUDIO
+
+        pacman -Syu pipewire lib32-pipewire pipewire-audio pipewire-alsa \
+            pipewire-pulse pipewire-jack pipewire-docs wireplumber pavucontrol \
+            --needed --noconfirm
+
+        curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/iss005/configfiles/pipewire/pipewire.conf -o /home/"$username"/.config/pipewire/pipewire.conf
+        curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/iss005/configfiles/pipewire/.pipewire-start.sh -o /home/"$username"/.config/pipewire/.pipewire-start.sh
+        chmod +x /home/"$username"/.config/pipewire/.pipewire-start.sh
+
     ### FIRMWARE & FUNCTIONALITY
 
         pacman -Syu sof-firmware --needed --noconfirm
@@ -434,6 +444,7 @@ elif [[ $installationType == 'custom' ]]; then
         curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/iss005/configfiles/lightdm/lightdm-gtk-greeter.conf -o /etc/lightdm/ligthdm-gtk-greeter.conf
         curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/iss005/configfiles/lightdm/users.conf -o /etc/lightdm/users.conf
         curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/iss005/configfiles/lightdm/Xsession -o /etc/lightdm/Xsession
+        curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/iss005/configfiles/xorg/.xprofile -o /home/"$username"/.xprofile
 
     ### WINDOW MANAGER
 

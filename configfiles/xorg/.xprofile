@@ -1,0 +1,8 @@
+# Autostart programs
+
+picom &
+nitrogen --restore &
+sh ~/.config/pipewire/.pipewire-start.sh &
+
+# Start Qtile
+exec dbus-launch --exit-with-session qtile start
