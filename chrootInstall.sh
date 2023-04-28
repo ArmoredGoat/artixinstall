@@ -382,8 +382,24 @@ elif [[ $installationType == 'custom' ]]; then
 
     ### AUDIO
 
-        pacman -Rs jack2
-        pacman -Syuq pipewire lib32-pipewire pipewire-audio pipewire-alsa pipewire-pulse pipewire-jack pipewire-docs wireplumber pavucontrol --needed --noconfirm
+        echo "1
+        1
+        1
+        1
+        1
+        1
+        1
+        1
+        1
+        1
+        1
+        1
+        1
+        1
+        1
+        1
+        y
+        " | pacman -Syuq pipewire lib32-pipewire pipewire-audio pipewire-alsa pipewire-pulse pipewire-jack pipewire-docs wireplumber pavucontrol --needed --noconfirm
 
         if [[ ! -d /home/"$username"/.config/pipewire ]]; then
             mkdir -p /home/"$username"/.config/pipewire
