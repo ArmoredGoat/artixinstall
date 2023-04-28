@@ -101,7 +101,7 @@ rc-update add NetworkManager
     # grub - 
     # efibootmgr - 
     # os-prober - Detection of other installed operating systems
-pacman -Syu grub efibootmgr os-prober --needed --noconfirm
+pacman -Syuq grub efibootmgr os-prober --needed --noconfirm
 
 # Check if BIOS or UEFI boot and install grub accordingly
 if [ "$boot" == 'uefi' ]; then
@@ -178,7 +178,7 @@ chmod 755 /home/"$username"/{.config,.local/share}
     # dosfstools    -
     filesystemAdministration="e2fsprogs dosfstools"
 
-pacman -Syu $manuals $generalAdministration $filesystemAdministration --needed --noconfirm
+pacman -Syuq $manuals $generalAdministration $filesystemAdministration --needed --noconfirm
 
 ##########  END GENERAL PACKAGE INSTALLATION
 
@@ -190,7 +190,7 @@ if [[ $installationType == 'base' ]]; then
         # nano  -
     editor='nano'
 
-    pacman -Syu $editor --needed --noconfirm
+    pacman -Syuq $editor --needed --noconfirm
 
 elif [[ $installationType == 'custom' ]]; then
 
@@ -211,14 +211,14 @@ elif [[ $installationType == 'custom' ]]; then
         sed -i 's/^#Server/Server/' /etc/pacman.d/mirrorlist-arch
 
         # Install and enable support of Arch repositories
-        pacman -Syu artix-archlinux-support --needed --noconfirm
+        pacman -Syuq artix-archlinux-support --needed --noconfirm
         # Retrieve keys
         pacman-key --populate archlinux
 
         ### REFLECTOR
 
             # reflector -
-            pacman -Syu reflector --needed --noconfirm
+            pacman -Syuq reflector --needed --noconfirm
 
             # Run reflector to select the best five servers for my country
             reflector --save /etc/pacman.d/mirrorlist-arch --country Germany --protocol https --latest 5
@@ -241,11 +241,11 @@ elif [[ $installationType == 'custom' ]]; then
 
         chmod +x /home/"$username"/.bash*
 
-        pacman -Syu bash-completion --needed --noconfirm
+        pacman -Syuq bash-completion --needed --noconfirm
 
     ### XDG
 
-        pacman -Syu xdg-user-dirs --needed --noconfirm
+        pacman -Syuq xdg-user-dirs --needed --noconfirm
 
         if [[ ! -d /etc/xdg ]]; then
             mkdir -p /etc/xdg
@@ -258,20 +258,20 @@ elif [[ $installationType == 'custom' ]]; then
 
     ### CRON
 
-        pacman -Syu cronie cronie-openrc --needed --noconfirm
+        pacman -Syuq cronie cronie-openrc --needed --noconfirm
         rc-update add cronie
         rc-service cronie start
 
     ### SSH
 
-        pacman -Syu openssh openssh-openrc --needed --noconfirm
+        pacman -Syuq openssh openssh-openrc --needed --noconfirm
         rc-update add sshd
         rc-service sshd start
 
     ### FIREWALL
 
         # ufw - 
-        #pacman -Syu ufw ufw-openrc --needed --noconfirm
+        #pacman -Syuq ufw ufw-openrc --needed --noconfirm
         
         # Enable ufw to start on boot
         #rc-update add ufw
@@ -321,11 +321,11 @@ elif [[ $installationType == 'custom' ]]; then
         
     ### EDITOR
         
-        pacman -Syu neovim --needed --noconfirm
+        pacman -Syuq neovim --needed --noconfirm
 
     ### TERMINAL EMULATOR
 
-        pacman -Syu kitty --needed --noconfirm
+        pacman -Syuq kitty --needed --noconfirm
 
         ## General configuration
         # Get config files repository and store them in corresponding directory
@@ -345,7 +345,7 @@ elif [[ $installationType == 'custom' ]]; then
 
     ### GIT
 
-        pacman -Syu git --needed --noconfirm
+        pacman -Syuq git --needed --noconfirm
 
         # Create directory for git repositories
         mkdir -p /home/"$username"/git/{own,cloned}
@@ -369,16 +369,16 @@ elif [[ $installationType == 'custom' ]]; then
 
     ### BROWSER
 
-        pacman -Syu firefox-esr --needed --noconfirm
+        pacman -Syuq firefox-esr --needed --noconfirm
 
     ### NEOFETCH
 
-        pacman -Syu neofetch --needed --noconfirm
+        pacman -Syuq neofetch --needed --noconfirm
         #TODO Add neofetch configuration
 
     ### AUDIO
 
-        pacman -Syu pipewire lib32-pipewire pipewire-audio pipewire-alsa pipewire-pulse pipewire-jack pipewire-docs wireplumber pavucontrol --needed --noconfirm
+        pacman -Syuq pipewire lib32-pipewire pipewire-audio pipewire-alsa pipewire-pulse pipewire-jack pipewire-docs wireplumber pavucontrol --needed --noconfirm
 
         if [[ ! -d /home/"$username"/.config/pipewire ]]; then
             mkdir -p /home/"$username"/.config/pipewire
@@ -390,7 +390,7 @@ elif [[ $installationType == 'custom' ]]; then
 
     ### FIRMWARE & FUNCTIONALITY
 
-        pacman -Syu sof-firmware --needed --noconfirm
+        pacman -Syuq sof-firmware --needed --noconfirm
 
         if [[ $cpu == 'AuthenticAMD' ]]; then
             microcodePackage='amd-ucode'
@@ -399,7 +399,7 @@ elif [[ $installationType == 'custom' ]]; then
         fi 
 
         #https://averagelinuxuser.com/arch-linux-after-install/#7-install-microcode
-        pacman -Syu $microcodePackage --needed --noconfirm
+        pacman -Syuq $microcodePackage --needed --noconfirm
 
     ### GRAPHIC DRIVERS
 
@@ -414,11 +414,11 @@ elif [[ $installationType == 'custom' ]]; then
             $graphicsDrivers='xf86-video-vmware xf86-input-vmmouse mesa lib32-mesa'
         fi
 
-        pacman -Syu $graphicsDrivers --needed --noconfirm
+        pacman -Syuq $graphicsDrivers --needed --noconfirm
 
     ### DISPLAY SERVER
 
-        pacman -Syu xorg xorg-server xorg-xinit --needed --noconfirm
+        pacman -Syuq xorg xorg-server xorg-xinit --needed --noconfirm
 
         # Get config files repository and store them in corresponding directory
         curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/iss005/configfiles/xorg/.xinitrc -o /home/"$username"/.xinitrc
@@ -431,7 +431,7 @@ elif [[ $installationType == 'custom' ]]; then
         # lightdm-openrc
         # lightdm-gtk-greeter
         # light-locker
-        pacman -Syu lightdm lightdm-openrc light-locker lightdm-gtk-greeter --needed --noconfirm
+        pacman -Syuq lightdm lightdm-openrc light-locker lightdm-gtk-greeter --needed --noconfirm
 
         # Enable sddm to start at boot
         rc-update add lightdm
@@ -451,7 +451,7 @@ elif [[ $installationType == 'custom' ]]; then
 
     ### WINDOW MANAGER
 
-        pacman -Syu qtile nitrogen picom --needed --noconfirm
+        pacman -Syuq qtile nitrogen picom --needed --noconfirm
 
         if [[ ! -d /home/"$username"/.config/backgrounds ]]; then
             mkdir -p /home/"$username"/.config/backgrounds
@@ -463,7 +463,7 @@ elif [[ $installationType == 'custom' ]]; then
 
     ### YOUTUBE TUI
     
-        #pacman -Syu jq mpv fzf yt-dlp imv
+        #pacman -Syuq jq mpv fzf yt-dlp imv
         #git clone 
     
 fi
