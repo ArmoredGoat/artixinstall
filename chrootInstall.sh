@@ -377,7 +377,7 @@ elif [[ $installationType == 'custom' ]]; then
 
     ### NEOFETCH
 
-        pacman -Syuq neofetch --needed --noconfirm
+        pacman -Syuq fastfetch --needed --noconfirm
         #TODO Add neofetch configuration
 
     ### AUDIO
