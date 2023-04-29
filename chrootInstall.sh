@@ -375,10 +375,14 @@ elif [[ $installationType == 'custom' ]]; then
 
         pacman -Syuq firefox-esr --needed --noconfirm
 
-    ### NEOFETCH
+    ### SYSTEM INFORMARTION VIEWER
 
         pacman -Syuq fastfetch --needed --noconfirm
         #TODO Add neofetch configuration
+
+    ### TASK MANAGER
+
+        pacman -Syuq bottom --needed --noconfirm
 
     ### AUDIO
 
