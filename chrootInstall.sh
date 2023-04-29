@@ -356,6 +356,12 @@ elif [[ $installationType == 'custom' ]]; then
         chmod 755 /home/"$username"/git/{own,cloned}
         chown -R "$username":"$username" /home/"$username"/git/{own,cloned}
 
+    ##  UTILITY
+
+    ### BLUETOOTH MANAGEMENT
+
+        pacman -Syuq bluez-utils --needed --noconfirm
+
     ### AUR HELPER
     
         runuser -l "$username" -c "git clone https://aur.archlinux.org/yay.git \
