@@ -194,6 +194,12 @@ if [[ $installationType == 'base' ]]; then
 
 elif [[ $installationType == 'custom' ]]; then
 
+    ## ESSENTIALS
+
+    ### JAVA
+
+        pacman -Syuq jdk17-openjdk --needed --noconfirm
+    
     ### PACMAN
 
         # Get config files repository and store them in corresponding directory
@@ -268,6 +274,26 @@ elif [[ $installationType == 'custom' ]]; then
         curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/iss005/configfiles/pipewire/pipewire.conf -o /home/"$username"/.config/pipewire/pipewire.conf
         curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/iss005/configfiles/pipewire/.pipewire-start.sh -o /home/"$username"/.config/pipewire/.pipewire-start.sh
         chmod +x /home/"$username"/.config/pipewire/.pipewire-start.sh
+
+    ### AUDIO PLAYER
+
+        pacman -Syuq cmus --needed --noconfirm
+
+    ### AUDIO TAG EDITOR
+
+        pacman -Syuq beets --needed --noconfirm
+
+    ### AUDIO VISUALIZER
+
+        runuser -l "$username" -c "yay -Syuq cli-visualizer-git --needed --noconfirm"
+
+    ### VIDEO PLAYER
+
+        pacman -Syuq mpv --needed --noconfirm
+
+    ### WEBCAM
+
+        pacman -Syuq cameracrtls --needed --noconfirm
 
     ### BASH
 
