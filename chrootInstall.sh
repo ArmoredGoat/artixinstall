@@ -228,8 +228,46 @@ elif [[ $installationType == 'custom' ]]; then
             curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/iss005/configfiles/local.d/reflector.start -o /etc/local.d/reflector.start
             # Make reflector.start executable
             chmod +x /etc/local.d/reflector.start
+            #TODO add paccache to cron
 
-    #TODO add paccache to cron
+    ## INTERNET
+
+    ### CLOUD SYNCHRONIZATION
+
+        pacman -Syuq nextcloud-client --needed --noconfirm
+
+    ### EMAIL CLIENT
+
+        pacman -Syuq neomutt --needed --noconfirm
+
+    ### INSTANT MESSAGING
+
+    #### MULTI-PROTOCOL CLIENT
+
+        pacman -Syuq weechat --needed --noconfirm
+
+    #### OTHER INSTANT MESSAGING CLIENTS
+
+        pacman -Syuq discord --needed --noconfirm
+
+    ### WEB BROWSER
+
+        pacman -Syuq firefox-esr --needed --noconfirm
+
+    ## MULTIMEDIA
+
+    ### AUDIO
+
+        pacman -Rdd jack2 --noconfirm
+        pacman -Syuq pipewire lib32-pipewire pipewire-audio pipewire-alsa pipewire-pulse pipewire-jack pipewire-docs wireplumber pavucontrol --needed --noconfirm
+
+        if [[ ! -d /home/"$username"/.config/pipewire ]]; then
+            mkdir -p /home/"$username"/.config/pipewire
+        fi
+
+        curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/iss005/configfiles/pipewire/pipewire.conf -o /home/"$username"/.config/pipewire/pipewire.conf
+        curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/iss005/configfiles/pipewire/.pipewire-start.sh -o /home/"$username"/.config/pipewire/.pipewire-start.sh
+        chmod +x /home/"$username"/.config/pipewire/.pipewire-start.sh
 
     ### BASH
 
@@ -358,16 +396,8 @@ elif [[ $installationType == 'custom' ]]; then
 
     ##  UTILITY
 
-    ### BLUETOOTH MANAGEMENT
-
-        pacman -Syuq bluez-utils --needed --noconfirm
-
-    ### FILE MANAGER
-
-        pacman -Syuq ranger --needed --noconfirm
-    
     ### AUR HELPER
-    
+
         runuser -l "$username" -c "git clone https://aur.archlinux.org/yay.git \
         /home/$username/git/cloned/yay && cd /home/$username/git/cloned/yay && \
         makepkg -si --noconfirm"
@@ -381,9 +411,17 @@ elif [[ $installationType == 'custom' ]]; then
         runuser -l "$username" -c "yay -Y --devel --combinedupgrade /
         --batchinstall --save --noconfirm"
 
-    ### BROWSER
+    ### BLUETOOTH MANAGEMENT
 
-        pacman -Syuq firefox-esr --needed --noconfirm
+        pacman -Syuq bluez-utils --needed --noconfirm
+
+    ### FILE MANAGER
+
+        pacman -Syuq ranger --needed --noconfirm
+    
+
+
+ 
 
     ### SYSTEM INFORMARTION VIEWER
 
@@ -394,18 +432,7 @@ elif [[ $installationType == 'custom' ]]; then
 
         pacman -Syuq bottom --needed --noconfirm
 
-    ### AUDIO
 
-        pacman -Rdd jack2 --noconfirm
-        pacman -Syuq pipewire lib32-pipewire pipewire-audio pipewire-alsa pipewire-pulse pipewire-jack pipewire-docs wireplumber pavucontrol --needed --noconfirm
-
-        if [[ ! -d /home/"$username"/.config/pipewire ]]; then
-            mkdir -p /home/"$username"/.config/pipewire
-        fi
-
-        curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/iss005/configfiles/pipewire/pipewire.conf -o /home/"$username"/.config/pipewire/pipewire.conf
-        curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/iss005/configfiles/pipewire/.pipewire-start.sh -o /home/"$username"/.config/pipewire/.pipewire-start.sh
-        chmod +x /home/"$username"/.config/pipewire/.pipewire-start.sh
 
     ### FIRMWARE & FUNCTIONALITY
 
