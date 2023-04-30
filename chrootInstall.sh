@@ -196,6 +196,19 @@ elif [[ $installationType == 'custom' ]]; then
 
     ## ESSENTIALS
 
+    ### FIRMWARE
+
+        pacman -Syuq sof-firmware --needed --noconfirm
+
+        if [[ $cpu == 'AuthenticAMD' ]]; then
+            microcodePackage='amd-ucode'
+        elif [[ $cpu == 'Intel' ]]; then
+            microcodePackage='intel-ucode'
+        fi 
+
+        #https://averagelinuxuser.com/arch-linux-after-install/#7-install-microcode
+        pacman -Syuq $microcodePackage --needed --noconfirm
+
     ### JAVA
 
         pacman -Syuq jdk17-openjdk --needed --noconfirm
@@ -235,6 +248,19 @@ elif [[ $installationType == 'custom' ]]; then
             # Make reflector.start executable
             chmod +x /etc/local.d/reflector.start
             #TODO add paccache to cron
+
+    ### XDG
+
+        pacman -Syuq xdg-user-dirs --needed --noconfirm
+
+        if [[ ! -d /etc/xdg ]]; then
+            mkdir -p /etc/xdg
+        fi
+
+        # Get config files repository and store them in corresponding directory
+        curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/iss005/configfiles/xdg/user-dirs.defaults -o /etc/xdg/user-dirs.defaults
+
+        mkdir -p /home/"$username"/{downloads,documents/{music,public,desktop,templates,pictures,videos}}
 
     ## INTERNET
 
@@ -362,6 +388,16 @@ elif [[ $installationType == 'custom' ]]; then
 
         pacman -Syuq ranger --needed --noconfirm
 
+    ### JOB SCHEDULER
+
+        pacman -Syuq cronie cronie-openrc --needed --noconfirm
+        rc-update add cronie
+        rc-service cronie start
+
+        # Make sure that local service is running
+        rc-update add local
+        rc-service local start
+
     ### MANUALS
 
         pacman -Syuq man-db man-pages texinfo --needed --noconfirm
@@ -369,6 +405,12 @@ elif [[ $installationType == 'custom' ]]; then
     ### PAGER
 
         pacman -Syuq less --needed --noconfirm
+
+    ### SECURE SHELL
+
+        pacman -Syuq openssh openssh-openrc --needed --noconfirm
+        rc-update add sshd
+        rc-service sshd start
 
     ### SYNCHRONIZATION
 
@@ -424,32 +466,12 @@ elif [[ $installationType == 'custom' ]]; then
         
         pacman -Syuq neovim --needed --noconfirm
 
-    ### XDG
+    ## GAMING
 
-        pacman -Syuq xdg-user-dirs --needed --noconfirm
 
-        if [[ ! -d /etc/xdg ]]; then
-            mkdir -p /etc/xdg
-        fi
+    ## SECURITY
 
-        # Get config files repository and store them in corresponding directory
-        curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/iss005/configfiles/xdg/user-dirs.defaults -o /etc/xdg/user-dirs.defaults
-
-        mkdir -p /home/"$username"/{downloads,documents/{music,public,desktop,templates,pictures,videos}}
-
-    ### CRON
-
-        pacman -Syuq cronie cronie-openrc --needed --noconfirm
-        rc-update add cronie
-        rc-service cronie start
-
-    ### SSH
-
-        pacman -Syuq openssh openssh-openrc --needed --noconfirm
-        rc-update add sshd
-        rc-service sshd start
-
-    ### FIREWALL
+    ### FIREWALL MANAGEMENT
 
         # ufw - 
         #pacman -Syuq ufw ufw-openrc --needed --noconfirm
@@ -482,48 +504,9 @@ elif [[ $installationType == 'custom' ]]; then
         # Reload ufw
         #ufw --force enable
 
-    ### LOCAL
-    
-        # Make sure that local service is running
-        rc-update add local
-        rc-service local start
+    ## SCIENCE
 
-    ### FIRMWARE & FUNCTIONALITY
 
-        pacman -Syuq sof-firmware --needed --noconfirm
-
-        if [[ $cpu == 'AuthenticAMD' ]]; then
-            microcodePackage='amd-ucode'
-        elif [[ $cpu == 'Intel' ]]; then
-            microcodePackage='intel-ucode'
-        fi 
-
-        #https://averagelinuxuser.com/arch-linux-after-install/#7-install-microcode
-        pacman -Syuq $microcodePackage --needed --noconfirm
-
-    ### GRAPHIC DRIVERS
-
-        # Install drivers depending on detected gpu
-        if [ "$gpu" == 'AMD' ]; then
-            $graphicsDrivers='xf86-video-amdgpu mesa lib32-mesa vulkan-radeon'
-        elif [ "$gpu" == 'INTEL' ]; then
-            $graphicsDrivers='xf86-video-intel mesa lib32-mesa vulkan-intel'
-        elif [ "$gpu" == 'NVIDIA' ]; then
-            $graphicsDrivers='xf86-video-nouveau mesa lib32-mesa nvidia-utils'
-        elif [ "$gpu" == 'VMware' ]; then
-            $graphicsDrivers='xf86-video-vmware xf86-input-vmmouse mesa lib32-mesa'
-        fi
-
-        pacman -Syuq $graphicsDrivers --needed --noconfirm
-
-    ### DISPLAY SERVER
-
-        pacman -Syuq xorg xorg-server xorg-xinit --needed --noconfirm
-
-        # Get config files repository and store them in corresponding directory
-        curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/iss005/configfiles/xorg/.xinitrc -o /home/"$username"/.xinitrc
-        chmod +x /home/"$username"/.xinitrc
-        curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/iss005/configfiles/xorg/xorg.conf -o /etc/X11/xorg.conf
 
     ## OTHERS
 
@@ -556,6 +539,15 @@ elif [[ $installationType == 'custom' ]]; then
         curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/iss005/configfiles/xorg/.xprofile -o /home/"$username"/.xprofile
         chmod +x /home/"$username"/.xprofile
 
+    ### DISPLAY SERVER
+
+        pacman -Syuq xorg xorg-server xorg-xinit --needed --noconfirm
+
+        # Get config files repository and store them in corresponding directory
+        curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/iss005/configfiles/xorg/.xinitrc -o /home/"$username"/.xinitrc
+        chmod +x /home/"$username"/.xinitrc
+        curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/iss005/configfiles/xorg/xorg.conf -o /etc/X11/xorg.conf        
+
     ### WALLPAPER SETTER
 
         pacman -Syuq nitrogen --needed --noconfirm
@@ -567,6 +559,21 @@ elif [[ $installationType == 'custom' ]]; then
     ### WINDOW MANAGER
 
         pacman -Syuq qtile --needed --noconfirm
+
+    ## GRAPHIC DRIVERS
+
+        # Install drivers depending on detected gpu
+        if [ "$gpu" == 'AMD' ]; then
+            $graphicsDrivers='xf86-video-amdgpu mesa lib32-mesa vulkan-radeon'
+        elif [ "$gpu" == 'INTEL' ]; then
+            $graphicsDrivers='xf86-video-intel mesa lib32-mesa vulkan-intel'
+        elif [ "$gpu" == 'NVIDIA' ]; then
+            $graphicsDrivers='xf86-video-nouveau mesa lib32-mesa nvidia-utils'
+        elif [ "$gpu" == 'VMware' ]; then
+            $graphicsDrivers='xf86-video-vmware xf86-input-vmmouse mesa lib32-mesa'
+        fi
+
+        pacman -Syuq $graphicsDrivers --needed --noconfirm
     
 fi
 
