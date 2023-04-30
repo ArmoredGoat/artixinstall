@@ -287,6 +287,18 @@ elif [[ $installationType == 'custom' ]]; then
 
         runuser -l "$username" -c "yay -Syuq cli-visualizer-git --needed --noconfirm"
 
+    ### IMAGE VIEWER
+
+        pacman -Syuq imv --needed --noconfirm
+
+    ### OPTICAL DISK RIPPING
+
+
+
+    ### SCREENSHOTS
+
+        pacman -Syuq flameshot --needed --noconfirm
+    
     ### VIDEO PLAYER
 
         pacman -Syuq mpv --needed --noconfirm
@@ -295,7 +307,46 @@ elif [[ $installationType == 'custom' ]]; then
 
         pacman -Syuq cameracrtls --needed --noconfirm
 
-    ### BASH
+    ##  UTILITY
+
+    ### ARCHIVE MANAGER
+
+
+
+    ### AUR HELPER
+
+        runuser -l "$username" -c "git clone https://aur.archlinux.org/yay.git \
+        /home/$username/git/cloned/yay && cd /home/$username/git/cloned/yay && \
+        makepkg -si --noconfirm"
+
+        # Generate development package database for *-git packages that were
+        # installed without yay
+        runuser -l "$username" -c "yay -Y --gendb --noconfirm"
+        # Check for development packages updates
+        runuser -l "$username" -c "yay -Syu --devel --noconfirm"
+        # Enable development packages updates and combined upgrades permanently
+        runuser -l "$username" -c "yay -Y --devel --combinedupgrade /
+        --batchinstall --save --noconfirm"
+
+    ### BACKUP
+
+    ### BLUETOOTH MANAGEMENT
+
+    pacman -Syuq bluez-utils --needed --noconfirm
+
+    ### BOOT MANAGEMENT
+
+        # Disable grub delay to speed up boot process
+        # If grub menu is needed, press ESC while booting
+
+        # Find and replace 'menu' with 'hidden'
+        sed -i 's/GRUB_TIMEOUT_STYLE=menu/GRUB_TIMEOUT_STYLE=hidden/g' \
+        /etc/default/grub
+
+        # Update grub config
+        grub-mkconfig -o /boot/grub/grub.cfg
+
+    ### COMMAND-LINE SHELL
 
         # Get config files repository and store them in corresponding directory
         curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/iss005/configfiles/bash/.bashrc -o /home/"$username"/.bashrc
@@ -306,6 +357,72 @@ elif [[ $installationType == 'custom' ]]; then
         chmod +x /home/"$username"/.bash*
 
         pacman -Syuq bash-completion --needed --noconfirm
+
+    ### FILE MANAGER
+
+        pacman -Syuq ranger --needed --noconfirm
+
+    ### MANUALS
+
+        pacman -Syuq man-db man-pages texinfo --needed --noconfirm
+
+    ### PAGER
+
+        pacman -Syuq less --needed --noconfirm
+
+    ### SYNCHRONIZATION
+
+
+
+    ### SYSTEM INFORMARTION VIEWER
+
+        pacman -Syuq fastfetch --needed --noconfirm
+
+    ### TASK MANAGER
+
+        pacman -Syuq bottom --needed --noconfirm
+        
+    ### TERMINAL EMULATOR
+
+        pacman -Syuq kitty --needed --noconfirm
+
+        if [[ ! -d /home/"$username"/.config/kitty ]]; then
+            mkdir -p /home/"$username"/.config/kitty
+        fi
+
+        ## General configuration
+        # Get config files repository and store them in corresponding directory
+        curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/iss005/configfiles/kitty/kitty.conf \
+        -o /home/"$username"/.config/kitty/kitty.conf
+        ## Configure theme
+        if [[ ! -d /home/"$username"/.config/kitty/themes ]]; then
+            mkdir -p /home/"$username"/.config/kitty/themes
+        fi
+
+        # Download them from https://github.com/kovidgoyal/kitty-themes
+        curl https://raw.githubusercontent.com/kovidgoyal/kitty-themes/master/themes/Earthsong.conf \
+        -o /home/"$username"/.config/kitty/themes/Earthsong.conf
+        ln -s /home/"$username"/.config/kitty/themes/Earthsong.conf \
+            /home/"$username"/.config/kitty/theme.conf
+
+    ### TRASH MANAGEMENT
+
+
+
+    ### VERSION CONTROL SYSTEM
+
+        pacman -Syuq git --needed --noconfirm
+
+        # Create directory for git repositories
+        mkdir -p /home/"$username"/git/{own,cloned}
+        chmod 755 /home/"$username"/git/{own,cloned}
+        chown -R "$username":"$username" /home/"$username"/git/{own,cloned}
+
+    ## DOCUMENTS
+
+    ### TEXT EDITOR EDITOR
+        
+        pacman -Syuq neovim --needed --noconfirm
 
     ### XDG
 
@@ -371,95 +488,6 @@ elif [[ $installationType == 'custom' ]]; then
         rc-update add local
         rc-service local start
 
-    ### GRUB
-
-        # Disable grub delay to speed up boot process
-        # If grub menu is needed, press ESC while booting
-
-        # Find and replace 'menu' with 'hidden'
-        sed -i 's/GRUB_TIMEOUT_STYLE=menu/GRUB_TIMEOUT_STYLE=hidden/g' \
-        /etc/default/grub
-
-        # Update grub config
-        grub-mkconfig -o /boot/grub/grub.cfg
-        
-    ### EDITOR
-        
-        pacman -Syuq neovim --needed --noconfirm
-
-    ### TERMINAL EMULATOR
-
-        pacman -Syuq kitty --needed --noconfirm
-
-        if [[ ! -d /home/"$username"/.config/kitty ]]; then
-            mkdir -p /home/"$username"/.config/kitty
-        fi
-
-        ## General configuration
-        # Get config files repository and store them in corresponding directory
-        curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/iss005/configfiles/kitty/kitty.conf \
-        -o /home/"$username"/.config/kitty/kitty.conf
-        ## Configure theme
-        if [[ ! -d /home/"$username"/.config/kitty/themes ]]; then
-            mkdir -p /home/"$username"/.config/kitty/themes
-        fi
-
-        # Download them from https://github.com/kovidgoyal/kitty-themes
-        curl https://raw.githubusercontent.com/kovidgoyal/kitty-themes/master/themes/Earthsong.conf \
-        -o /home/"$username"/.config/kitty/themes/Earthsong.conf
-        ln -s /home/"$username"/.config/kitty/themes/Earthsong.conf \
-            /home/"$username"/.config/kitty/theme.conf
-
-
-    ### GIT
-
-        pacman -Syuq git --needed --noconfirm
-
-        # Create directory for git repositories
-        mkdir -p /home/"$username"/git/{own,cloned}
-        chmod 755 /home/"$username"/git/{own,cloned}
-        chown -R "$username":"$username" /home/"$username"/git/{own,cloned}
-
-    ##  UTILITY
-
-    ### AUR HELPER
-
-        runuser -l "$username" -c "git clone https://aur.archlinux.org/yay.git \
-        /home/$username/git/cloned/yay && cd /home/$username/git/cloned/yay && \
-        makepkg -si --noconfirm"
-
-        # Generate development package database for *-git packages that were
-        # installed without yay
-        runuser -l "$username" -c "yay -Y --gendb --noconfirm"
-        # Check for development packages updates
-        runuser -l "$username" -c "yay -Syu --devel --noconfirm"
-        # Enable development packages updates and combined upgrades permanently
-        runuser -l "$username" -c "yay -Y --devel --combinedupgrade /
-        --batchinstall --save --noconfirm"
-
-    ### BLUETOOTH MANAGEMENT
-
-        pacman -Syuq bluez-utils --needed --noconfirm
-
-    ### FILE MANAGER
-
-        pacman -Syuq ranger --needed --noconfirm
-    
-
-
- 
-
-    ### SYSTEM INFORMARTION VIEWER
-
-        pacman -Syuq fastfetch --needed --noconfirm
-        #TODO Add neofetch configuration
-
-    ### TASK MANAGER
-
-        pacman -Syuq bottom --needed --noconfirm
-
-
-
     ### FIRMWARE & FUNCTIONALITY
 
         pacman -Syuq sof-firmware --needed --noconfirm
@@ -497,18 +525,25 @@ elif [[ $installationType == 'custom' ]]; then
         chmod +x /home/"$username"/.xinitrc
         curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/iss005/configfiles/xorg/xorg.conf -o /etc/X11/xorg.conf
 
-    ### LOGIN MANAGER
+    ## OTHERS
+
+    ### COMPOSITE MANAGER
+
+        pacman -Syuq picom --needed --noconfirm
+
+    ### DISPLAY MANAGER
+
+        pacman -Syuq lightdm lightdm-openrc light-locker lightdm-gtk-greeter --needed --noconfirm
 
         # lightdm
         # lightdm-openrc
         # lightdm-gtk-greeter
         # light-locker
-        pacman -Syuq lightdm lightdm-openrc light-locker lightdm-gtk-greeter --needed --noconfirm
 
-        # Enable sddm to start at boot
+        # Enable lightdmto start at boot
         rc-update add lightdm
 
-        # Create directory for sddm config files
+        # Create directory for lightdm config files
         if [[ ! -d /etc/lightdm ]]; then
             mkdir -p /etc/lightdm
         fi
@@ -521,22 +556,17 @@ elif [[ $installationType == 'custom' ]]; then
         curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/iss005/configfiles/xorg/.xprofile -o /home/"$username"/.xprofile
         chmod +x /home/"$username"/.xprofile
 
-    ### WINDOW MANAGER
+    ### WALLPAPER SETTER
 
-        pacman -Syuq qtile nitrogen picom --needed --noconfirm
+        pacman -Syuq nitrogen --needed --noconfirm
 
         if [[ ! -d /home/"$username"/.config/backgrounds ]]; then
             mkdir -p /home/"$username"/.config/backgrounds
         fi
 
+    ### WINDOW MANAGER
 
-
-        #TODO Add configuration
-
-    ### YOUTUBE TUI
-    
-        #pacman -Syuq jq mpv fzf yt-dlp imv
-        #git clone 
+        pacman -Syuq qtile --needed --noconfirm
     
 fi
 
