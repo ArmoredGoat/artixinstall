@@ -343,8 +343,15 @@ elif [[ $installationType == 'custom' ]]; then
 
     ### OPTICAL DISK RIPPING
 
-        #runuser -l "$username" -c "echo 'yes
-        #' | yay -Syuq makemkv-cli --needed --noconfirm"
+        # Installing makemkv-cli requires to accept the EULA, which pops up
+        # before finishing the process. The pager 'less' is used to display
+        # the text. To automatically leave less the command line option
+        # LESS='+q' is given along. Then it behaves as 'q' was entered manually.
+        # "yes 'yes'" outputs a constant stream of 'yes' strings 
+        # followed by a new line. This way as soon as the script leaves the
+        # pager, it accepts the EULA.
+        runuser -l "$username" -c "yes 'yes' | LESS='+q' yay -Syuq makemkv-cli \
+            --needed --noconfirm"
 
     ### SCREENSHOTS
 
