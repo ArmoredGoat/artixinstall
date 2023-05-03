@@ -359,7 +359,12 @@ elif [[ $installationType == 'custom' ]]; then
     
     ### VIDEO PLAYER
 
-        pacman -Syuq mpv --needed --noconfirm
+        pacman -Syuq mpv --needed --noconfirm´
+
+    ### VIDEO EDITOR
+
+        runuser -l "$username" -c "yay -Syuq losslesscut-bin \
+            --needed --noconfirm"
 
     ### WEBCAM
 
@@ -484,6 +489,25 @@ elif [[ $installationType == 'custom' ]]; then
 
     ## GAMING
 
+    ### GAME DISTRIBUTION PLATFORM
+
+        pacman -Syuq steam --needed --noconfirm
+
+    ### MINECRAFT LAUNCHER
+
+        # Build dependencies
+        pacman -Syuq qt6 ninja cmake extra-cmake-modules zlib --needed --noconfirm
+        git clone --recursive https://github.com/Diegiwg/PrismLauncher-Cracked.git /home/"$username"/git/cloned/prismlauncher
+        cd /home/"$username"/git/cloned/prismlauncher
+
+        cmake -S . -B build -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_INSTALL_PREFIX="/usr" \
+            -DENABLE_LTO=ON \
+            -DLauncher_QT_VERSION_MAJOR="6"
+
+        cmake --build build
+        cmake --install build
 
     ## SECURITY
 
