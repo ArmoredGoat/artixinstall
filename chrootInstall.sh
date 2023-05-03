@@ -319,7 +319,8 @@ elif [[ $installationType == 'custom' ]]; then
 
     ### OPTICAL DISK RIPPING
 
-
+        #runuser -l "$username" -c "echo 'yes
+        #' | yay -Syuq makemkv-cli --needed --noconfirm"
 
     ### SCREENSHOTS
 
