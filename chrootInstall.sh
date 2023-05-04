@@ -90,8 +90,9 @@ locale-gen
 # Configure clock settings
 hwclock --systohc --utc
 
-# Enable network manager
-rc-update add NetworkManager
+# Enable and start connman
+rc-update add connmand
+rc-service connmand start
 
 ##########  END CONFIGURATION
 
@@ -306,6 +307,17 @@ elif [[ $installationType == 'custom' ]]; then
 
         pacman -Syuq discord --needed --noconfirm
 
+    ### NETWORK MANAGER
+
+        # See install.sh. connman and wpa_supplicant are being used.
+
+    ### VPN CLIENT
+
+        pacman -Syuq wireguard-tools wireguard-openrc --needed --confirm
+
+        #rc-update add wireguard
+        #rc-service wireguard start
+
     ### WEB BROWSER
 
         pacman -Syuq firefox-esr --needed --noconfirm
@@ -374,7 +386,7 @@ elif [[ $installationType == 'custom' ]]; then
 
     ### ARCHIVE MANAGER
 
-
+        pacman -Syuq p7zip --needed --noconfirm
 
     ### AUR HELPER
 
@@ -382,9 +394,11 @@ elif [[ $installationType == 'custom' ]]; then
 
     ### BACKUP
 
+        # See SYNCHRONIZATION below. 
+
     ### BLUETOOTH MANAGEMENT
 
-    pacman -Syuq bluez-utils --needed --noconfirm
+    pacman -Syuq bluez bluez-openrc bluez-utils --needed --noconfirm
 
     ### BOOT MANAGEMENT
 
@@ -397,6 +411,10 @@ elif [[ $installationType == 'custom' ]]; then
 
         # Update grub config
         grub-mkconfig -o /boot/grub/grub.cfg
+
+    ### CLOCK SYNCHRONIZATION
+
+        # connman's native ntp service is used.
 
     ### COMMAND-LINE SHELL
 
@@ -440,7 +458,13 @@ elif [[ $installationType == 'custom' ]]; then
 
     ### SYNCHRONIZATION
 
+        pacman -Syuq rsync rsync-openrc --needed --noconfirm
 
+    ### SYSLOGS
+
+        pacman -Syuq syslog-ng syslog-ng-openrc --needed --noconfirm
+        rc-update add syslog-ng
+        rc-service syslog-ng start
 
     ### SYSTEM INFORMARTION VIEWER
 
@@ -475,11 +499,30 @@ elif [[ $installationType == 'custom' ]]; then
 
     ### TRASH MANAGEMENT
 
+        pacman -Syuq trash-cli --needed --noconfirm
 
+        # Create cron job to delete all files that are trashed longer than
+        # 90 days on a daily basis. The '2>/dev/null' is necessary to
+        # surpress 'no crontab for username' message.
+        (crontab -l 2>/dev/null ; echo "@daily $(which trash-empty) 90") \
+            | crontab -
 
     ### VERSION CONTROL SYSTEM
 
         # See section ESSENTIALS above.
+
+    ### VIRTUALIZATION
+
+        pacman -Rdd iptables --noconfirm
+        pacman -Syuq virt-manager qemu-desktop qemu-guest-agent-openrc dnsmasq iptables-nft --needed --noconfirm
+
+        # Set UNIX domain socket ownership to libvirt and permissions to read
+        # and write by uncommenting the following lines
+
+        sed -i '/unix_sock_group = /s/^#//g' /etc/libvirt/libvirtd.conf
+        sed -i '/unix_sock_rw_perms = /s/^#//g' /etc/libvirt/libvirtd.conf
+
+        usermod -aG libvirt "$username"
 
     ## DOCUMENTS
 
