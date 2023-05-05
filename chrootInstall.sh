@@ -2,7 +2,7 @@
 
 baseUrlRaw="https://raw.githubusercontent.com"
 gitRepo="ArmoredGoat/artixinstall"
-gitBranch="iss007"
+gitBranch="iss005"
 
 ##########  START FUNCTIONS
 
@@ -446,10 +446,24 @@ elif [[ $installationType == 'custom' ]]; then
         
         ## Configure theme
 
+        # Get theme from repo
         curl $baseUrlRaw/$gitRepo/$gitBranch/configfiles/themes/Earthsong.conf \
             -o /home/"$username"/.config/kitty/themes/Earthsong.conf
+
+        # Create symbolic link in general config directory. 
+        # 'include ./theme.conf' in kitty.conf will tell kitty to use this as 
+        # its theme.
         ln -s /home/"$username"/.config/kitty/themes/Earthsong.conf \
             /home/"$username"/.config/kitty/theme.conf
+
+        ## Configure font
+
+        # Create directory for fonts in home directory and download font to it.
+        # This way kitty can see it as an available font to use.
+        create_directory /home/"$username"/.fonts/pt_mono
+        
+        curl $baseUrlRaw/$gitRepo/$gitBranch/configfiles/fonts/PTMono-Regular.ttf \
+            -o /home/"$username"/.fonts/pt_mono/pt_mono_regular.ttf
 
     ### TRASH MANAGEMENT
 
