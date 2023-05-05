@@ -281,7 +281,8 @@ elif [[ $installationType == 'custom' ]]; then
     ### AUDIO
 
         pacman -Rdd jack2 --noconfirm
-        pacman -Syuq pipewire lib32-pipewire pipewire-audio pipewire-alsa pipewire-pulse pipewire-jack pipewire-docs wireplumber pavucontrol --needed --noconfirm
+        pacman -Syuq pipewire lib32-pipewire pipewire-audio pipewire-alsa \
+            pipewire-pulse pipewire-jack pipewire-docs wireplumber pavucontrol --needed --noconfirm
 
 	create_directory /home/"$username"/.config/pipewire
 
@@ -301,7 +302,8 @@ elif [[ $installationType == 'custom' ]]; then
 
     ### AUDIO VISUALIZER
 
-        runuser -l "$username" -c "yay -Syuq cli-visualizer-git --needed --noconfirm"
+        runuser -l "$username" -c "yay -Syuq cli-visualizer-git \
+            --needed --noconfirm"
 
     ### IMAGE VIEWER
 
@@ -440,12 +442,12 @@ elif [[ $installationType == 'custom' ]]; then
         ## General configuration
         # Get config files repository and store them in corresponding directory
         curl $baseUrlRaw/$gitRepo/$gitBranch/configfiles/kitty/kitty.conf \
-        -o /home/"$username"/.config/kitty/kitty.conf
+            -o /home/"$username"/.config/kitty/kitty.conf
+        
         ## Configure theme
 
-        # Download them from https://github.com/kovidgoyal/kitty-themes
-        curl https://raw.githubusercontent.com/kovidgoyal/kitty-themes/master/themes/Earthsong.conf \
-        -o /home/"$username"/.config/kitty/themes/Earthsong.conf
+        curl $baseUrlRaw/$gitRepo/$gitBranch/configfiles/themes/Earthsong.conf \
+            -o /home/"$username"/.config/kitty/themes/Earthsong.conf
         ln -s /home/"$username"/.config/kitty/themes/Earthsong.conf \
             /home/"$username"/.config/kitty/theme.conf
 
@@ -466,7 +468,8 @@ elif [[ $installationType == 'custom' ]]; then
     ### VIRTUALIZATION
 
         pacman -Rdd iptables --noconfirm
-        pacman -Syuq virt-manager qemu-desktop qemu-guest-agent-openrc dnsmasq iptables-nft --needed --noconfirm
+        pacman -Syuq virt-manager qemu-desktop qemu-guest-agent-openrc \
+            dnsmasq iptables-nft --needed --noconfirm
 
         # Set UNIX domain socket ownership to libvirt and permissions to read
         # and write by uncommenting the following lines
@@ -495,20 +498,20 @@ elif [[ $installationType == 'custom' ]]; then
 
     ### MINECRAFT LAUNCHER
 
-        # Build dependencies
-        pacman -Syuq qt6 ninja cmake extra-cmake-modules zlib --needed --noconfirm
-        git clone --recursive https://github.com/Diegiwg/PrismLauncher-Cracked.git \
-            /home/"$username"/git/cloned/prismlauncher
-        cd /home/"$username"/git/cloned/prismlauncher
-
-        cmake -S . -B build -G Ninja \
-            -DCMAKE_BUILD_TYPE=Release \
-            -DCMAKE_INSTALL_PREFIX="/usr" \
-            -DENABLE_LTO=ON \
-            -DLauncher_QT_VERSION_MAJOR="6"
-
-        cmake --build build
-        cmake --install build
+#        # Build dependencies
+#        pacman -Syuq qt6 ninja cmake extra-cmake-modules zlib --needed --noconfirm
+#        git clone --recursive https://github.com/Diegiwg/PrismLauncher-Cracked.git \
+#            /home/"$username"/git/cloned/prismlauncher
+#        cd /home/"$username"/git/cloned/prismlauncher
+#
+#        cmake -S . -B build -G Ninja \
+#            -DCMAKE_BUILD_TYPE=Release \
+#            -DCMAKE_INSTALL_PREFIX="/usr" \
+#            -DENABLE_LTO=ON \
+#            -DLauncher_QT_VERSION_MAJOR="6"
+#
+#        cmake --build build
+#        cmake --install build
 
     ## SECURITY
 
