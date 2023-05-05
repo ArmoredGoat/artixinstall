@@ -1,55 +1,10 @@
 #! /bin/bash
 
-##########  START COLORS   
-
-# Reset
-colorOff='\033[0m'       # Text Reset
-
-# Colors
-blue='\033[0;34m'         # blue
-purple='\033[0;35m'       # purple
-cyan='\033[0;36m'         # cyan
-red='\033[0;31m'          # red
-green='\033[0;32m'        # green
-
-##########  END COLORS
-
-##########  START SPECIAL CHARACTERS
-
-# Green = Accepted inputs/done steps
-squareGreen="\033[0;32m\xE2\x96\x88\033[0m"
-# Red = Denied inputs/canceled steps
-squareRed="\033[0;31m\xE2\x96\x88\033[0m"
-# YellowRead = Waiting for input
-squareYellowRead=$'\033[0;33m\xE2\x96\x88\033[0m'
-# Yellow = Steps not done yet
-squareYellow="\033[0;33m\xE2\x96\x88\033[0m"
-
-##########  END SPECIAL CHARACTERS
+baseUrlRaw="https://raw.githubusercontent.com"
+gitRepo="ArmoredGoat/artixinstall"
+gitBranch="iss007"
 
 ##########  START FUNCTIONS
-
-# \r jumps to beginning of line
-# \033 marks beginning of escape sequence
-# [1A moves one line up
-# [0K erase from cursor to right end
-
-delete_term_lines () {
-    local ERASE_CURR="\r\033[0K"
-    local ERASE_PREV="\r\033[1A\033[0K"
-    local MOVE_CURSOR_UP="\033[1A"
-    local ERASE_STRING=""
-    if [[ $2 ]]; then
-        ERASE_STRING+="${ERASE_CURR}"
-    fi
-    for (( i=0; i < $1; i++ )); do
-        ERASE_STRING+="${ERASE_PREV}"
-    done
-    if [[ $3 ]]; then
-        ERASE_STRING+="${MOVE_CURSOR_UP}"
-    fi
-    echo -e "${ERASE_STRING}"
-}
 
 create_directory () {
 	# Check if directories exists. If not, create them.
@@ -128,18 +83,6 @@ if [ "$boot" == 'bios' ]; then
     grub-install --target=i386-pc --recheck $baseDisk
 fi
 
-# TODO Learn what the heck is going on right here...
-
-#cp /usr/share/locale/en\@quot/LC_MESSAGES/grub.mo /boot/grub/locale/en.mo
-#curl https://raw.githubusercontent.com/rwinkhart/artix-install-script/iss005/config-files/grub -o /etc/default/grub
-#if [ "$gpu" == 'NVIDIA' ]; then
-#    echo "GRUB_CMDLINE_LINUX_DEFAULT=\"loglevel=3 quiet nowatchdog retbleed=off mem_sleep_default=deep nohz_full=1-"$threadsminusone" nvidia-drm.modeset=1\"" >> /etc/default/grub
-#elif [ "$gpu" == 'AMD' ]; then
-#    echo "GRUB_CMDLINE_LINUX_DEFAULT=\"loglevel=3 quiet nowatchdog retbleed=off mem_sleep_default=deep nohz_full=1-"$threadsminusone" amdgpu.ppfeaturemask=0xffffffff\"" >> /etc/default/grub
-#else
-#    echo "GRUB_CMDLINE_LINUX_DEFAULT=\"loglevel=3 quiet nowatchdog retbleed=off mem_sleep_default=deep nohz_full=1-"$threadsminusone"\"" >> /etc/default/grub
-#fi
-
 # Create grub configuration in boot directory
 grub-mkconfig -o /boot/grub/grub.cfg
 
@@ -164,8 +107,10 @@ $userPassword
 
 # Grant groups to user
 usermod -aG wheel,audio,video,storage "$username"
+
 # Give users in wheel group sudo privileges --> no need for root user
 sed -i '/%wheel ALL=(ALL:ALL) ALL/s/^#//g' /etc/sudoers
+
 # Disable sudo password prompts for this user
 echo "$username ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
 
@@ -231,12 +176,13 @@ elif [[ $installationType == 'custom' ]]; then
 
         # Get config files repository and store them in corresponding directory
         # Download pacman.conf with additional repositories and access to the Arch repositories
-        curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/iss005/configfiles/pacman/pacman.conf -o /etc/pacman.conf
+        curl $baseUrlRaw/$gitRepo/$gitBranch/configfiles/pacman/pacman.conf \
+            -o /etc/pacman.conf
 	
 	create_directory /etc/pacman.d
 
         # Get recent mirror lists
-        curl https://raw.githubusercontent.com/archlinux/svntogit-packages/packages/pacman-mirrorlist/trunk/mirrorlist -o /etc/pacman.d/mirrorlist-arch
+        curl $baseUrlRaw/archlinux/svntogit-packages/packages/pacman-mirrorlist/trunk/mirrorlist -o /etc/pacman.d/mirrorlist-arch
 
         # Uncomment every mirror temporarily to download reflector
         sed -i 's/^#Server/Server/' /etc/pacman.d/mirrorlist-arch
@@ -256,7 +202,7 @@ elif [[ $installationType == 'custom' ]]; then
 
             # Get config files repository and store them in corresponding directory
             # Add file reflector.start to local.d directory to run reflector at start without systemd
-            curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/iss005/configfiles/local.d/reflector.start -o /etc/local.d/reflector.start
+            curl $baseUrlRaw/$gitRepo/$gitBranch/configfiles/local.d/reflector.start -o /etc/local.d/reflector.start
             # Make reflector.start executable
             chmod +x /etc/local.d/reflector.start
             #TODO add paccache to cron
@@ -290,7 +236,8 @@ elif [[ $installationType == 'custom' ]]; then
 	create_directory /etc/xdg
 
         # Get config files repository and store them in corresponding directory
-        curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/iss005/configfiles/xdg/user-dirs.defaults -o /etc/xdg/user-dirs.defaults
+        curl $baseUrlRaw/$gitRepo/$gitBranch/configfiles/xdg/user-dirs.defaults \
+            -o /etc/xdg/user-dirs.defaults
 
 	create_directory /home/"$username"/{downloads,documents/{music,public,desktop,templates,pictures,videos}}
 
@@ -338,8 +285,10 @@ elif [[ $installationType == 'custom' ]]; then
 
 	create_directory /home/"$username"/.config/pipewire
 
-        curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/iss005/configfiles/pipewire/pipewire.conf -o /home/"$username"/.config/pipewire/pipewire.conf
-        curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/iss005/configfiles/pipewire/.pipewire-start.sh -o /home/"$username"/.config/pipewire/.pipewire-start.sh
+        curl $baseUrlRaw/$gitRepo/$gitBranch/configfiles/pipewire/pipewire.conf \
+            -o /home/"$username"/.config/pipewire/pipewire.conf
+        curl $baseUrlRaw/$gitRepo/$gitBranch/configfiles/pipewire/.pipewire-start.sh \
+            -o /home/"$username"/.config/pipewire/.pipewire-start.sh
         chmod +x /home/"$username"/.config/pipewire/.pipewire-start.sh
 
     ### AUDIO PLAYER
@@ -424,8 +373,10 @@ elif [[ $installationType == 'custom' ]]; then
     ### COMMAND-LINE SHELL
 
         # Get config files repository and store them in corresponding directory
-        curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/iss005/configfiles/bash/.bashrc -o /home/"$username"/.bashrc
-        curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/iss005/configfiles/bash/.bash_aliases -o /home/"$username"/.bash_aliases
+        curl $baseUrlRaw/$gitRepo/$gitBranch/configfiles/bash/.bashrc \
+            -o /home/"$username"/.bashrc
+        curl $baseUrlRaw/$gitRepo/$gitBranch/configfiles/bash/.bash_aliases \
+            -o /home/"$username"/.bash_aliases
 
         source /home/"$username"/.bashrc
 
@@ -488,7 +439,7 @@ elif [[ $installationType == 'custom' ]]; then
 
         ## General configuration
         # Get config files repository and store them in corresponding directory
-        curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/iss005/configfiles/kitty/kitty.conf \
+        curl $baseUrlRaw/$gitRepo/$gitBranch/configfiles/kitty/kitty.conf \
         -o /home/"$username"/.config/kitty/kitty.conf
         ## Configure theme
 
@@ -525,8 +476,10 @@ elif [[ $installationType == 'custom' ]]; then
 
         usermod -aG libvirt "$username"
 
-        sed sed -i "s/user = \"libvirt-qemu\"/user = \"$username\"/" /etc/libvirt/libvirtd.conf
-        sed sed -i "s/group = \"libvirt-qemu\"/group = \"$username\"/" /etc/libvirt/libvirtd.conf
+        sed sed -i "s/user = \"libvirt-qemu\"/user = \"$username\"/" \
+            /etc/libvirt/libvirtd.conf
+        sed sed -i "s/group = \"libvirt-qemu\"/group = \"$username\"/" \
+            /etc/libvirt/libvirtd.conf
 
     ## DOCUMENTS
 
@@ -544,7 +497,8 @@ elif [[ $installationType == 'custom' ]]; then
 
         # Build dependencies
         pacman -Syuq qt6 ninja cmake extra-cmake-modules zlib --needed --noconfirm
-        git clone --recursive https://github.com/Diegiwg/PrismLauncher-Cracked.git /home/"$username"/git/cloned/prismlauncher
+        git clone --recursive https://github.com/Diegiwg/PrismLauncher-Cracked.git \
+            /home/"$username"/git/cloned/prismlauncher
         cd /home/"$username"/git/cloned/prismlauncher
 
         cmake -S . -B build -G Ninja \
@@ -617,11 +571,16 @@ elif [[ $installationType == 'custom' ]]; then
         create_directory /etc/lightdm
 
         # Get config files repository and store them in corresponding directory
-        curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/iss005/configfiles/lightdm/lightdm.conf -o /etc/lightdm/ligthdm.conf
-        curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/iss005/configfiles/lightdm/lightdm-gtk-greeter.conf -o /etc/lightdm/ligthdm-gtk-greeter.conf
-        curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/iss005/configfiles/lightdm/users.conf -o /etc/lightdm/users.conf
-        curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/iss005/configfiles/lightdm/Xsession -o /etc/lightdm/Xsession
-        curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/iss005/configfiles/xorg/.xprofile -o /home/"$username"/.xprofile
+        curl $baseUrlRaw/$gitRepo/$gitBranch/configfiles/lightdm/lightdm.conf \
+            -o /etc/lightdm/ligthdm.conf
+        curl $baseUrlRaw/$gitRepo/$gitBranch/configfiles/lightdm/lightdm-gtk-greeter.conf \
+            -o /etc/lightdm/ligthdm-gtk-greeter.conf
+        curl $baseUrlRaw/$gitRepo/$gitBranch/configfiles/lightdm/users.conf \
+            -o /etc/lightdm/users.conf
+        curl $baseUrlRaw/$gitRepo/$gitBranch/configfiles/lightdm/Xsession \
+            -o /etc/lightdm/Xsession
+        curl $baseUrlRaw/$gitRepo/$gitBranch/configfiles/xorg/.xprofile \
+            -o /home/"$username"/.xprofile
         chmod +x /home/"$username"/.xprofile
 
     ### DISPLAY SERVER
@@ -629,9 +588,11 @@ elif [[ $installationType == 'custom' ]]; then
         pacman -Syuq xorg xorg-server xorg-xinit --needed --noconfirm
 
         # Get config files repository and store them in corresponding directory
-        curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/iss005/configfiles/xorg/.xinitrc -o /home/"$username"/.xinitrc
+        curl $baseUrlRaw/$gitRepo/$gitBranch/configfiles/xorg/.xinitrc \
+            -o /home/"$username"/.xinitrc
         chmod +x /home/"$username"/.xinitrc
-        curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/iss005/configfiles/xorg/xorg.conf -o /etc/X11/xorg.conf        
+        curl $baseUrlRaw/$gitRepo/$gitBranch/configfiles/xorg/xorg.conf \
+            -o /etc/X11/xorg.conf        
 
     ### WALLPAPER SETTER
 
