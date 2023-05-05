@@ -51,6 +51,20 @@ delete_term_lines () {
     echo -e "${ERASE_STRING}"
 }
 
+create_directory () {
+	# Check if directories exists. If not, create them.
+	if [[ ! -d $@ ]]; then
+	mkdir -pv $@
+	# This script is run with privileged rights. Therefore, anything created with
+	# it will be owned by root. To make sure that the permissions are set
+	# correclty, the function checks if the directory lies in the home folder.
+	# If so, it grants ownership to the user.
+	if [[ $@ = /home/"$username"/* ]]; then
+		chmod 755 $@
+		chown -R "$username":"$username" $@
+	fi
+}
+
 ##########  END FUNCTIONS
 
 ##########  START IMPORTING VARIABLES
@@ -156,9 +170,8 @@ sed -i '/%wheel ALL=(ALL:ALL) ALL/s/^#//g' /etc/sudoers
 echo "$username ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
 
 # set home directory permissions
-mkdir -p /home/"$username"/{.config,.local/share}
 chmod 750 /home/"$username"
-chmod 755 /home/"$username"/{.config,.local/share}
+create_directory /home/"$username"/{.config,.local/share}
 
 ##########  END USER MANAGEMENT
 
@@ -219,10 +232,8 @@ elif [[ $installationType == 'custom' ]]; then
         # Get config files repository and store them in corresponding directory
         # Download pacman.conf with additional repositories and access to the Arch repositories
         curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/iss005/configfiles/pacman/pacman.conf -o /etc/pacman.conf
-
-        if [[ ! -d /etc/pacman.d ]]; then
-            mkdir -p /etc/pacman.d
-        fi
+	
+	create_directory /etc/pacman.d
 
         # Get recent mirror lists
         curl https://raw.githubusercontent.com/archlinux/svntogit-packages/packages/pacman-mirrorlist/trunk/mirrorlist -o /etc/pacman.d/mirrorlist-arch
@@ -255,9 +266,7 @@ elif [[ $installationType == 'custom' ]]; then
         pacman -Syuq git --needed --noconfirm
 
         # Create directory for git repositories
-        mkdir -p /home/"$username"/git/{own,cloned}
-        chmod 755 /home/"$username"/git/{own,cloned}
-        chown -R "$username":"$username" /home/"$username"/git/{own,cloned}
+        create_directory /home/"$username"/git/{own,cloned}
 
     ### AUR HELPER
 
@@ -277,15 +286,13 @@ elif [[ $installationType == 'custom' ]]; then
     ### XDG
 
         pacman -Syuq xdg-user-dirs --needed --noconfirm
-
-        if [[ ! -d /etc/xdg ]]; then
-            mkdir -p /etc/xdg
-        fi
+	
+	create_directory /etc/xdg
 
         # Get config files repository and store them in corresponding directory
         curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/iss005/configfiles/xdg/user-dirs.defaults -o /etc/xdg/user-dirs.defaults
 
-        mkdir -p /home/"$username"/{downloads,documents/{music,public,desktop,templates,pictures,videos}}
+	create_directory /home/"$username"/{downloads,documents/{music,public,desktop,templates,pictures,videos}}
 
     ## INTERNET
 
@@ -329,9 +336,7 @@ elif [[ $installationType == 'custom' ]]; then
         pacman -Rdd jack2 --noconfirm
         pacman -Syuq pipewire lib32-pipewire pipewire-audio pipewire-alsa pipewire-pulse pipewire-jack pipewire-docs wireplumber pavucontrol --needed --noconfirm
 
-        if [[ ! -d /home/"$username"/.config/pipewire ]]; then
-            mkdir -p /home/"$username"/.config/pipewire
-        fi
+	create_directory /home/"$username"/.config/pipewire
 
         curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/iss005/configfiles/pipewire/pipewire.conf -o /home/"$username"/.config/pipewire/pipewire.conf
         curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/iss005/configfiles/pipewire/.pipewire-start.sh -o /home/"$username"/.config/pipewire/.pipewire-start.sh
@@ -477,19 +482,15 @@ elif [[ $installationType == 'custom' ]]; then
     ### TERMINAL EMULATOR
 
         pacman -Syuq kitty --needed --noconfirm
-
-        if [[ ! -d /home/"$username"/.config/kitty ]]; then
-            mkdir -p /home/"$username"/.config/kitty
-        fi
+	
+	# Create directories for kitty's general configs and themes
+	create_directory /home/"$username"/.config/kitty/themes
 
         ## General configuration
         # Get config files repository and store them in corresponding directory
         curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/iss005/configfiles/kitty/kitty.conf \
         -o /home/"$username"/.config/kitty/kitty.conf
         ## Configure theme
-        if [[ ! -d /home/"$username"/.config/kitty/themes ]]; then
-            mkdir -p /home/"$username"/.config/kitty/themes
-        fi
 
         # Download them from https://github.com/kovidgoyal/kitty-themes
         curl https://raw.githubusercontent.com/kovidgoyal/kitty-themes/master/themes/Earthsong.conf \
@@ -613,9 +614,7 @@ elif [[ $installationType == 'custom' ]]; then
         rc-update add lightdm
 
         # Create directory for lightdm config files
-        if [[ ! -d /etc/lightdm ]]; then
-            mkdir -p /etc/lightdm
-        fi
+        create_directory /etc/lightdm
 
         # Get config files repository and store them in corresponding directory
         curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/iss005/configfiles/lightdm/lightdm.conf -o /etc/lightdm/ligthdm.conf
@@ -638,9 +637,7 @@ elif [[ $installationType == 'custom' ]]; then
 
         pacman -Syuq nitrogen --needed --noconfirm
 
-        if [[ ! -d /home/"$username"/.config/backgrounds ]]; then
-            mkdir -p /home/"$username"/.config/backgrounds
-        fi
+        create_directory /home/"$username"/.config/backgrounds
 
     ### WINDOW MANAGER
 
