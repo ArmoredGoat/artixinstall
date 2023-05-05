@@ -313,7 +313,7 @@ elif [[ $installationType == 'custom' ]]; then
 
     ### VPN CLIENT
 
-        pacman -Syuq wireguard-tools wireguard-openrc --needed --confirm
+        pacman -Syuq wireguard-tools wireguard-openrc --needed --noconfirm
 
         #rc-update add wireguard
         #rc-service wireguard start
@@ -523,6 +523,9 @@ elif [[ $installationType == 'custom' ]]; then
         sed -i '/unix_sock_rw_perms = /s/^#//g' /etc/libvirt/libvirtd.conf
 
         usermod -aG libvirt "$username"
+
+        sed sed -i "s/user = \"libvirt-qemu\"/user = \"$username\"/" /etc/libvirt/libvirtd.conf
+        sed sed -i "s/group = \"libvirt-qemu\"/group = \"$username\"/" /etc/libvirt/libvirtd.conf
 
     ## DOCUMENTS
 
