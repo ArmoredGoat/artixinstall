@@ -459,28 +459,4 @@ chown -R "$username":"$username" /home/"$username"
 
 rm -rf /chrootInstall.sh /tempfiles
 
-echo -e "\n##############################################################################################"
-echo -e "#                                   ${Green}Installation completed                                   ${Color_Off}#"
-echo -e "#                Make sure to ${Red}remove installation media${Color_Off} before powering back on              #"
-echo -e "##############################################################################################"
-
-
-while true; do
-    read -n 1 -sp $'\n'"Press RETURN to reboot the system now or any other key \
-to exit the script without rebooting." reboot
-    case $reboot in
-        "")
-            delete_term_lines 1 1
-
-            umount -R /mnt  # Unmounts disk
-            reboot
-            
-            break
-            ;;
-        *)
-            delete_term_lines 1 1
-
-            break
-            ;;
-    esac      
-done
+exit
