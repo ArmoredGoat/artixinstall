@@ -1,34 +1,36 @@
 #! /bin/bash
 
-#####   START COLORS    #####
+##########  START COLORS   
 
 # Reset
-Color_Off='\033[0m'       # Text Reset
+colorOff='\033[0m'       # Text Reset
 
-# Regular Colors
-Black='\033[0;30m'        # Black
-Red='\033[0;31m'          # Red
-Green='\033[0;32m'        # Green
-Yellow='\033[0;33m'       # Yellow
-Blue='\033[0;34m'         # Blue
-Purple='\033[0;35m'       # Purple
-Cyan='\033[0;36m'         # Cyan
-White='\033[0;37m'        # White
+# Colors
+blue='\033[0;34m'         # blue
+purple='\033[0;35m'       # purple
+cyan='\033[0;36m'         # cyan
+
+##########  END COLORS
+
+##########  START SPECIAL CHARACTERS
+
+# Green = Accepted inputs/done steps
+squareGreen="\033[0;32m\xE2\x96\x88\033[0m"
+# Red = Denied inputs/canceled steps
+squareRed="\033[0;31m\xE2\x96\x88\033[0m"
+# YellowRead = Waiting for input
+squareYellowRead=$'\033[0;33m\xE2\x96\x88\033[0m'
+# Yellow = Steps not done yet
+squareYellow="\033[0;33m\xE2\x96\x88\033[0m"
+
+##########  END SPECIAL CHARACTERS
+
+##########  START FUNCTIONS
 
 # \r jumps to beginning of line
 # \033 marks beginning of escape sequence
 # [1A moves one line up
 # [0K erase from cursor to right end
-ERASE_CURR="\r\033[0K"
-ERASE_PREV="\r\033[1A\033[0K" 
-
-
-CHECK_MARK="\033[0;32m\xE2\x9C\x94\033[0m"
-CROSS_MARK="\033[0;31m\xE2\x9C\x96\033[0m"
-QUEST_MARK=$'\033[0;33m\xE2\x9D\x94\033[0m'
-EXCLA_MARK="\033[0;33m\xE2\x9D\x95\033[0m"
-
-#####   END COLORS      #####
 
 delete_term_lines () {
     local ERASE_CURR="\r\033[0K"
@@ -47,7 +49,9 @@ delete_term_lines () {
     echo -e "${ERASE_STRING}"
 }
 
-#####   START IMPORTING VARIABLES   #####
+##########  END FUNCTIONS
+
+##########  START IMPORTING VARIABLES
 
 #echo "$formfactor"="$(< /tempfiles/formfactor)"
 cpu="$(< /tempfiles/cpu)"
@@ -62,9 +66,9 @@ setRootPassword="$(< /tempfiles/setRootPassword)"
 rootPassword="$(< /tempfiles/rootPassword)"
 timezone="$(< /tempfiles/timezone)"
 
-#####   END IMPORTING VARIABLES     #####
+##########  END IMPORTING VARIABLES
 
-#####   START CONFIGURATION         #####
+##########  START CONFIGURATION
 
 # Configure localization
 # Enable desired locale by uncommenting line
@@ -86,9 +90,9 @@ hwclock --systohc --utc
 # Enable network manager
 rc-update add NetworkManager
 
-#####   END CONFIGURATION           #####
+##########  END CONFIGURATION
 
-#####   START GRUB INSTALLATION     #####
+##########  START GRUB INSTALLATION
 
 # Install grub
     # grub - 
@@ -109,7 +113,7 @@ fi
 # TODO Learn what the heck is going on right here...
 
 #cp /usr/share/locale/en\@quot/LC_MESSAGES/grub.mo /boot/grub/locale/en.mo
-#curl https://raw.githubusercontent.com/rwinkhart/artix-install-script/main/config-files/grub -o /etc/default/grub
+#curl https://raw.githubusercontent.com/rwinkhart/artix-install-script/development/config-files/grub -o /etc/default/grub
 #if [ "$gpu" == 'NVIDIA' ]; then
 #    echo "GRUB_CMDLINE_LINUX_DEFAULT=\"loglevel=3 quiet nowatchdog retbleed=off mem_sleep_default=deep nohz_full=1-"$threadsminusone" nvidia-drm.modeset=1\"" >> /etc/default/grub
 #elif [ "$gpu" == 'AMD' ]; then
@@ -121,9 +125,9 @@ fi
 # Create grub configuration in boot directory
 grub-mkconfig -o /boot/grub/grub.cfg
 
-#####   END GRUB INSTALLATION       #####
+##########  END GRUB INSTALLATION
 
-#####   START USER MANAGEMENT       #####
+##########  START USER MANAGEMENT
 
 # Set root password if given. Otherwise disable access.
 if [ "$setRootPassword" = true ]; then
@@ -152,19 +156,104 @@ chown "$username":users /home/"$username"/{.config,.local}
 chown "$username":users /home/"$username"/.local/share
 chmod 755 /home/"$username"/{.config,.local/share}
 
-#####   END USER MANAGEMENT         #####
+##########  END USER MANAGEMENT
+
+##########  START GENERAL PACKAGE INSTALLATION
+
+# Manuals
+    # man-db    -
+    # man-pages -
+    # texinfo   -
+    manuals="man-db man-pages texinfo"
+
+# General administration
+    # sudo
+    generalAdministration="sudo"
+
+# Filesystem adiminstration
+    # e2fsprogs -
+    # dosfstools    -
+    filesystemAdministration="e2fsprogs dosfstools"
+
+pacman -Syu $manuals $generalAdministration $filesystemAdministration --needed --noconfirm
+
+##########  END GENERAL PACKAGE INSTALLATION
+
+##########  START INSTALLATION TYPE SPEFIFIC INSTALLATION AND CONFIGURATION
 
 if [[ $installationType == "base" ]]; then 
 
-baseInstallationPackages="nano man-db man-pages texinfo e2fsprogs dosfstools"
-pacman -Syu $baseInstallationPackages
+    # Editor
+        # nano  -
+    editor="nano"
+
+    pacman -Syu $editor --needed --noconfirm
 
 elif [[ $installationType == "custom" ]]; then
+
+    ### CRON
+
+    pacman -Syu cronie cronie-openrc --needed --noconfirm
+    rc-update add cronie
+    rc-service sshd cronie
+
+    ### SSH
+
+    pacman -Syu openssh openssh-openrc --needed --noconfirm
+    rc-update add sshd
+    rc-service sshd start
+
+    ### UFW
+
+
+    ### PACMAN
+
+    # Download pacman.conf with additional repositories and access to the Arch repositories
+    curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/development/configfiles/pacman/pacman.conf -o /etc/pacman.conf
+
+    # Get recent mirror lists
+    curl https://raw.githubusercontent.com/archlinux/svntogit-packages/packages/pacman-mirrorlist/trunk/mirrorlist -O /etc/pacman.d/mirrorlist-arch
+
+    # Uncomment every mirror temporarily to download reflector
+    sed -i 's/^#Server/Server/' /etc/pacman.d/mirrorlist-arch
+
+    # reflector -
+    pacman -Syu reflector
+
+    reflector --save /etc/pacman.d/mirrorlist-arch --country Germany --protocol https --latest 5
+
+    ## TODO add reflector to cron
+
+
+    ### BASH
+
+    curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/development/configfiles/bash/.bashrc -o /home/"$username"/.bashrc
+
+    curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/development/configfiles/bash/.bash_aliases -o /home/"$username"/.bash_aliases
+
+    source /home/"$username"/.bashrc
+
+
+
     # Create directory for git repositories
     mkdir -p /home/"$username"/git/{own,cloned}
+    chmod 755 /home/"$username"/git/{own,cloned}
 
 
-    curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/tree/main/configfiles/user-dirs.defaults -o /etc/xdg/user-dirs.defaults
+
+    mkdir /etc/xdg
+    curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/development/configfiles/user-dirs.defaults -o /etc/xdg/user-dirs.defaults
+
+    mkdir /home/"$username"/{downloads,documents/{music,public,desktop,templates,pictures,videos}}
+
+    
+
+    
+
+    pacman -Syu neovim git man-db man-pages texinfo sudo e2fsprogs dosfstools git micro bash-completion sof-firmware
+
+    pacman -Syu artix-archlinux-support
+    pacman-key --populate archlinx
 
     ##### START GRAPHIC DRIVERs INSTALLATION    #####
 
@@ -184,14 +273,21 @@ elif [[ $installationType == "custom" ]]; then
 
     pacman -Syu $xorgPackages --needed --noconfirm
 
+    cp /etc/X11/xinit/xinitrc /home/"$username"/.xinitrc
+
+    pacman -Syu neovim
+
+    # openssh openssh-openrc rc-update add sshd rc-service sshd start
+    
+
     #####   END GRAPHIC DRIVERs INSTALLATION    #####
 
     #####   START WM INSTALLATION   #####
 
     # Might switch from awesome to qtile as it is completely written in python
-    wm='awesome' # qtile
 
-    pacman -Syu $wm --needed --noconfirm
+    pacman -Syu qtile nitrogen picom --needed --noconfirm
+    pacman -Syu firefox-esr
 
     # TODO Add configuration
 
@@ -207,9 +303,9 @@ elif [[ $installationType == "custom" ]]; then
     # TODO Add alacritty configuration
 
     # Install AUR helper
-    git clone https://aur.archlinux.org/yay-git.git /home/"$username"/git/cloned/yay
-    cd /home/"$username"/git/cloned/yay
-    sudo -u "$username" makepkg -si
+    runuser -l "$username" -c "git clone https://aur.archlinux.org/yay-git.git \
+    /home/$username/git/cloned/yay && cd /home/$username/git/cloned/yay && \
+    makepkg -siS --noconfirm"
 
     # Install browser
     echo "1
@@ -222,38 +318,28 @@ elif [[ $installationType == "custom" ]]; then
 
     # Xorg
 
+    pacman -Syu jq mpv fzf yt-dlp imv
+    git clone 
+    
 
 
     # vim
-    #curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/tree/main/configfiles/user-dirs.defaults -o /etc/xdg/user-dirs.defaults
+    #curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/tree/development/configfiles/user-dirs.defaults -o /etc/xdg/user-dirs.defaults
 
     # $filesystemAdministration $additionalPackages $generalAdministration $editor
 
     # Editor
         # vim   -
-    editor='vim'
-
-    # Manuals
-        # man-db    -
-        # man-pages -
-        # texinfo   -
-    manuals='man-db man-pages texinfo'
-
-    # General administration
-        # sudo
-    generalAdministration='sudo'
-
-    # Filesystem adiminstration
-        # e2fsprogs -
-        # dosfstools    -
-    filesystemAdministration='e2fsprogs dosfstools'
+    editor='neovim'
 
     # Additional packages
         # git   -
         # micro -
         # bash-completion   -
-    additionalPackages='git micro bash-completion sof-firmware'
+    additionalPackages=''
 fi
+
+##########  END INSTALLATION TYPE SPEFIFIC INSTALLATION AND CONFIGURATION
 
 # finishing up + cleaning
 rm -rf /chrootInstall.sh /tempfiles
