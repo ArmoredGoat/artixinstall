@@ -183,9 +183,9 @@ elif [[ $installationType == 'custom' ]]; then
 
     ### PYTHON
 
-        pacman -Syu python python-pip
+        pacman -Syu python python-pip --needed --noconfirm
 
-        pip install setuptools
+        runuser -l "$username" -c "pip install setuptools"
     
     ### PACMAN
 
@@ -678,7 +678,8 @@ elif [[ $installationType == 'custom' ]]; then
 
         # Fix for qtile. It seems there are issues with building cairocffi
         # through pip and normal packages.
-        pip install --no-cache --upgrade --no-build-isolation cairocffi
+        runuser -l "$username" -c "pip install --no-cache --upgrade \
+            --no-build-isolation cairocffi"
 
         # For the time qtile is bugged due to python dependencies I use awesome
 #        pacman -Syu awesome --needed --noconfirm
