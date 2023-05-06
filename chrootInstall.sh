@@ -10,6 +10,7 @@ create_directory () {
 	# Check if directories exists. If not, create them.
 	if [[ ! -d $@ ]]; then
 	mkdir -pv $@
+    fi
 	# This script is run with privileged rights. Therefore, anything created with
 	# it will be owned by root. To make sure that the permissions are set
 	# correclty, the function checks if the directory lies in the home folder.
