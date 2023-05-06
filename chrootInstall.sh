@@ -23,7 +23,7 @@ timezone="$(< /tempfiles/timezone)"
 sed -i '/en_US.UTF-8 UTF-8/s/^#//g' /etc/locale.gen
 
 # Set desired locale systemwide
-echo 'export LANG=¨en_US.UTF-8"' > /etc/locale.conf
+echo 'export LANG="en_US.UTF-8"' > /etc/locale.conf
 # Set collation rules (rules for sorting and regular expresions)
 # C - dotfiles first, followed by uppercase and lowercase filenames
 echo 'export LC_COLLATE="C"' >> /etc/locale.conf
