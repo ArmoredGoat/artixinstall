@@ -384,23 +384,23 @@ elif [[ $installationType == 'custom' ]]; then
 
         pacman -Syu xorg xorg-server xorg-xinit --needed --noconfirm
 
-        cp /etc/X11/xinit/xinitrc /home/"$username"/.xinitrc
+        curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/development/configfiles/xorg/.xinitrc -o /home/"$username"/.xinitrc
         chmod +x /home/"$username"/.xinitrc
 
     ### LOGIN MANAGER
 
         # sddm
-        #pacman -Syu sddm sddm-openrc --needed --noconfirm
+        pacman -Syu sddm sddm-openrc --needed --noconfirm
 
         # Enable sddm to start at boot
-        #rc-update add sddm
+        rc-update add sddm
 
         # Create directory for sddm config files
-        #if [[ ! -d /etc/sddm.conf.d ]]; then
-        #    mkdir /etc/sddm.conf.d
-        #fi
+        if [[ ! -d /etc/sddm.conf.d ]]; then
+            mkdir /etc/sddm.conf.d
+        fi
 
-        #curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/development/configfiles/sddm/default.conf -o /etc/sddm.conf.d/default.conf
+        curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/development/configfiles/sddm/default.conf -o /etc/sddm.conf.d/default.conf
 
     ### WINDOW MANAGER
 
