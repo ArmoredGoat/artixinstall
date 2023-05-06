@@ -25,7 +25,7 @@ MOVE_CURSOR_UP="\033[1A"
 
 CHECK_MARK="\033[0;32m\xE2\x9C\x94\033[0m"
 CROSS_MARK="\033[0;31m\xE2\x9C\x96\033[0m"
-QUEST_MARK="\033[0;33m\xE2\x9D\x94\033[0m"
+QUEST_MARK=$'\033[0;33m\xE2\x9D\x94\033[0m'
 EXCLA_MARK="\033[0;33m\xE2\x9D\x95\033[0m"
 
 #####   END COLORS      #####
@@ -82,7 +82,8 @@ ${Green}2) Customized installation${Color_Off}
 "
 
 while true; do
-    read -rp $'\r\033[1A\033[0K\033[0;33m\xE2\x9D\x94\033[0m    Which installation would you like to perfom (1-2)? ' installationType
+    delete_term_lines 1
+    read -p $QUEST_MARK"    Which installation would you like to perfom (1-2)? " installationType
     case $installationType in
         1)
             delete_term_lines 11
