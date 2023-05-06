@@ -362,6 +362,10 @@ elif [[ $installationType == 'custom' ]]; then
 
         pacman -Syuq bluez-utils --needed --noconfirm
 
+    ### FILE MANAGER
+
+        pacman -Syuq ranger --needed --noconfirm
+    
     ### AUR HELPER
     
         runuser -l "$username" -c "git clone https://aur.archlinux.org/yay.git \
