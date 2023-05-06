@@ -61,6 +61,7 @@ threadsMinusOne="$(< /tempfiles/threadsMinusOne)"
 gpu="$(< /tempfiles/gpu)"
 #"$intel_vaapi_driver"="$(< /tempfiles/intel_vaapi_driver
 boot="$(< /tempfiles/boot)"
+installationType="$(< /tempfiles/installationType)"
 baseDisk="$(< /tempfiles/disk)"
 username="$(< /tempfiles/username)"
 userPassword="$(< /tempfiles/userPassword)"
