@@ -683,6 +683,11 @@ elif [[ $installationType == 'custom' ]]; then
         runuser -l "$username" -c "pip install --no-cache --upgrade \
             --no-build-isolation cairocffi"
 
+    ### ZSA KEYBOARD FLASHER
+
+        # I am using an ErgoDox EZ and this software is used to flash
+        # layouts on the device.
+        pacman -Syu zsa-wally --needed --noconfirms
     ## GRAPHIC DRIVERS
 
         # Install drivers depending on detected gpu
