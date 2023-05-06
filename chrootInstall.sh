@@ -176,7 +176,7 @@ elif [[ $installationType == 'custom' ]]; then
 
         # Get config files repository and store them in corresponding directory
         # Download pacman.conf with additional repositories and access to the Arch repositories
-        curl $baseUrlRaw/$gitRepo/$gitBranch/configfiles/pacman/pacman.conf \
+        curl $baseUrlRaw/$gitRepo/$gitBranch/dotfiles/pacman/pacman.conf \
             -o /etc/pacman.conf
 	
 	create_directory /etc/pacman.d
@@ -202,7 +202,7 @@ elif [[ $installationType == 'custom' ]]; then
 
             # Get config files repository and store them in corresponding directory
             # Add file reflector.start to local.d directory to run reflector at start without systemd
-            curl $baseUrlRaw/$gitRepo/$gitBranch/configfiles/local.d/reflector.start -o /etc/local.d/reflector.start
+            curl $baseUrlRaw/$gitRepo/$gitBranch/dotfiles/local.d/reflector.start -o /etc/local.d/reflector.start
             # Make reflector.start executable
             chmod +x /etc/local.d/reflector.start
             #TODO add paccache to cron
@@ -236,7 +236,7 @@ elif [[ $installationType == 'custom' ]]; then
 	create_directory /etc/xdg
 
         # Get config files repository and store them in corresponding directory
-        curl $baseUrlRaw/$gitRepo/$gitBranch/configfiles/xdg/user-dirs.defaults \
+        curl $baseUrlRaw/$gitRepo/$gitBranch/dotfiles/xdg/user-dirs.defaults \
             -o /etc/xdg/user-dirs.defaults
 
 	create_directory /home/"$username"/{downloads,documents/{music,public,desktop,templates,pictures,videos}}
@@ -286,9 +286,9 @@ elif [[ $installationType == 'custom' ]]; then
 
 	create_directory /home/"$username"/.config/pipewire
 
-        curl $baseUrlRaw/$gitRepo/$gitBranch/configfiles/pipewire/pipewire.conf \
+        curl $baseUrlRaw/$gitRepo/$gitBranch/dotfiles/pipewire/pipewire.conf \
             -o /home/"$username"/.config/pipewire/pipewire.conf
-        curl $baseUrlRaw/$gitRepo/$gitBranch/configfiles/pipewire/.pipewire-start.sh \
+        curl $baseUrlRaw/$gitRepo/$gitBranch/dotfiles/pipewire/.pipewire-start.sh \
             -o /home/"$username"/.config/pipewire/.pipewire-start.sh
         chmod +x /home/"$username"/.config/pipewire/.pipewire-start.sh
 
@@ -375,9 +375,9 @@ elif [[ $installationType == 'custom' ]]; then
     ### COMMAND-LINE SHELL
 
         # Get config files repository and store them in corresponding directory
-        curl $baseUrlRaw/$gitRepo/$gitBranch/configfiles/bash/.bashrc \
+        curl $baseUrlRaw/$gitRepo/$gitBranch/dotfiles/bash/.bashrc \
             -o /home/"$username"/.bashrc
-        curl $baseUrlRaw/$gitRepo/$gitBranch/configfiles/bash/.bash_aliases \
+        curl $baseUrlRaw/$gitRepo/$gitBranch/dotfiles/bash/.bash_aliases \
             -o /home/"$username"/.bash_aliases
 
         source /home/"$username"/.bashrc
@@ -441,13 +441,13 @@ elif [[ $installationType == 'custom' ]]; then
 
         ## General configuration
         # Get config files repository and store them in corresponding directory
-        curl $baseUrlRaw/$gitRepo/$gitBranch/configfiles/kitty/kitty.conf \
+        curl $baseUrlRaw/$gitRepo/$gitBranch/dotfiles/kitty/kitty.conf \
             -o /home/"$username"/.config/kitty/kitty.conf
         
         ## Configure theme
 
         # Get theme from repo
-        curl $baseUrlRaw/$gitRepo/$gitBranch/configfiles/themes/Earthsong.conf \
+        curl $baseUrlRaw/$gitRepo/$gitBranch/dotfiles/themes/Earthsong.conf \
             -o /home/"$username"/.config/kitty/themes/Earthsong.conf
 
         # Create symbolic link in general config directory. 
@@ -461,8 +461,8 @@ elif [[ $installationType == 'custom' ]]; then
         # Create directory for fonts in home directory and download font to it.
         # This way kitty can see it as an available font to use.
         create_directory /home/"$username"/.fonts/pt_mono
-        
-        curl $baseUrlRaw/$gitRepo/$gitBranch/configfiles/fonts/PTMono-Regular.ttf \
+
+        curl $baseUrlRaw/$gitRepo/$gitBranch/dotfiles/fonts/PTMono-Regular.ttf \
             -o /home/"$username"/.fonts/pt_mono/pt_mono_regular.ttf
 
     ### TRASH MANAGEMENT
@@ -588,15 +588,15 @@ elif [[ $installationType == 'custom' ]]; then
         create_directory /etc/lightdm
 
         # Get config files repository and store them in corresponding directory
-        curl $baseUrlRaw/$gitRepo/$gitBranch/configfiles/lightdm/lightdm.conf \
+        curl $baseUrlRaw/$gitRepo/$gitBranch/dotfiles/lightdm/lightdm.conf \
             -o /etc/lightdm/ligthdm.conf
-        curl $baseUrlRaw/$gitRepo/$gitBranch/configfiles/lightdm/lightdm-gtk-greeter.conf \
+        curl $baseUrlRaw/$gitRepo/$gitBranch/dotfiles/lightdm/lightdm-gtk-greeter.conf \
             -o /etc/lightdm/ligthdm-gtk-greeter.conf
-        curl $baseUrlRaw/$gitRepo/$gitBranch/configfiles/lightdm/users.conf \
+        curl $baseUrlRaw/$gitRepo/$gitBranch/dotfiles/lightdm/users.conf \
             -o /etc/lightdm/users.conf
-        curl $baseUrlRaw/$gitRepo/$gitBranch/configfiles/lightdm/Xsession \
+        curl $baseUrlRaw/$gitRepo/$gitBranch/dotfiles/lightdm/Xsession \
             -o /etc/lightdm/Xsession
-        curl $baseUrlRaw/$gitRepo/$gitBranch/configfiles/xorg/.xprofile \
+        curl $baseUrlRaw/$gitRepo/$gitBranch/dotfiles/xorg/.xprofile \
             -o /home/"$username"/.xprofile
         chmod +x /home/"$username"/.xprofile
 
@@ -605,10 +605,10 @@ elif [[ $installationType == 'custom' ]]; then
         pacman -Syuq xorg xorg-server xorg-xinit --needed --noconfirm
 
         # Get config files repository and store them in corresponding directory
-        curl $baseUrlRaw/$gitRepo/$gitBranch/configfiles/xorg/.xinitrc \
+        curl $baseUrlRaw/$gitRepo/$gitBranch/dotfiles/xorg/.xinitrc \
             -o /home/"$username"/.xinitrc
         chmod +x /home/"$username"/.xinitrc
-        curl $baseUrlRaw/$gitRepo/$gitBranch/configfiles/xorg/xorg.conf \
+        curl $baseUrlRaw/$gitRepo/$gitBranch/dotfiles/xorg/xorg.conf \
             -o /etc/X11/xorg.conf        
 
     ### WALLPAPER SETTER
