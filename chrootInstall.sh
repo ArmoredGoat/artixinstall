@@ -183,7 +183,8 @@ elif [[ $installationType == 'custom' ]]; then
 	create_directory /etc/pacman.d
 
         # Get recent mirror lists
-        curl $baseUrlRaw/archlinux/svntogit-packages/packages/pacman-mirrorlist/trunk/mirrorlist -o /etc/pacman.d/mirrorlist-arch
+        curl $baseUrlRaw/archlinux/svntogit-packages/packages/pacman-mirrorlist/trunk/mirrorlist \
+            -o /etc/pacman.d/mirrorlist-arch
 
         # Uncomment every mirror temporarily to download reflector
         sed -i 's/^#Server/Server/' /etc/pacman.d/mirrorlist-arch
@@ -647,6 +648,11 @@ elif [[ $installationType == 'custom' ]]; then
 
         # For the time qtile is bugged due to python dependencies I use awesome
         pacman -Syuq awesome --needed --noconfirm
+
+        create_directory /home/"$username"/.config/awesome
+
+        curl $baseUrlRaw/$gitRepo/$gitBranch/dotfiles/awesome/rc.lua \
+            -o /home/"$username"/.config/awesome/rc.lua
 
     ## GRAPHIC DRIVERS
 
