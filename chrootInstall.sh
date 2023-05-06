@@ -683,6 +683,10 @@ elif [[ $installationType == 'custom' ]]; then
         runuser -l "$username" -c "pip install --no-cache --upgrade \
             --no-build-isolation cairocffi"
 
+        # Get config files repository and store them in corresponding directory
+        curl $downloadUrl/dotfiles/qtile/config.py \
+            -o $homedir/.config/qtile/config.py
+
     ### ZSA KEYBOARD FLASHER
 
         # I am using an ErgoDox EZ and this software is used to flash
