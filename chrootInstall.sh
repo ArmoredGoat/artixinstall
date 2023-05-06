@@ -574,7 +574,7 @@ elif [[ $installationType == 'custom' ]]; then
 
     ### DISPLAY MANAGER
 
-        pacman -Syuq lightdm lightdm-openrc light-locker lightdm-gtk-greeter --needed --noconfirm
+        pacman -Syuq lightdm lightdm-openrc light-locker lightdm-slick-greeter --needed --noconfirm
 
         # lightdm
         # lightdm-openrc
@@ -589,13 +589,12 @@ elif [[ $installationType == 'custom' ]]; then
 
         # Get config files repository and store them in corresponding directory
         curl $baseUrlRaw/$gitRepo/$gitBranch/dotfiles/lightdm/lightdm.conf \
-            -o /etc/lightdm/ligthdm.conf
-        curl $baseUrlRaw/$gitRepo/$gitBranch/dotfiles/lightdm/lightdm-gtk-greeter.conf \
-            -o /etc/lightdm/ligthdm-gtk-greeter.conf
+            -o /etc/lightdm/lightdm.conf
+        curl $baseUrlRaw/$gitRepo/$gitBranch/dotfiles/lightdm/slick-greeter.conf \
+            -o /etc/lightdm/slick-greeter.conf
         curl $baseUrlRaw/$gitRepo/$gitBranch/dotfiles/lightdm/users.conf \
             -o /etc/lightdm/users.conf
-        curl $baseUrlRaw/$gitRepo/$gitBranch/dotfiles/lightdm/Xsession \
-            -o /etc/lightdm/Xsession
+
         curl $baseUrlRaw/$gitRepo/$gitBranch/dotfiles/xorg/.xprofile \
             -o /home/"$username"/.xprofile
         chmod +x /home/"$username"/.xprofile
@@ -615,11 +614,38 @@ elif [[ $installationType == 'custom' ]]; then
 
         pacman -Syuq nitrogen --needed --noconfirm
 
+        # Create directory for nitrogen config and download config.
+        create_directory /home/"$username"/.config/nitrogen
+
+        curl $baseUrlRaw/$gitRepo/$gitBranch/dotfiles/nitrogen/nitrogen.cfg \
+            -o /home/"$username"/.config/nitrogen/nitrogen.cfg
+        curl $baseUrlRaw/$gitRepo/$gitBranch/dotfiles/nitrogen/bg-saved.cfg \
+            -o /home/"$username"/.config/nitrogen/bg-saved.cfg
+
         create_directory /home/"$username"/.config/backgrounds
+
+        #TODO Download all wallpaper at once
+
+        # Download wallpaper
+        curl $baseUrlRaw/$gitRepo/$gitBranch/dotfiles/backgrounds/the_elders_forest.jpg \
+            -o /home/"$username"/.config/backgrounds/the_elders_forest.jpg
+        
+        # Duplicate wallpaper and rename it to _background. This way, I can
+        # reference it with symbolic links from multiple places and change it
+        # by subsituting it with another image with the same name.
+        cp /home/"$username"/.config/backgrounds/the_elders_forest.jpg \
+            /home/"$username"/.config/backgrounds/_background
+        
+        # Create symbolic link to background image for lightdm
+        ln -s /home/"$username"/.config/backgrounds/_background \
+            /etc/lightdm/background
 
     ### WINDOW MANAGER
 
-        pacman -Syuq qtile --needed --noconfirm
+        #pacman -Syuq qtile --needed --noconfirm
+
+        # For the time qtile is bugged due to python dependencies I use awesome
+        pacman -Syuq awesome --needed --noconfirm
 
     ## GRAPHIC DRIVERS
 
