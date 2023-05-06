@@ -88,24 +88,24 @@ else
 fi
 
 # Create user and set password
-useradd -m "$username"
+useradd -m $username
 echo "$userPassword
 $userPassword
-" | passwd "$username"
+" | passwd $username
 
 # Grant groups to user
-usermod -aG wheel,audio,video,storage "$username"
+usermod -aG wheel,audio,video,storage $username
 # Give users in wheel group sudo privileges --> no need for root user
 sed -i '/%wheel ALL=(ALL:ALL) ALL/s/^#//g' /etc/sudoers
 
 # set home directory permissions
-mkdir -p /home/"$username"/{.config,.local/share}
-chmod 700 /home/"$username"
-chown "$username":users /home/"$username"/{.config,.local}
-chown "$username":users /home/"$username"/.local/share
-chmod 755 /home/"$username"/{.config,.local/share}
+mkdir -p /home/$username/{.config,.local/share}
+chmod 700 /home/$username
+chown $username:users /home/$username/{.config,.local}
+chown $username:users /home/$username/.local/share
+chmod 755 /home/$username/{.config,.local/share}
 
-mkdir -p /home/"$username"/git/{own,cloned}
+mkdir -p /home/$username/git/{own,cloned}
 
 
 #####   END USER MANAGEMENT         #####
