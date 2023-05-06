@@ -566,24 +566,24 @@ fi
 # In case of BIOS boot --> MBR/BIOS partitioning
 if [ "$boot" == 'uefi' ]; then
     wipefs --all --force $baseDisk
-    echo 'g # Create new GPT disklabel
-    n # New partition
-    1 # Partition number 1
+    echo 'g
+    n
+    1
 
-    +1024M  # 1 GiB boot partition
-    t # Set type of partiton
-    1 # Set type to 'EFI System'
-    n # New partition
-    2 # Partition number 2
+    +1024M
+    t
+    1
+    n
+    2
 
-    +'$swap' # Partiton size equal to given swap value
-    t # Set type of partiton
-    2 # Select partition 2
-    19 # Set type to 'Linux Swap'
-    n # New partition
-    3 # Partition number 3
+    +'$swap'
+    t
+    2
+    19
+    n
+    3
 
-    w # Write the partition table
+    w
     ' | fdisk -w always -W always $baseDisk
 
     # Format and label disks
@@ -602,17 +602,17 @@ if [ "$boot" == 'uefi' ]; then
     mount /dev/disk/by-label/ESP /mnt/boot/efi
 else
     partitions=0
-    echo 'o # Clear in memory partition table
-    n # New partition
-    p # Primary partition
-    1 # Partition number 1
+    echo 'o
+    n
+    p
+    1
 
-    +'$swap' # Partiton size equal to given swap value
-    n # New partition
-    p # Primary partition
-
-    -1M # Use remaining disk space minus 1 M
-    w # Write the partition table
+    +'$swap'
+    n
+    p
+    
+    -1M
+    w
     ' | fdisk -w always -W always $baseDisk
 
     # Format and label disks
