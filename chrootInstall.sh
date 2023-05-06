@@ -378,9 +378,11 @@ elif [[ $installationType == 'custom' ]]; then
 
     ### AUDIO
 
-        pacman -Syu pipewire lib32-pipewire pipewire-audio pipewire-alsa \
-            pipewire-pulse pipewire-jack pipewire-docs wireplumber pavucontrol \
-            --needed --noconfirm
+        pacman -Syu pipewire lib32-pipewire pipewire-audio pipewire-alsa pipewire-pulse pipewire-jack pipewire-docs wireplumber pavucontrol --needed --noconfirm
+
+        if [[ ! -d /home/"$username"/.config/pipewire ]]; then
+            mkdir -p /home/"$username"/.config/pipewire
+        fi
 
         curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/iss005/configfiles/pipewire/pipewire.conf -o /home/"$username"/.config/pipewire/pipewire.conf
         curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/iss005/configfiles/pipewire/.pipewire-start.sh -o /home/"$username"/.config/pipewire/.pipewire-start.sh
@@ -445,6 +447,7 @@ elif [[ $installationType == 'custom' ]]; then
         curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/iss005/configfiles/lightdm/users.conf -o /etc/lightdm/users.conf
         curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/iss005/configfiles/lightdm/Xsession -o /etc/lightdm/Xsession
         curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/iss005/configfiles/xorg/.xprofile -o /home/"$username"/.xprofile
+        chmod +x /home/"$username"/.xprofile
 
     ### WINDOW MANAGER
 
