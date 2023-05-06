@@ -43,7 +43,7 @@ fi
 # This prevents neofetch from launching everytime you open a terminal
 runningTerms=$(ps a | awk '{print $2}' | grep -vi "tty*" | uniq | wc -l);
 if [ $runningTerms -eq 1 ]; then
-     neofetch
+    fastfetch
 fi
 
 ##########  VARIABLES
