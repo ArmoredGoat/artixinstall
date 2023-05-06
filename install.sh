@@ -697,10 +697,7 @@ kernel="linux-lts"
 firmware="linux-firmware"
 
 # Network
-    # networkmanager                -
-    # networkmanager-$initSystem    -
-    # dhcpcd                        -
-network="networkmanager-$initSystem dhcpcd"
+network="connman connman-$initSystem wpa_supplicant wpa_supplicant-$initSystem"
 
 basestrap /mnt $basePackages $initSystem $loginManager $kernel $firmware \
 $network
