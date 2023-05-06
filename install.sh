@@ -1,6 +1,6 @@
 #! /bin/bash
 
-#####   START COLORS    #####
+##########   START COLORS   
 
 # Reset
 Color_Off='\033[0m'       # Text Reset
@@ -15,20 +15,23 @@ Purple='\033[0;35m'       # Purple
 Cyan='\033[0;36m'         # Cyan
 White='\033[0;37m'        # White
 
-# \r jumps to beginning of line
-# \033 marks beginning of escape sequence
-# [1A moves one line up
-# [0K erase from cursor to right end
-ERASE_CURR="\r\033[0K"
-ERASE_PREV="\r\033[1A\033[0K" 
+##########   END COLORS
 
+##########  START SPECIAL CHARACTERS
 
 CHECK_MARK="\033[0;32m\xE2\x9C\x94\033[0m"
 CROSS_MARK="\033[0;31m\xE2\x9C\x96\033[0m"
 QUEST_MARK=$'\033[0;33m\xE2\x9D\x94\033[0m'
 EXCLA_MARK="\033[0;33m\xE2\x9D\x95\033[0m"
 
-#####   END COLORS      #####
+##########  END SPECIAL CHARACTERS
+
+##########  START FUNCTIONS
+
+# \r jumps to beginning of line
+# \033 marks beginning of escape sequence
+# [1A moves one line up
+# [0K erase from cursor to right end
 
 delete_term_lines () {
     local ERASE_CURR="\r\033[0K"
@@ -47,12 +50,16 @@ delete_term_lines () {
     echo -e "${ERASE_STRING}"
 }
 
+##########  END FUNCTIONS
+
 # Create directory for storing temp files/variables
 if [[ ! -d /tempfiles ]]; then
     mkdir /tempfiles
 fi
 
-#loadkeys us
+# Load keymap us
+loadkeys us
+
 echo -e "${Cyan}###############################################################\
 #################"
 echo -e "#                   ArmoredGoat's Artix Installation Script           \
@@ -69,13 +76,13 @@ read -n 1 -sp $'\nPress any key to continue.'
 
 delete_term_lines 3
 
-#####   START MANUAL CONFIGURATION  #####
+##########   START MANUAL CONFIGURATION
 
-echo -e "${Purple}################################ CONFIGURATION ##############\
+echo -e "${Purple}##############################   CONFIGURATION   ############\
 ###################${Color_Off}"
 
-echo -e "\n                    ${Blue}########## INSTALLATION TYPE ##########\
-${Color_Off}"
+echo -e "\n          ${Blue}#################### INSTALLATION TYPE ############\
+########${Color_Off}"
 
 echo -e "\n${Green}1) Base installation${Color_Off} 
     Only necessary packages and configuration.
@@ -124,10 +131,12 @@ Installation"
     esac      
 done
 
-echo -e "\n                       ${Blue}########## PARTITIONING ##########\
+echo -e "\n          ${Blue}####################    PARTITIONING   ############\
+########${Color_Off}"
+
+echo -e "\n                    ${Blue}##########   DISK SELECTION  ##########\
 ${Color_Off}"
-echo -e "\n                           ${Blue}##### DISK SELECTION #####\
-${Color_Off}"
+
 # List available disks
 echo -e "\n$(lsblk --tree | grep 'NAME\|disk\|part')" | tee /tempfiles/output
 numberOfLines=$(wc -l < /tempfiles/output)
@@ -199,7 +208,7 @@ any key to exit."
     esac      
 done
 
-echo -e "\n                             ${Blue}##### SWAP SPACE #####\
+echo -e "\n                    ${Blue}##########     SWAP SPACE    ##########\
 ${Color_Off}"
 
 # Ask how much swap space should be allocated and convert the value
@@ -210,7 +219,11 @@ read -rp $'\nSwap size in GiB: ' swap
 delete_term_lines 4
 echo -e "${CHECK_MARK}    ${swap} GiB swap space set!"
 
-echo -e "\n                      ${Blue}##### HOST SETTINGS #####${Color_Off}"
+echo -e "\n          ${Blue}####################  SYSTEM SETTINGS  #############\
+#######${Color_Off}"
+
+echo -e "\n                    ${Blue}##########   HOST SETTINGS   ##########\
+${Color_Off}"
 
 # Ask for hostname and credentials. Ensuring that passwords match.
 echo -e "\n${EXCLA_MARK}    Setting hostname..."
@@ -219,7 +232,8 @@ read -rp $'\nHostname: ' hostname
 delete_term_lines 4
 echo -e "${CHECK_MARK}    Hostname '${hostname}' set!"
 
-echo -e "\n                      ${Blue}##### USER SETTINGS #####${Color_Off}"
+echo -e "\n                    ${Blue}##########   USER SETTINGS   ##########\
+${Color_Off}"
 
 echo -e "\n${EXCLA_MARK}    Setting username..."
 
@@ -313,7 +327,8 @@ too short (at least 8 characters)."
     esac      
 done
 
-echo -e "\n                      ${Blue}##### TIME SETTINGS #####${Color_Off}"
+echo -e "\n                    ${Blue}##########   TIME SETTINGS   ##########\
+${Color_Off}"
 
 echo -e "\n${EXCLA_MARK}    Setting time zone..."
 echo ""
@@ -329,7 +344,7 @@ numberOfRegions="$(wc -l < /tempfiles/regions)"
 
 while true; do
     read -p $'\n'$QUEST_MARK"    Please enter your region's number (1 - \
-    $numberOfRegions): " regionNumber
+$numberOfRegions): " regionNumber
     if (( 1 <= $regionNumber && $regionNumber <= $numberOfRegions )); then
         region=$((sed "${regionNumber}q;d" /tempfiles/regions) | \
         awk '{print $2}')
@@ -366,7 +381,7 @@ numberOfOutputLines=$(wc -l < /tempfiles/output)
 while true; do
     if [[ $numberOfCities > "1" ]]; then
         read -p $'\n'$QUEST_MARK"    Please enter your cities' number (1 - \
-        $numberOfCities): " cityNumber
+$numberOfCities): " cityNumber
     else
         read -p $'\n'$QUEST_MARK"    Please enter your cities' number \
         (1): " cityNumber
@@ -408,10 +423,10 @@ if [[ -d /usr/share/zoneinfo/$region/$city ]]; then
     while true; do
         if [[ "$numberOfSubCities" > "1" ]]; then
             read -p $'\n'$QUEST_MARK"    Please enter your cities' number (1 - \
-            $numberOfSubCities): " subCityNumber
+$numberOfSubCities): " subCityNumber
         else
             read -p $'\n'$QUEST_MARK"    Please enter your cities' number \
-            (1): " subCityNumber
+(1): " subCityNumber
         fi
         if (( 1 <= $subCityNumber && $subCityNumber <= $numberOfCities )); then
             subCity=$(sed "${subCityNumber}q;d" /tempfiles/regionSubCities | \
@@ -447,9 +462,41 @@ fi
 
 echo -e "${CHECK_MARK}    Time zone ${timezone} set."
 
-#####   END MANUAL CONFIGURATION    #####
+echo -e "${Purple}##############################    CONFIRMATION   ############\
+###################${Color_Off}"
 
-#####   START HARDWARE DETECTION    #####
+# Ask for confirmation to continue with installation
+while true; do
+    read -p $'\n'$QUEST_MARK"   Do you want to proceed the installation with \
+the given information (y/N)? " proceed
+    case $proceed in
+        [yY][eE][sS]|[yY])
+            delete_term_lines 2 0 1
+            break
+            ;;
+        [nN][oO]|[nN]|"")
+            delete_term_lines 2
+
+            echo -e "${CROSS_MARK}    The installation will be aborted. Press \
+any key to exit."
+            read -sp $'\n'
+
+            exit 0
+            ;;
+        *)
+            delete_term_lines 2
+
+            echo -e "${CROSS_MARK}    Invalid input..."
+            sleep 2
+
+            delete_term_lines 2 0 1
+            ;;
+    esac      
+done
+
+##########   END MANUAL CONFIGURATION
+
+##########   START HARDWARE DETECTION
 
 # Get CPU and threads 
 # TODO Insert reason for detection
@@ -463,17 +510,17 @@ fi
 # Get amount of RAM
 ram=$(echo "$(< /proc/meminfo)" | grep 'MemTotal:' | awk '{print $2;}'); ram=$(( $ram / 1000000 ))
 
-#####   END HARDWARE DETECTION      #####
+##########   END HARDWARE DETECTION
 
-#####   START SOFTWARE DETECTION    #####
+##########   START SOFTWARE DETECTION
 
 # THAT'S NOT WORKING, SUBSTITUTE FOR INTERACTIVE MENU
 # Detect init system by getting process with pid 1
 #initSystem=$(ps -p 1 -o comm=)
 
-#####   END SOFTWARE DETECTION    #####
+##########   END SOFTWARE DETECTION
 
-#####   START CONDITIONAL QUERIES   #####
+##########   START CONDITIONAL QUERIES
 
 # Do not know why this is done, yet. Will implement it when I figured it out.
 #if [ "$gpu" == 'Intel' ]; then
@@ -494,9 +541,9 @@ else
     boot='bios'
 fi
 
-#####   END CONDITIONAL QUERIES     #####
+##########   END CONDITIONAL QUERIES
 
-#####   START VARIABLE MANIPULATION #####
+##########   START VARIABLE MANIPULATION
 
 # Change uppercase characters to lowercase for username and hostname
 username=$(echo "$username" | tr '[:upper:]' '[:lower:]')
@@ -504,9 +551,9 @@ hostname=$(echo "$hostname" | tr '[:upper:]' '[:lower:]')
 # Convert size of swap space from gibibyte to megabyte
 swap="$(( $swap * 1024 ))"'M'
 
-#####   END VARIABLE MANIPULATION   #####
+##########   END VARIABLE MANIPULATION
 
-#####   START PARTITIONING          #####
+##########   START PARTITIONING
 
 # In case of UEFI boot --> GPT/UEFI partitioning with 1 GiB disk space for boot partition
 # In case of BIOS boot --> MBR/BIOS partitioning
@@ -568,9 +615,9 @@ else
     mkdir -p /mnt/etc/conf.d
 fi
 
-#####   END PARTITIONING            #####
+##########   END PARTITIONING
 
-#####   START BASE INSTALLATION     #####
+##########   START BASE INSTALLATION
 
 # Generate filesystem table
 fstabgen -U /mnt >> /mnt/etc/fstab
@@ -614,9 +661,9 @@ network="networkmanager-$initSystem dhcpcd"
 
 basestrap /mnt $basePackages $initSystem $loginManager $kernel $firmware $manuals $network
 
-#####   END BASE INSTALLATION       #####
+##########   END BASE INSTALLATION
 
-#####   START EXPORTING VARIABLES   #####
+##########   START EXPORTING VARIABLES
 
 mkdir /mnt/tempfiles
 #echo "$formfactor" > /mnt/tempfiles/formfactor
@@ -632,7 +679,7 @@ echo "$setRootPassword" > /mnt/tempfiles/setRootPassword
 echo "$rootPassword" > /mnt/tempfiles/rootPassword
 echo "$timezone" > /mnt/tempfiles/timezone
 
-#####   END EXPORTING VARIABLES     #####
+##########   END EXPORTING VARIABLES
 
 curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/main/chrootInstall.sh -o /mnt/chrootInstall.sh
 chmod +x /mnt/chrootInstall.sh
