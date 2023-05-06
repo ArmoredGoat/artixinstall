@@ -583,6 +583,7 @@ if [ "$boot" == 'uefi' ]; then
     n
     3
 
+
     w
     ' | fdisk -w always -W always $baseDisk
 
@@ -610,7 +611,7 @@ else
     +'$swap'
     n
     p
-    
+
     -1M
     w
     ' | fdisk -w always -W always $baseDisk
