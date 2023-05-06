@@ -619,31 +619,35 @@ EOF
 else
     wipefs --all --force "$baseDisk"
     sed -e 's/\s*\([\+0-9a-zA-Z]*\).*/\1/' << EOF | fdisk -w always -W always "$baseDisk"
-    o # Clear in-memory partition table
+    g      # Create new GPT disklabel
     n # New partition
-    p # Primary partition
     1 # Partition number 1
       # Default - Start at beginning of disk
+    +1M
+    t
+    4
+    n
+    2
+
     +$swap # Partiton size equal to given swap value
     t # Set type of partiton
-    82 # Set type to 'Linux swap / Solaris'
+    19 # Set type to 'Linux swap / Solaris'
     n # New partition
-    p # Primary partition
-    2 # Partition number 1
+    3
       # Default - start at beginning of remaining disk
-    -1M # Use remaining disk space minus 1 M
+
     w # Write partition table
     q # Quit fdisk
 EOF
 
     # Format and label disks
-    mkswap -L SWAP "$disk"'1'
+    mkswap -L SWAP "$disk"'2'
     
-    mkfs.ext4 -L ROOT "$disk"'2'
+    mkfs.ext4 -L ROOT "$disk"'3'
 
     # Mount storage and EFI partitions, and create necessary directories
-    swapon "$disk"'1'
-    mount "$disk"'2' /mnt
+    swapon "$disk"'2'
+    mount "$disk"'3' /mnt
     
     mkdir -p /mnt/etc/conf.d
 fi
