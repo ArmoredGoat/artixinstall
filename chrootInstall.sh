@@ -180,6 +180,12 @@ elif [[ $installationType == 'custom' ]]; then
     ### JAVA
 
         pacman -Syu jdk17-openjdk --needed --noconfirm
+
+    ### PYTHON
+
+        pacman -Syu python python-pip
+
+        pip install setuptools
     
     ### PACMAN
 
@@ -668,15 +674,19 @@ elif [[ $installationType == 'custom' ]]; then
 
     ### WINDOW MANAGER
 
-        #pacman -Syu qtile --needed --noconfirm
+        pacman -Syu qtile --needed --noconfirm
+
+        # Fix for qtile. It seems there are issues with building cairocffi
+        # through pip and normal packages.
+        pip install --no-cache --upgrade --no-build-isolation cairocffi
 
         # For the time qtile is bugged due to python dependencies I use awesome
-        pacman -Syu awesome --needed --noconfirm
-
-        create_directory $homedir/.config/awesome
-
-        curl $downloadUrl/dotfiles/awesome/rc.lua \
-            -o $homedir/.config/awesome/rc.lua
+#        pacman -Syu awesome --needed --noconfirm
+#
+#        create_directory $homedir/.config/awesome
+#
+#        curl $downloadUrl/dotfiles/awesome/rc.lua \
+#            -o $homedir/.config/awesome/rc.lua
 
     ## GRAPHIC DRIVERS
 
