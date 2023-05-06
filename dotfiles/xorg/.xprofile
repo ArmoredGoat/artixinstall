@@ -5,4 +5,4 @@ nitrogen --restore &
 sh ~/.config/pipewire/.pipewire-start.sh &
 
 # Start Qtile
-exec dbus-launch --exit-with-session awesome start
+exec dbus-launch --exit-with-session awesome
