@@ -399,7 +399,7 @@ elif [[ $installationType == 'custom' ]]; then
         1
         1
         y
-        " | pacman -Syuq pipewire lib32-pipewire pipewire-audio pipewire-alsa pipewire-pulse pipewire-jack pipewire-docs wireplumber pavucontrol --needed --noconfirm
+        " | pacman -Syuq pipewire lib32-pipewire pipewire-audio pipewire-alsa pipewire-pulse pipewire-jack pipewire-docs wireplumber pavucontrol --needed
 
         if [[ ! -d /home/"$username"/.config/pipewire ]]; then
             mkdir -p /home/"$username"/.config/pipewire
