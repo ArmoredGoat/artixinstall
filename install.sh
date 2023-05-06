@@ -659,7 +659,7 @@ firmware="linux-firmware"
     # dhcpcd                        -
 network="networkmanager-$initSystem dhcpcd"
 
-basestrap /mnt $basePackages $initSystem $loginManager $kernel $firmware $manuals $network
+basestrap /mnt $basePackages $initSystem $loginManager $kernel $firmware $network
 
 ##########   END BASE INSTALLATION
 
