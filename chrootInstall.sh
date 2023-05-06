@@ -199,7 +199,7 @@ elif [[ $installationType == 'custom' ]]; then
         curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/development/configfiles/pacman/pacman.conf -o /etc/pacman.conf
 
         if [[ ! -d /etc/pacman.d ]]; then
-            mkdir /etc/pacman.d
+            mkdir -p /etc/pacman.d
         fi
 
         # Get recent mirror lists
@@ -246,13 +246,13 @@ elif [[ $installationType == 'custom' ]]; then
         pacman -Syu xdg-user-dirs --needed --noconfirm
 
         if [[ ! -d /etc/xdg ]]; then
-            mkdir /etc/xdg
+            mkdir -p /etc/xdg
         fi
 
         # Get config files repository and store them in corresponding directory
         curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/development/configfiles/xdg/user-dirs.defaults -o /etc/xdg/user-dirs.defaults
 
-        mkdir /home/"$username"/{downloads,documents/{music,public,desktop,templates,pictures,videos}}
+        mkdir -p /home/"$username"/{downloads,documents/{music,public,desktop,templates,pictures,videos}}
 
     ### CRON
 
@@ -327,15 +327,15 @@ elif [[ $installationType == 'custom' ]]; then
 
         ## General configuration
         # Get config files repository and store them in corresponding directory
-        curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/development/configfiles/kitty/kitty.conf -o /home/"$username"/.config/kitty/kitty.conf
+        curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/development/configfiles/kitty/kitty.conf \
+        -o /home/"$username"/.config/kitty/kitty.conf
         ## Configure theme
         if [[ ! -d /home/"$username"/.config/kitty/themes ]]; then
             mkdir -p /home/"$username"/.config/kitty/themes
         fi
 
         # Download them from https://github.com/kovidgoyal/kitty-themes
-        curl https://raw.githubusercontent.com/kovidgoyal/kitty-themes/master/\
-        themes/Earthsong.conf \
+        curl https://raw.githubusercontent.com/kovidgoyal/kitty-themes/master/themes/Earthsong.conf \
         -o /home/"$username"/.config/kitty/themes/Earthsong.conf
         ln -s /home/"$username"/.config/kitty/themes/Earthsong.conf \
             /home/"$username"/.config/kitty/theme.conf
