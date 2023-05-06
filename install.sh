@@ -54,20 +54,17 @@ done < /tempfiles/availableDisks
 numberOfDisks=$(wc -l < /tempfiles/availableDisks)
 # Disk can be selected by entering its number 
 while true; do
-    if [[ "$numberOfDisks" > 1 ]]; then
+    if [[ "$numberOfDisks" > "1" ]]; then
         read -rp "Which disk shall be partitioned (1 - $(numberOfDisks))? " selectedDisk
     else
         read -rp "Which disk shall be partitioned (1)? " selectedDisk
     fi
-    case $selectedDisk in
-        [1-$numberOfDisks])
+    if (( 1 <= $selectedDisk && $selectedDisk <= $selectedDisk )); then
             disk=$(sed "${selectedDisk}q;d" /tempfiles/availableDisks | awk '{print $2}')
             break
-            ;;  
-        *)
+        else
             echo "Invalid input. Please choose one of the available disks listed above by entering its number."
-            ;;
-    esac      
+    fi    
 done
 
 # Ask for confirmation to wipe selected disk.
@@ -193,8 +190,8 @@ while true; do
     esac
 done
 
-ls /usr/share/zoneinfo/$region > ./tempfiles/regionCities
-numberOfCities="$(wc -l < ./tempfiles/regionCities)"
+ls /usr/share/zoneinfo/$region > /tempfiles/regionCities
+numberOfCities="$(wc -l < /tempfiles/regionCities)"
 
 ls /usr/share/zoneinfo/$region | awk '{print NR") " $0}' | column
 
@@ -205,7 +202,7 @@ while true; do
         read -rp "Please enter your cities' number (1): " cityNumber
     fi
     if (( 1 <= $cityNumber && $cityNumber <= $numberOfCities )); then
-        city=$(sed "${cityNumber}q;d" ./tempfiles/regionCities)
+        city=$(sed "${cityNumber}q;d" /tempfiles/regionCities)
         break
     else
         echo 'Invalid input. Please choose one of the available cities listed above by entering its number.'
@@ -213,8 +210,8 @@ while true; do
 done
 
 if [ -d /usr/share/zoneinfo/$region/$city ]; then
-    ls /usr/share/zoneinfo/$region/$city > ./tempfiles/regionSubCities
-    numberOfSubCities="$(wc -l < ./tempfiles/regionCities)"
+    ls /usr/share/zoneinfo/$region/$city > /tempfiles/regionSubCities
+    numberOfSubCities="$(wc -l < /tempfiles/regionSubCities)"
 
     ls /usr/share/zoneinfo/$region/$city | awk '{print NR") " $0}' | column
 
@@ -225,7 +222,7 @@ if [ -d /usr/share/zoneinfo/$region/$city ]; then
             read -rp "Please enter your cities' number (1): " subCityNumber
         fi
         if (( 1 <= $subCityNumber && $subCityNumber <= $numberOfCities )); then
-            subCity=$(sed "${subCityNumber}q;d" ./tempfiles/regionSubCities)
+            subCity=$(sed "${subCityNumber}q;d" /tempfiles/regionSubCities)
             break
         else
             echo 'Invalid input. Please choose one of the available cities listed above by entering its number.'
@@ -380,41 +377,15 @@ kernel='linux-lts'
 # Firmware
     # linux-firmware    -
     # sof-firmware      -
-firmware='linux-firmware sof-firmware'
+firmware='linux-firmware'
 
 # Network
     # networkmanager                -
     # networkmanager-$initSystem    -
     # dhcpcd                        -
-    # iwd                           -
 network='networkmanager-'$initSystem' dhcpcd'
 
-# Editor
-    # vim   -
-editor='vim'
-
-# Manuals
-    # man-db    -
-    # man-pages -
-    # texinfo   -
-manuals='man-db man-pages texinfo'
-
-# General administration
-    # sudo
-generalAdministration='sudo'
-
-# Filesystem adiminstration
-    # e2fsprogs -
-    # dosfstools    -
-filesystemAdministration='e2fsprogs dosfstools'
-
-# Additional packages
-    # git   -
-    # micro -
-    # bash-completion   -
-additionalPackages='git micro bash-completion'
-
-basestrap /mnt $basePackages $initSystem $loginManager $kernel $firmware $generalAdministration $editor $manuals $network $filesystemAdministration $additionalPackages
+basestrap /mnt $basePackages $initSystem $loginManager $kernel $firmware $manuals $network
 
 #####   END BASE INSTALLATION       #####
 
