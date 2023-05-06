@@ -683,14 +683,6 @@ elif [[ $installationType == 'custom' ]]; then
         runuser -l "$username" -c "pip install --no-cache --upgrade \
             --no-build-isolation cairocffi"
 
-        # For the time qtile is bugged due to python dependencies I use awesome
-#        pacman -Syu awesome --needed --noconfirm
-#
-#        create_directory $homedir/.config/awesome
-#
-#        curl $downloadUrl/dotfiles/awesome/rc.lua \
-#            -o $homedir/.config/awesome/rc.lua
-
     ## GRAPHIC DRIVERS
 
         # Install drivers depending on detected gpu
