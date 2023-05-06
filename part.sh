@@ -289,7 +289,7 @@ fi
 # for boot partition
 # In case of BIOS boot --> MBR/BIOS partitioning
 if [ "$boot" == 'uefi' ]; then
-    wipefs --all --force $baseDisk
+    wipefs --all --force "$baseDisk"
     echo 'g
     n
     1
@@ -312,12 +312,12 @@ if [ "$boot" == 'uefi' ]; then
     ' | fdisk -w always -W always "$baseDisk"
 
     # Format and label disks
-    mkfs.fat -F 32 $disk'1'
-    fatlabel $disk'1' ESP
+    mkfs.fat -F 32 "$disk"'1'
+    fatlabel "$disk"'1' ESP
     
-    mkswap -L SWAP $disk'2'
+    mkswap -L SWAP "$disk"'2'
     
-    mkfs.ext4 -L ROOT $disk'3'
+    mkfs.ext4 -L ROOT "$disk"'3'
         
     # Mount storage and EFI partitions, and create necessary directories
     swapon /dev/disk/by-label/SWAP
@@ -341,9 +341,9 @@ else
     ' | fdisk -w always -W always "$baseDisk"
 
     # Format and label disks
-    mkswap -L SWAP $disk'1'
+    mkswap -L SWAP "$disk"'1'
     
-    mkfs.ext4 -L ROOT $disk'2'
+    mkfs.ext4 -L ROOT "$disk"'2'
 
     # Mount storage and EFI partitions, and create necessary directories
     swapon /dev/disk/by-label/SWAP
@@ -358,6 +358,6 @@ echo $disk
 
 ls /dev/disk/by-label/
 
-echo $disk'1'
+echo "$disk"'1'
 
 lsblk
