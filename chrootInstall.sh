@@ -459,8 +459,11 @@ elif [[ $installationType == 'custom' ]]; then
 
         pacman -Syu kitty --needed --noconfirm
 	
-	# Create directories for kitty's general configs and themes
-	create_directory $homedir/.config/kitty/themes
+        # Create directories for kitty's general configs
+        create_directory $homedir/.config/kitty
+
+        # Create directories for other customization files
+        create_directory $homedir/{.backgrounds,.fonts,.themes}
 
         ## General configuration
         # Get config files repository and store them in corresponding directory
@@ -469,14 +472,14 @@ elif [[ $installationType == 'custom' ]]; then
         
         ## Configure theme
 
-        # Get theme from repo
+        # Get theme from repository
         curl $downloadUrl/dotfiles/themes/Earthsong.conf \
-            -o $homedir/.config/kitty/themes/Earthsong.conf
+            -o $homedir/.themes/Earthsong.conf
 
         # Create symbolic link in general config directory. 
         # 'include ./theme.conf' in kitty.conf will tell kitty to use this as 
         # its theme.
-        ln -s $homedir/.config/kitty/themes/Earthsong.conf \
+        ln -s $homedir/.themes/Earthsong.conf \
             $homedir/.config/kitty/theme.conf
 
         ## Configure font
@@ -591,9 +594,6 @@ elif [[ $installationType == 'custom' ]]; then
 
 
     ## OTHERS
-
-    # Create directories for customization files
-    create_directory $homedir/{.backgrounds,.fonts,.themes}
 
     ### COMPOSITE MANAGER
 
