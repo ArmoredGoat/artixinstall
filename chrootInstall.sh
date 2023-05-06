@@ -656,6 +656,10 @@ elif [[ $installationType == 'custom' ]]; then
             $homedir/.config/backgrounds/_background
         
         # Set permissions so that lightdm can use the background file.
+        # QUICK AND DIRTY FIX
+        chmod 751 $homedir/.config/backgrounds
+        chmod 751 $homedir/.config/
+        chmod 751 $homedir/
         chmod 755 $homedir/.config/backgrounds/_background
         
         # Create symbolic link to background image for lightdm
