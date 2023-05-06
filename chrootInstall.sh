@@ -592,6 +592,9 @@ elif [[ $installationType == 'custom' ]]; then
 
     ## OTHERS
 
+    # Create directories for customization files
+    create_directory $homedir/{.backgrounds,.fonts,.themes}
+
     ### COMPOSITE MANAGER
 
         pacman -Syu picom --needed --noconfirm
@@ -647,29 +650,28 @@ elif [[ $installationType == 'custom' ]]; then
         curl $downloadUrl/dotfiles/nitrogen/bg-saved.cfg \
             -o $homedir/.config/nitrogen/bg-saved.cfg
 
-        create_directory $homedir/.config/backgrounds
-
         #TODO Download all wallpaper at once
 
         # Download wallpaper
         curl $downloadUrl/dotfiles/backgrounds/the_elders_forest.jpg \
-            -o $homedir/.config/backgrounds/the_elders_forest.jpg
+            -o $homedir/.backgrounds/the_elders_forest.jpg
+        curl $downloadUrl/dotfiles/backgrounds/statue_under_tree.jpg \
+            -o $homedir/.backgrounds/statue_under_tree.jpg
         
         # Duplicate wallpaper and rename it to _background. This way, I can
         # reference it with symbolic links from multiple places and change it
         # by subsituting it with another image with the same name.
-        cp $homedir/.config/backgrounds/the_elders_forest.jpg \
-            $homedir/.config/backgrounds/_background
+        cp $homedir/.backgrounds/statue_under_tree.jpg \
+            $homedir/.backgrounds/_background
         
         # Set permissions so that lightdm can use the background file.
         # QUICK AND DIRTY FIX
-        chmod 751 $homedir/.config/backgrounds
-        chmod 751 $homedir/.config/
+        chmod 751 $homedir/.backgrounds
         chmod 751 $homedir/
-        chmod 755 $homedir/.config/backgrounds/_background
+        chmod 755 $homedir/.backgrounds/_background
         
         # Create symbolic link to background image for lightdm
-        ln -s $homedir/.config/backgrounds/_background \
+        ln -s $homedir/.backgrounds/_background \
             /etc/lightdm/background
 
     ### WINDOW MANAGER
