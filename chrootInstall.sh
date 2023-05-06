@@ -249,6 +249,30 @@ elif [[ $installationType == 'custom' ]]; then
             chmod +x /etc/local.d/reflector.start
             #TODO add paccache to cron
 
+    ### VERSION CONTROL SYSTEM
+
+        pacman -Syuq git --needed --noconfirm
+
+        # Create directory for git repositories
+        mkdir -p /home/"$username"/git/{own,cloned}
+        chmod 755 /home/"$username"/git/{own,cloned}
+        chown -R "$username":"$username" /home/"$username"/git/{own,cloned}
+
+    ### AUR HELPER
+
+        runuser -l "$username" -c "git clone https://aur.archlinux.org/yay.git \
+        /home/$username/git/cloned/yay && cd /home/$username/git/cloned/yay && \
+        makepkg -si --noconfirm"
+
+        # Generate development package database for *-git packages that were
+        # installed without yay
+        runuser -l "$username" -c "yay -Y --gendb --noconfirm"
+        # Check for development packages updates
+        runuser -l "$username" -c "yay -Syu --devel --noconfirm"
+        # Enable development packages updates and combined upgrades permanently
+        runuser -l "$username" -c "yay -Y --devel --combinedupgrade /
+        --batchinstall --save --noconfirm"
+
     ### XDG
 
         pacman -Syuq xdg-user-dirs --needed --noconfirm
@@ -342,18 +366,7 @@ elif [[ $installationType == 'custom' ]]; then
 
     ### AUR HELPER
 
-        runuser -l "$username" -c "git clone https://aur.archlinux.org/yay.git \
-        /home/$username/git/cloned/yay && cd /home/$username/git/cloned/yay && \
-        makepkg -si --noconfirm"
-
-        # Generate development package database for *-git packages that were
-        # installed without yay
-        runuser -l "$username" -c "yay -Y --gendb --noconfirm"
-        # Check for development packages updates
-        runuser -l "$username" -c "yay -Syu --devel --noconfirm"
-        # Enable development packages updates and combined upgrades permanently
-        runuser -l "$username" -c "yay -Y --devel --combinedupgrade /
-        --batchinstall --save --noconfirm"
+        # See section ESSENTIALS above.
 
     ### BACKUP
 
@@ -454,12 +467,7 @@ elif [[ $installationType == 'custom' ]]; then
 
     ### VERSION CONTROL SYSTEM
 
-        pacman -Syuq git --needed --noconfirm
-
-        # Create directory for git repositories
-        mkdir -p /home/"$username"/git/{own,cloned}
-        chmod 755 /home/"$username"/git/{own,cloned}
-        chown -R "$username":"$username" /home/"$username"/git/{own,cloned}
+        # See section ESSENTIALS above.
 
     ## DOCUMENTS
 
