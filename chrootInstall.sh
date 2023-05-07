@@ -227,6 +227,10 @@ elif [[ $installationType == 'custom' ]]; then
             # Make reflector.start executable
             chmod +x /etc/local.d/reflector.start
             #TODO add paccache to cron
+        
+        ### ADDITIONALS
+
+        pacman -Syu pacman-contrib --needed --noconfirm
 
     ### VERSION CONTROL SYSTEM
 
