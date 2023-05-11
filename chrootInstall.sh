@@ -632,7 +632,7 @@ elif [[ $installationType == 'custom' ]]; then
 
     ### PYWAL
 
-        pacman -Syu procps imagemagick
+        pacman -Syu procps imagemagick --needed --noconfirm
         runuser -l "$username" -c "pip install --user pywal"
 
         wal -i $homedir/.local/share/backgrounds/mushroom_town.png
