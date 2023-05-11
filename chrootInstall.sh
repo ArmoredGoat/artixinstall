@@ -170,7 +170,7 @@ elif [[ $installationType == 'custom' ]]; then
 
         if [[ $cpu == 'AuthenticAMD' ]]; then
             microcodePackage='amd-ucode'
-        elif [[ $cpu == 'Intel' ]]; then
+        elif [[ $cpu == 'Intel' ]] || [[ $cpu == 'GenuineIntel' ]]; then
             microcodePackage='intel-ucode'
         fi 
 
