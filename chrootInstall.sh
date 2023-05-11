@@ -473,18 +473,6 @@ elif [[ $installationType == 'custom' ]]; then
         # Get config files repository and store them in corresponding directory
         curl $downloadUrl/dotfiles/kitty/kitty.conf \
             -o $homedir/.config/kitty/kitty.conf
-        
-        ## Configure theme
-
-        # Get theme from repository
-        curl $downloadUrl/dotfiles/themes/Earthsong.conf \
-            -o $homedir/.local/share/themes/Earthsong.conf
-
-        # Create symbolic link in general config directory. 
-        # 'include ./theme.conf' in kitty.conf will tell kitty to use this as 
-        # its theme.
-        ln -s $homedir/.local/share/Earthsong.conf \
-            $homedir/.config/kitty/theme.conf
 
         ## Configure font
 
@@ -653,16 +641,20 @@ elif [[ $installationType == 'custom' ]]; then
 
         pacman -Syu nitrogen --needed --noconfirm
 
-        # Create directory for nitrogen config and download config.
+        # Create directory for nitrogen config.
         create_directory $homedir/.config/nitrogen
 
         # Download wallpaper
         curl $downloadUrl/dotfiles/backgrounds/mushroom_town.png \
             -o $homedir/.local/share/backgrounds/mushroom_town.png
         
-        # Create symbolic link to background image for lightdm
-        ln -s $homedir/.backgrounds/_background \
-            /etc/lightdm/background
+        # Set wallpaper for lightdm with slickgreeter-pywal
+        git clone https://github.com/Paul-Houser/slickgreeter-pywal \
+            $homedir/git/cloned/slickgreeter-pywal
+        cd $homedir/git/cloned/slickgreeter-pywal
+        chmod +x install.sh
+        ./install.sh
+        reTheme $(cat $HOME/.cache/wal/wal)
 
     ### WINDOW MANAGER
 
