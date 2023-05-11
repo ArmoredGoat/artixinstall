@@ -1,7 +1,10 @@
 # Autostart programs
 
-picom &
-nitrogen --restore &
+# As long as picom does not work in my testing vm, it will be deactivated.
+#picom &
+# Run pywal at boot andrRestore last cholorscheme and background that were
+# in use.
+wal -R &
 sh ~/.config/pipewire/.pipewire-start.sh &
 
 # Start Qtile
