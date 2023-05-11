@@ -252,7 +252,7 @@ elif [[ $installationType == 'custom' ]]; then
         # Check for development packages updates
         runuser -l "$username" -c "yay -Syu --devel --noconfirm"
         # Enable development packages updates and combined upgrades permanently
-        runuser -l "$username" -c "yay -Y --devel --combinedupgrade /
+        runuser -l "$username" -c "yay -Y --devel --combinedupgrade \
             --batchinstall --save --noconfirm"
 
     ### XDG
