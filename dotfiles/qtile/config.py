@@ -1,19 +1,31 @@
 from libqtile import bar, layout, widget
+from libqtile.bar import CALCULATED
 from libqtile.config import Click, Drag, Group, Key, Match, Screen
 from libqtile.lazy import lazy
 from libqtile.utils import guess_terminal
 
 mod = "mod4"
-terminal = guess_terminal()
+terminal = "kitty" 
+
+colors = []
+cache="/home/julius/.cache/wal/colors"
+def load_colors(cache):
+    with open(cache, 'r') as file:
+        for i in range(8):
+            colors.append(file.readline().strip())
+    colors.append('#ffffff')
+    lazy.reload()
+load_colors(cache)
+
 
 keys = [
     # A list of available commands that can be bound to keys can be found
     # at https://docs.qtile.org/en/latest/manual/config/lazy.html
     # Switch between windows
-    Key([mod], "h", lazy.layout.left(), desc="Move focus to left"),
-    Key([mod], "l", lazy.layout.right(), desc="Move focus to right"),
-    Key([mod], "j", lazy.layout.down(), desc="Move focus down"),
-    Key([mod], "k", lazy.layout.up(), desc="Move focus up"),
+    Key([mod], "h",     lazy.layout.left(), desc="Move focus to left"),
+    Key([mod], "l",     lazy.layout.right(),desc="Move focus to right"),
+    Key([mod], "j",     lazy.layout.down(), desc="Move focus down"),
+    Key([mod], "k",     lazy.layout.up(),   desc="Move focus up"),
     Key([mod], "space", lazy.layout.next(), desc="Move window focus to other window"),
     # Move windows between left/right columns or move up/down in current stack.
     # Moving out of range in Columns layout will create new column.
@@ -44,27 +56,41 @@ keys = [
     Key([mod], "w", lazy.window.kill(), desc="Kill focused window"),
     Key([mod, "control"], "r", lazy.reload_config(), desc="Reload the config"),
     Key([mod, "control"], "q", lazy.shutdown(), desc="Shutdown Qtile"),
-    Key([mod], "r", lazy.spawncmd(), desc="Spawn a command using a prompt widget"),
+    Key([mod], "r", lazy.spawn("rofi -show run"), desc="Spawn a command using a prompt widget"),
+    # If rofi is throwing a tantrum, I have the inbuilt spawner still in place.
+    Key([mod, "shift"], "r", lazy.spawncmd()),
 ]
 
-groups = [Group(i) for i in "123456789"]
+groups = []
 
-for i in groups:
+group_names = ["1", "2", "3", "4", "5", "6", "7",]
+group_labels = ["Start", "\ue7a2", "\ueac4", "󰘑", "\uf1b6", "\uf269", "\uf001",]
+group_layouts = ["monadtall", "monadtall", "monadtall", "monadtall", "monadtall", "monadtall", "tile",]
+
+for i in range(len(group_names)):
+    groups.append(
+        Group(
+            name = group_names[i],
+            layout = group_layouts[i].lower(),
+            label = group_labels[i],
+            )
+        )
+
     keys.extend(
         [
             # mod1 + letter of group = switch to group
             Key(
                 [mod],
-                i.name,
-                lazy.group[i.name].toscreen(),
-                desc="Switch to group {}".format(i.name),
+                groups[i].name,
+                lazy.group[groups[i].name].toscreen(),
+                desc="Switch to group {}".format(groups[i].name),
             ),
             # mod1 + shift + letter of group = switch to & move focused window to group
             Key(
                 [mod, "shift"],
-                i.name,
-                lazy.window.togroup(i.name, switch_group=True),
-                desc="Switch to & move focused window to group {}".format(i.name),
+                groups[i].name,
+                lazy.window.togroup(groups[i].name, switch_group=True),
+                desc="Switch to & move focused window to group {}".format(groups[i].name),
             ),
             # Or, use below if you prefer not to switch to that group.
             # # mod1 + shift + letter of group = move focused window to group
@@ -77,49 +103,114 @@ layouts = [
     layout.Columns(border_focus_stack=["#d75f5f", "#8f3d3d"], border_width=4),
     layout.Max(),
     # Try more layouts by unleashing below layouts.
-    # layout.Stack(num_stacks=2),
-    # layout.Bsp(),
-    # layout.Matrix(),
-    # layout.MonadTall(),
-    # layout.MonadWide(),
-    # layout.RatioTile(),
-    # layout.Tile(),
-    # layout.TreeTab(),
-    # layout.VerticalTile(),
-    # layout.Zoomy(),
+    layout.Stack(num_stacks=2),
+    layout.Bsp(),
+    layout.Matrix(),
+    layout.MonadTall(),
+    layout.MonadWide(),
+    layout.RatioTile(),
+    layout.Tile(),
+    layout.TreeTab(),
+    layout.VerticalTile(),
+    layout.Zoomy(),
 ]
 
 widget_defaults = dict(
-    font="sans",
-    fontsize=12,
-    padding=3,
+    font="Hack Nerd Font Mono",
+    fontsize=16,
+    padding=4,
 )
 extension_defaults = widget_defaults.copy()
 
 screens = [
     Screen(
-        bottom=bar.Bar(
-            [
-                widget.CurrentLayout(),
+        top=bar.Bar(
+            [   
+                widget.TextBox(
+                    text = "\uf31f",
+                    ),
+                widget.Sep(),
                 widget.GroupBox(),
-                widget.Prompt(),
-                widget.WindowName(),
-                widget.Chord(
-                    chords_colors={
-                        "launch": ("#ff0000", "#ffffff"),
-                    },
-                    name_transform=lambda name: name.upper(),
-                ),
-                widget.TextBox("default config", name="default"),
-                widget.TextBox("Press &lt;M-r&gt; to spawn", foreground="#d75f5f"),
-                # NB Systray is incompatible with Wayland, consider using StatusNotifier instead
-                # widget.StatusNotifier(),
+                widget.WindowName(
+                    empty_group_string = "",
+                    width = CALCULATED,
+                    ),
                 widget.Systray(),
-                widget.Clock(format="%Y-%m-%d %a %I:%M %p"),
-                widget.QuickExit(),
+                widget.TextBox(
+                    text="\uf4bc",
+                    fontsize=20,
+                    padding=1,
+                    ), 
+                widget.CPU(
+                    format="{load_percent}%",
+                    ),
+                widget.TextBox(
+                    text="\ue266",
+                    fontsize=20,
+                    padding=1,
+                    ),
+                widget.Memory(format="{MemPercent}%"),
+                widget.TextBox(
+                    text="\uf0a0",
+                    fontsize=20,
+                    padding=1,
+                    ),
+                widget.DF(
+                    format="{uf}{m}",
+                    measure="G",
+                    partition="/",
+                    visible_on_warn=False,
+                    ),
+                widget.TextBox(
+                    background = colors[5],
+                    foreground = colors[1],
+                    text="󰒍",
+                    fontsize=20,
+                    padding=1,
+                    ),
+                widget.Net(
+                    background = colors[1],
+                    foreground = colors[5],
+                    format="{down}",
+                    interface="eth0",
+                    padding=1,
+                    prefix="M",
+                    ),
+                widget.TextBox(
+                    text="\uf175\uf176",
+                    fontsize=20,
+                    padding=1,
+                    ),
+                widget.Net(
+                    format="{up}",
+                    interface="eth0",
+                    padding=3,
+                    prefix="M",
+                    ),
+                widget.TextBox(
+                    text="󰚰", # \udb81\udeb0"
+                    fontsize=20,
+                    padding=1,
+                    ),
+                widget.CheckUpdates(
+                    display_format="{updates}",
+                    distro="Arch_checkupdates",
+                    no_update_string="0",
+                    update_interval=60,
+                    ),
+                widget.Cmus(
+                    max_chars=20,
+                    scroll=True,
+                    scroll_repeat=True,
+                    ),
+                widget.Sep(),
+                widget.TextBox(
+                    text = "󱑏", # \udb85\udc4f
+                    ),
+                widget.Clock(format="%A - %H:%M:%S"),
             ],
-            24,
-            # border_width=[2, 0, 2, 0],  # Draw top and bottom borders
+            size = 18,
+            border_width = 4,
             # border_color=["ff00ff", "000000", "ff00ff", "000000"]  # Borders are magenta
         ),
     ),
