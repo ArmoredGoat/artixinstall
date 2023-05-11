@@ -185,7 +185,7 @@ elif [[ $installationType == 'custom' ]]; then
 
         pacman -Syu python python-pip --needed --noconfirm
 
-        runuser -l "$username" -c "pip install --user setuptools"
+        runuser -l "$username" -c "pip3 install --user setuptools"
     
     ### PACMAN
 
@@ -633,7 +633,7 @@ elif [[ $installationType == 'custom' ]]; then
     ### PYWAL
 
         pacman -Syu procps imagemagick --needed --noconfirm
-        runuser -l "$username" -c "pip install --user pywal"
+        runuser -l "$username" -c "pip3 install --user pywal"
 
         wal -i $homedir/.local/share/backgrounds/mushroom_town.png
 
@@ -662,7 +662,7 @@ elif [[ $installationType == 'custom' ]]; then
 
         # Fix for qtile. It seems there are issues with building cairocffi
         # through pip and normal packages.
-        runuser -l "$username" -c "pip install --no-cache --upgrade \
+        runuser -l "$username" -c "pip3 install --user --no-cache --upgrade \
             --no-build-isolation cairocffi"
 
         # Get config files repository and store them in corresponding directory
