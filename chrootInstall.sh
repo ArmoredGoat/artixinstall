@@ -185,7 +185,7 @@ elif [[ $installationType == 'custom' ]]; then
 
         pacman -Syu python python-pip --needed --noconfirm
 
-        runuser -l "$username" -c "pip install setuptools"
+        runuser -l "$username" -c "pip install --user setuptools"
     
     ### PACMAN
 
@@ -466,8 +466,8 @@ elif [[ $installationType == 'custom' ]]; then
         # Create directories for kitty's general configs
         create_directory $homedir/.config/kitty
 
-        # Create directories for other customization files
-        create_directory $homedir/{.backgrounds,.fonts,.themes}
+        # Create directories for personal backgrounds, fonts, themes, etc.
+        create_directory $homedir/.local/share/{backgrounds,fonts,themes}
 
         ## General configuration
         # Get config files repository and store them in corresponding directory
@@ -478,12 +478,12 @@ elif [[ $installationType == 'custom' ]]; then
 
         # Get theme from repository
         curl $downloadUrl/dotfiles/themes/Earthsong.conf \
-            -o $homedir/.themes/Earthsong.conf
+            -o $homedir/.local/share/themes/Earthsong.conf
 
         # Create symbolic link in general config directory. 
         # 'include ./theme.conf' in kitty.conf will tell kitty to use this as 
         # its theme.
-        ln -s $homedir/.themes/Earthsong.conf \
+        ln -s $homedir/.local/share/Earthsong.conf \
             $homedir/.config/kitty/theme.conf
 
         ## Configure font
@@ -493,7 +493,7 @@ elif [[ $installationType == 'custom' ]]; then
         create_directory $homedir/.fonts/pt_mono
 
         curl $downloadUrl/dotfiles/fonts/PTMono-Regular.ttf \
-            -o $homedir/.fonts/pt_mono/pt_mono_regular.ttf
+            -o $homedir/.local/share/fonts/pt_mono/pt_mono_regular.ttf
 
     ### TRASH MANAGEMENT
 
@@ -640,7 +640,14 @@ elif [[ $installationType == 'custom' ]]; then
             -o $homedir/.xinitrc
         chmod +x $homedir/.xinitrc
         curl $downloadUrl/dotfiles/xorg/xorg.conf \
-            -o /etc/X11/xorg.conf        
+            -o /etc/X11/xorg.conf
+
+    ### PYWAL
+
+        pacman -Syu procps imagemagick
+        runuser -l "$username" -c "pip install --user pywal"
+
+        wal -i $homedir/.local/share/backgrounds/mushroom_town.png
 
     ### WALLPAPER SETTER
 
@@ -649,30 +656,9 @@ elif [[ $installationType == 'custom' ]]; then
         # Create directory for nitrogen config and download config.
         create_directory $homedir/.config/nitrogen
 
-        curl $downloadUrl/dotfiles/nitrogen/nitrogen.cfg \
-            -o $homedir/.config/nitrogen/nitrogen.cfg
-        curl $downloadUrl/dotfiles/nitrogen/bg-saved.cfg \
-            -o $homedir/.config/nitrogen/bg-saved.cfg
-
-        #TODO Download all wallpaper at once
-
         # Download wallpaper
-        curl $downloadUrl/dotfiles/backgrounds/the_elders_forest.jpg \
-            -o $homedir/.backgrounds/the_elders_forest.jpg
-        curl $downloadUrl/dotfiles/backgrounds/statue_under_tree.jpg \
-            -o $homedir/.backgrounds/statue_under_tree.jpg
-        
-        # Duplicate wallpaper and rename it to _background. This way, I can
-        # reference it with symbolic links from multiple places and change it
-        # by subsituting it with another image with the same name.
-        cp $homedir/.backgrounds/statue_under_tree.jpg \
-            $homedir/.backgrounds/_background
-        
-        # Set permissions so that lightdm can use the background file.
-        # QUICK AND DIRTY FIX
-        chmod 751 $homedir/.backgrounds
-        chmod 751 $homedir/
-        chmod 755 $homedir/.backgrounds/_background
+        curl $downloadUrl/dotfiles/backgrounds/mushroom_town.png \
+            -o $homedir/.local/share/backgrounds/mushroom_town.png
         
         # Create symbolic link to background image for lightdm
         ln -s $homedir/.backgrounds/_background \
@@ -691,11 +677,16 @@ elif [[ $installationType == 'custom' ]]; then
         curl $downloadUrl/dotfiles/qtile/config.py \
             -o $homedir/.config/qtile/config.py
 
+    ### WINDOW SWITCHER
+
+        pacman -Syu rofi --needed --noconfirm
+
     ### ZSA KEYBOARD FLASHER
 
         # I am using an ErgoDox EZ and this software is used to flash
         # layouts on the device.
         pacman -Syu zsa-wally --needed --noconfirms
+
     ## GRAPHIC DRIVERS
 
         # Install drivers depending on detected gpu
