@@ -505,14 +505,14 @@ elif [[ $installationType == 'custom' ]]; then
         # Set UNIX domain socket ownership to libvirt and permissions to read
         # and write by uncommenting the following lines
 
-        sed -i "s/unix_sock_group = /s/^#//g" /etc/libvirt/libvirtd.conf
-        sed -i "s/unix_sock_rw_perms = /s/^#//g" /etc/libvirt/libvirtd.conf
+        sed -i "/unix_sock_group = /s/^#//g" /etc/libvirt/libvirtd.conf
+        sed -i "/unix_sock_rw_perms = /s/^#//g" /etc/libvirt/libvirtd.conf
 
         usermod -aG libvirt "$username"
 
-        sed sed -i "s/user = \"libvirt-qemu\"/user = \"$username\"/" \
+        sed -i "s/user = \"libvirt-qemu\"/user = \"$username\"/" \
             /etc/libvirt/libvirtd.conf
-        sed sed -i "s/group = \"libvirt-qemu\"/group = \"$username\"/" \
+        sed -i "s/group = \"libvirt-qemu\"/group = \"$username\"/" \
             /etc/libvirt/libvirtd.conf
 
     ## DOCUMENTS
