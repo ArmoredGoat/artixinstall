@@ -480,10 +480,7 @@ elif [[ $installationType == 'custom' ]]; then
 
         # Create directory for fonts in home directory and download font to it.
         # This way kitty can see it as an available font to use.
-        create_directory $homedir/.fonts/pt_mono
-
-        curl $downloadUrl/dotfiles/fonts/PTMono-Regular.ttf \
-            -o $homedir/.local/share/fonts/pt_mono/pt_mono_regular.ttf
+        create_directory $homedir/.fonts/ttf
 
     ### TRASH MANAGEMENT
 
