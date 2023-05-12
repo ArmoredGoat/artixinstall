@@ -185,6 +185,8 @@ elif [[ $installationType == 'custom' ]]; then
 
         pacman -Syu python python-pip --needed --noconfirm
 
+        create_directory /home/"$username"/.local/lib
+
         runuser -l "$username" -c "pip3 install --user setuptools"
     
     ### PACMAN
