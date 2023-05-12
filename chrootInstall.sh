@@ -686,13 +686,13 @@ elif [[ $installationType == 'custom' ]]; then
 
         # Install drivers depending on detected gpu
         if [ "$gpu" == 'AMD' ]; then
-            $graphicsDrivers='xf86-video-amdgpu mesa lib32-mesa vulkan-radeon'
+            graphicsDrivers='xf86-video-amdgpu mesa lib32-mesa vulkan-radeon'
         elif [ "$gpu" == 'INTEL' ]; then
-            $graphicsDrivers='xf86-video-intel mesa lib32-mesa vulkan-intel'
+            graphicsDrivers='xf86-video-intel mesa lib32-mesa vulkan-intel'
         elif [ "$gpu" == 'NVIDIA' ]; then
-            $graphicsDrivers='xf86-video-nouveau mesa lib32-mesa nvidia-utils'
+            graphicsDrivers='xf86-video-nouveau mesa lib32-mesa nvidia-utils'
         elif [ "$gpu" == 'VMware' ]; then
-            $graphicsDrivers='xf86-video-vmware xf86-input-vmmouse mesa lib32-mesa'
+            graphicsDrivers='xf86-video-vmware xf86-input-vmmouse mesa lib32-mesa'
         fi
 
         pacman -Syu $graphicsDrivers --needed --noconfirm
