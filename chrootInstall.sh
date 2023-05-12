@@ -363,7 +363,7 @@ elif [[ $installationType == 'custom' ]]; then
 
     ### WEBCAM
 
-        pacman -Syu cameracrtls --needed --noconfirm
+        pacman -Syu cameractrls --needed --noconfirm
 
     ##  UTILITY
 
