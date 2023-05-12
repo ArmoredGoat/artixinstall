@@ -680,7 +680,7 @@ elif [[ $installationType == 'custom' ]]; then
 
         # I am using an ErgoDox EZ and this software is used to flash
         # layouts on the device.
-        pacman -Syu zsa-wally --needed --noconfirms
+        pacman -Syu zsa-wally --needed --noconfirm
 
     ## GRAPHIC DRIVERS
 
