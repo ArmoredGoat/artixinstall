@@ -667,6 +667,7 @@ elif [[ $installationType == 'custom' ]]; then
         runuser -l "$username" -c "pip3 install --user --no-cache --upgrade \
             --no-build-isolation cairocffi"
 
+        create_directory $homedir/.config/qtile
         # Get config files repository and store them in corresponding directory
         curl $downloadUrl/dotfiles/qtile/config.py \
             -o $homedir/.config/qtile/config.py
