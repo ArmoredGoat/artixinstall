@@ -3,19 +3,6 @@
 ##########   START COLORS   
 
 # Reset
-<<<<<<< HEAD
-Color_Off='\033[0m'       # Text Reset
-
-# Regular Colors
-Black='\033[0;30m'        # Black
-Red='\033[0;31m'          # Red
-Green='\033[0;32m'        # Green
-Yellow='\033[0;33m'       # Yellow
-Blue='\033[0;34m'         # Blue
-Purple='\033[0;35m'       # Purple
-Cyan='\033[0;36m'         # Cyan
-White='\033[0;37m'        # White
-=======
 colorOff='\033[0m'       # Text Reset
 
 # Colors
@@ -24,18 +11,11 @@ purple='\033[0;35m'       # purple
 cyan='\033[0;36m'         # cyan
 red='\033[0;31m'          # red
 green='\033[0;32m'        # green
->>>>>>> iss005
 
 ##########   END COLORS
 
 ##########  START SPECIAL CHARACTERS
 
-<<<<<<< HEAD
-CHECK_MARK="\033[0;32m\xE2\x9C\x94\033[0m"
-CROSS_MARK="\033[0;31m\xE2\x9C\x96\033[0m"
-QUEST_MARK=$'\033[0;33m\xE2\x9D\x94\033[0m'
-EXCLA_MARK="\033[0;33m\xE2\x9D\x95\033[0m"
-=======
 # Green = Accepted inputs/done steps
 squareGreen="\033[0;32m\xE2\x96\x88\033[0m"
 # Red = Denied inputs/canceled steps
@@ -44,7 +24,6 @@ squareRed="\033[0;31m\xE2\x96\x88\033[0m"
 squareYellowRead=$'\033[0;33m\xE2\x96\x88\033[0m'
 # Yellow = Steps not done yet
 squareYellow="\033[0;33m\xE2\x96\x88\033[0m"
->>>>>>> iss005
 
 ##########  END SPECIAL CHARACTERS
 
@@ -82,11 +61,7 @@ fi
 # Load keymap us
 loadkeys us
 
-<<<<<<< HEAD
-echo -e "${Cyan}###############################################################\
-=======
 echo -e "${cyan}###############################################################\
->>>>>>> iss005
 #################"
 echo -e "#                   ArmoredGoat's Artix Installation Script           \
          #"
@@ -95,79 +70,12 @@ echo -e "#                          Last updated at 2023/03/20                 \
 echo -e "# Educationally inspired by https://github.com/rwinkhart/artix-install\
 -script  #"
 echo -e "######################################################################\
-<<<<<<< HEAD
-##########${Color_Off}"
-=======
 ##########${colorOff}"
->>>>>>> iss005
 
 echo -e "\nBefore installation, a few questions have to be answered."
 read -n 1 -sp $'\nPress any key to continue.'
 
 delete_term_lines 3
-<<<<<<< HEAD
-
-##########   START MANUAL CONFIGURATION
-
-echo -e "${Purple}##############################   CONFIGURATION   ############\
-###################${Color_Off}"
-
-echo -e "\n          ${Blue}#################### INSTALLATION TYPE ############\
-########${Color_Off}"
-
-echo -e "\n${Green}1) Base installation${Color_Off} 
-    Only necessary packages and configuration.
-    In the end you have a working but basic Artix installation.
-
-${Green}2) Customized installation${Color_Off} 
-    Take over all my configuration and user settings.
-    It is not guaranteed that my configuration is one hundred percent compatible
-    with your system, although this script is designed to be adaptive."
-
-while true; do
-    read -p $'\n'$QUEST_MARK"    Which installation would you like to perfom (1-\
-2)? " installationType
-    case $installationType in
-        1)
-            delete_term_lines 11
-
-            installationType='base'
-            echo -e "${CHECK_MARK}    Installation type '${installationType}' \
-set!" 
-            break
-            ;;
-        2)
-#            delete_term_lines 11
-#            
-#            installationType='custom'
-#            echo -e "${CHECK_MARK}    Installation type '${installationType}' \
-#set!" 
-#            break
-            delete_term_lines 2
-
-            echo -e "${CROSS_MARK}    Not available yet. Please choose Base \
-Installation"
-            sleep 2
-
-            delete_term_lines 2 0 1
-            ;;
-        *)
-            delete_term_lines 2
-
-            echo -e "${CROSS_MARK}    Invalid input..."
-            sleep 2
-
-            delete_term_lines 2 0 1
-            ;;
-    esac      
-done
-
-echo -e "\n          ${Blue}####################    PARTITIONING   ############\
-########${Color_Off}"
-
-echo -e "\n                    ${Blue}##########   DISK SELECTION  ##########\
-${Color_Off}"
-=======
 
 ##########   START MANUAL CONFIGURATION
 
@@ -222,7 +130,6 @@ echo -e "\n          ${blue}####################    PARTITIONING   ############\
 
 echo -e "\n                    ${blue}##########   DISK SELECTION  ##########\
 ${colorOff}"
->>>>>>> iss005
 
 # List available disks
 echo -e "\n$(lsblk --tree | grep 'NAME\|disk\|part')" | tee /tempfiles/output
@@ -241,19 +148,11 @@ numberOfDisks=$(wc -l < /tempfiles/availableDisks)
 # Disk can be selected by entering its number 
 while true; do
     if [[ "$numberOfDisks" > "1" ]]; then
-<<<<<<< HEAD
-        read -p $'\n'$QUEST_MARK"    Which disk shall be partitioned (1-\
-$numberOfDisks)? " selectedDisk
-    else
-        read -p $'\n'$QUEST_MARK"    Which disk shall be partitioned (1)? " \
-        selectedDisk
-=======
         read -p $'\n'$squareYellowRead"    Which disk shall be partitioned (1-\
 $numberOfDisks)? " selectedDisk
     else
         read -p $'\n'$squareYellowRead"    Which disk shall be partitioned (1)?\
  " selectedDisk
->>>>>>> iss005
     fi
     if (( 1 <= $selectedDisk && $selectedDisk <= $numberOfDisks )); then
             disk=$(sed "${selectedDisk}q;d" /tempfiles/availableDisks | \
@@ -261,21 +160,13 @@ $numberOfDisks)? " selectedDisk
             
             delete_term_lines $(( $numberOfLines + 5 ))
 
-<<<<<<< HEAD
-            echo -e "${CHECK_MARK}    Disk ${disk} selected."
-=======
             echo -e "${squareGreen}    Disk ${disk} selected."
->>>>>>> iss005
 
             break
         else
             delete_term_lines 2
 
-<<<<<<< HEAD
-            echo -e "${CROSS_MARK}    Invalid input..."
-=======
             echo -e "${squareRed}    Invalid input..."
->>>>>>> iss005
             sleep 2
 
             delete_term_lines 2 0 1
@@ -284,13 +175,8 @@ done
 
 # Ask for confirmation to wipe selected disk.
 while true; do
-<<<<<<< HEAD
-    read -p $'\n'$QUEST_MARK"   ${disk} will be completely wiped. Do you want \
-to continue (y/N)? " wipe
-=======
     read -p $'\n'$squareYellowRead"   ${disk} will be completely wiped. Do you \
 want to continue (y/N)? " wipe
->>>>>>> iss005
     case $wipe in
         [yY][eE][sS]|[yY])
             delete_term_lines 2 0 1
@@ -299,11 +185,7 @@ want to continue (y/N)? " wipe
         [nN][oO]|[nN]|"")
             delete_term_lines 2
 
-<<<<<<< HEAD
-            echo -e "${CROSS_MARK}    The installation will be aborted. Press \
-=======
             echo -e "${squareRed}    The installation will be aborted. Press \
->>>>>>> iss005
 any key to exit."
             read -sp $'\n'
 
@@ -312,11 +194,7 @@ any key to exit."
         *)
             delete_term_lines 2
 
-<<<<<<< HEAD
-            echo -e "${CROSS_MARK}    Invalid input..."
-=======
             echo -e "${squareRed}    Invalid input..."
->>>>>>> iss005
             sleep 2
 
             delete_term_lines 2 0 1
@@ -324,42 +202,6 @@ any key to exit."
     esac      
 done
 
-<<<<<<< HEAD
-echo -e "\n                    ${Blue}##########     SWAP SPACE    ##########\
-${Color_Off}"
-
-# Ask how much swap space should be allocated and convert the value
-# from Gibibyte to Megabyte.
-echo -e "\n${EXCLA_MARK}    Setting size of swap space..."
-
-read -rp $'\nSwap size in GiB: ' swap
-delete_term_lines 4
-echo -e "${CHECK_MARK}    ${swap} GiB swap space set!"
-
-echo -e "\n          ${Blue}####################  SYSTEM SETTINGS  #############\
-#######${Color_Off}"
-
-echo -e "\n                    ${Blue}##########   HOST SETTINGS   ##########\
-${Color_Off}"
-
-# Ask for hostname and credentials. Ensuring that passwords match.
-echo -e "\n${EXCLA_MARK}    Setting hostname..."
-
-read -rp $'\nHostname: ' hostname
-delete_term_lines 4
-echo -e "${CHECK_MARK}    Hostname '${hostname}' set!"
-
-echo -e "\n                    ${Blue}##########   USER SETTINGS   ##########\
-${Color_Off}"
-
-echo -e "\n${EXCLA_MARK}    Setting username..."
-
-read -rp $'\nUsername: ' username
-delete_term_lines 4
-echo -e "${CHECK_MARK}    Username '${username}' set!"
-
-echo -e "\n${EXCLA_MARK}    Setting user password..."
-=======
 echo -e "\n                    ${blue}##########     SWAP SPACE    ##########\
 ${colorOff}"
 
@@ -394,7 +236,6 @@ delete_term_lines 4
 echo -e "${squareGreen}    Username '${username}' set!"
 
 echo -e "\n${squareYellow}    Setting user password..."
->>>>>>> iss005
 userPassword="foo"; userPasswordConf="bar"
 while [ $userPassword != $userPasswordConf ]; do
     read -rsp $'\nUser password: ' userPassword
@@ -402,79 +243,44 @@ while [ $userPassword != $userPasswordConf ]; do
     read -rsp $'Confirm user password: ' userPasswordConf
     if [[ $userPassword != $userPasswordConf && ${#userPassword} < 8 ]]; then
         delete_term_lines 0 1 1
-<<<<<<< HEAD
-        echo -e "${CROSS_MARK}    Passwords do not match AND are too short (at \
-=======
         echo -e "${squareRed}    Passwords do not match AND are too short (at \
->>>>>>> iss005
 least 8 characters)."
         sleep 3
         delete_term_lines 2 1 1
     elif [[ $userPassword == $userPasswordConf && ${#userPassword} < 8 ]]; then
         delete_term_lines 0 1 1
-<<<<<<< HEAD
-        echo -e "${CROSS_MARK}    Passwords are too short (at least 8 \
-=======
         echo -e "${squareRed}    Passwords are too short (at least 8 \
->>>>>>> iss005
 characters)."
         userPassword="foo"; userPasswordConf="bar"
         sleep 3
         delete_term_lines 2 1 1
     elif [[ $userPassword != $userPasswordConf ]]; then
         delete_term_lines 0 1 1
-<<<<<<< HEAD
-        echo -e "${CROSS_MARK}    Passwords do not match."
-=======
         echo -e "${squareRed}    Passwords do not match."
->>>>>>> iss005
         sleep 3
         delete_term_lines 2 1 1
     else
         # Erase all ouput done due to entering root password and confirm that
         # password is set
         delete_term_lines 3 1
-<<<<<<< HEAD
-        echo -e "${CHECK_MARK}    User password set."
-=======
         echo -e "${squareGreen}    User password set."
->>>>>>> iss005
         break
     fi
 done
 
 while true; do
-<<<<<<< HEAD
-    read -p $'\n'$QUEST_MARK"    Do you want to set a root password (y/N)? " setRootPassword
-    case $setRootPassword in
-        [yY][eE][sS]|[yY])
-            delete_term_lines 1 0 1
-            echo -e "${EXCLA_MARK}    Setting root password..."
-=======
     read -p $'\n'$squareYellowRead"    Do you want to set a root password (y/N)\
 ? " setRootPassword
     case $setRootPassword in
         [yY][eE][sS]|[yY])
             delete_term_lines 1 0 1
             echo -e "${squareYellow}    Setting root password..."
->>>>>>> iss005
             setRootPassword=true
             rootPassword="foo"; rootPasswordConf="bar"
             while [[ $rootPassword != $rootPasswordConf ]]; do
                 read -rsp $'\nRoot password: ' rootPassword
                 delete_term_lines 0 1 1
                 read -rsp $'Confirm root password: ' rootPasswordConf
-<<<<<<< HEAD
-                if [[ $rootPassword != $rootPasswordConf && ${#rootPassword} < 8 ]]; then
-                    delete_term_lines 0 1 1
-                    echo -e "${CROSS_MARK}    Passwords do not match AND are \
-too short (at least 8 characters)."
-                    sleep 3
-                    delete_term_lines 2 1 1
-                elif [[ $rootPassword == $rootPasswordConf && ${#rootPassword} < 8 ]]; then
-                    delete_term_lines 0 1 1
-                    echo -e "${CROSS_MARK}    Passwords are too short (at least 8 characters)."
-=======
                 if [[ $rootPassword != $rootPasswordConf && \
                 ${#rootPassword} < 8 ]]; then
                     delete_term_lines 0 1 1
@@ -487,28 +293,19 @@ too short (at least 8 characters)."
                     delete_term_lines 0 1 1
                     echo -e "${squareRed}    Passwords are too short (at least \
 8 characters)."
->>>>>>> iss005
                     rootPassword="foo"; rootPasswordConf="bar"
                     sleep 3
                     delete_term_lines 2 1 1
                 elif [[ $rootPassword != $rootPasswordConf ]]; then
                     delete_term_lines 0 1 1
-<<<<<<< HEAD
-                    echo -e "${CROSS_MARK}    Passwords do not match."
-=======
                     echo -e "${squareRed}    Passwords do not match."
->>>>>>> iss005
                     sleep 3
                     delete_term_lines 2 1 1
                 else
                     # Erase all ouput done due to entering root password and 
                     # confirm that password is set
                     delete_term_lines 3 1
-<<<<<<< HEAD
-                    echo -e "${CHECK_MARK}    Root password set."
-=======
                     echo -e "${squareGreen}    Root password set."
->>>>>>> iss005
                     break
                 fi
             done
@@ -517,36 +314,21 @@ too short (at least 8 characters)."
         [nN][oO]|[nN]|"")
             setRootPassword=false
             delete_term_lines 2
-<<<<<<< HEAD
-            echo -e "${CHECK_MARK}    No root password set."
-=======
             echo -e "${squareGreen}    No root password set."
->>>>>>> iss005
             break
             ;;
         *)
             delete_term_lines 2
-<<<<<<< HEAD
-            echo -e "${CROSS_MARK}    Invalid input..."
-=======
             echo -e "${squareRed}    Invalid input..."
->>>>>>> iss005
             sleep 2
             ;;
     esac      
 done
 
-<<<<<<< HEAD
-echo -e "\n                    ${Blue}##########   TIME SETTINGS   ##########\
-${Color_Off}"
-
-echo -e "\n${EXCLA_MARK}    Setting time zone..."
-=======
 echo -e "\n                    ${blue}##########   TIME SETTINGS   ##########\
 ${colorOff}"
 
 echo -e "\n${squareYellow}    Setting time zone..."
->>>>>>> iss005
 echo ""
 echo "1) Africa
 2) America
@@ -557,161 +339,6 @@ echo "1) Africa
 7) Pacific
 8) Etc" | tee /tempfiles/regions
 numberOfRegions="$(wc -l < /tempfiles/regions)"
-<<<<<<< HEAD
-
-while true; do
-    read -p $'\n'$QUEST_MARK"    Please enter your region's number (1 - \
-$numberOfRegions): " regionNumber
-    if (( 1 <= $regionNumber && $regionNumber <= $numberOfRegions )); then
-        region=$((sed "${regionNumber}q;d" /tempfiles/regions) | \
-        awk '{print $2}')
-
-        delete_term_lines 11 1
-
-        break
-    else
-        if [[ $regionNumber == "" ]]; then
-            delete_term_lines 3
-        else
-            delete_term_lines 2
-        fi
-
-        echo -e "${CROSS_MARK}    Invalid input..."
-        sleep 2
-
-        delete_term_lines 2 0 1
-    fi
-done
-
-echo -e "${CHECK_MARK}    ${region} selected..."
-
-echo ""
-
-ls -l /usr/share/zoneinfo/$region | grep -v "\->" | \
-tail -n +2 > /tempfiles/regionCities
-numberOfCities="$(wc -l < /tempfiles/regionCities)"
-
-ls -l /usr/share/zoneinfo/$region | grep -v "\->" | tail -n +2 | \
-awk '{print NR") " $9}' | column -c $(tput cols) | tee /tempfiles/output
-numberOfOutputLines=$(wc -l < /tempfiles/output)
-
-while true; do
-    if [[ $numberOfCities > "1" ]]; then
-        read -p $'\n'$QUEST_MARK"    Please enter your cities' number (1 - \
-$numberOfCities): " cityNumber
-    else
-        read -p $'\n'$QUEST_MARK"    Please enter your cities' number \
-        (1): " cityNumber
-    fi
-    if (( 1 <= $cityNumber && $cityNumber <= $numberOfCities )); then
-        city=$(sed "${cityNumber}q;d" /tempfiles/regionCities | \
-        awk '{print $9}')
-
-        delete_term_lines $(( $numberOfOutputLines + 5 ))
-
-        break
-    else
-        if [[ $cityNumber == "" ]]; then
-            delete_term_lines 3
-        else
-            delete_term_lines 2
-        fi
-
-        echo -e "${CROSS_MARK}    Invalid input..."
-        sleep 2
-
-        delete_term_lines 2 0 1
-    fi 
-done
-
-if [[ -d /usr/share/zoneinfo/$region/$city ]]; then
-
-    echo -e "${CHECK_MARK}    ${region}/${city} selected..."
-
-    echo ""
-
-    ls -l /usr/share/zoneinfo/$region/$city | grep -v "\->" | \
-    tail -n +2 > /tempfiles/regionSubCities
-    numberOfSubCities="$(wc -l < /tempfiles/regionSubCities)"
-
-    ls -l /usr/share/zoneinfo/$region/$city | grep -v "\->" | tail -n +2 | \
-    awk '{print NR") " $9}' | column -c $(tput cols) | tee /tempfiles/output
-
-    while true; do
-        if [[ "$numberOfSubCities" > "1" ]]; then
-            read -p $'\n'$QUEST_MARK"    Please enter your cities' number (1 - \
-$numberOfSubCities): " subCityNumber
-        else
-            read -p $'\n'$QUEST_MARK"    Please enter your cities' number \
-(1): " subCityNumber
-        fi
-        if (( 1 <= $subCityNumber && $subCityNumber <= $numberOfCities )); then
-            subCity=$(sed "${subCityNumber}q;d" /tempfiles/regionSubCities | \
-            awk '{print $9}')
-            
-            delete_term_lines 8
-            
-            break
-        else
-            if [[ $subCityNumber == "" ]]; then
-                delete_term_lines 3
-            else
-                delete_term_lines 2
-            fi
-
-            echo -e "${CROSS_MARK}    Invalid input..."
-            sleep 2
-
-            delete_term_lines 2 0 1
-        fi 
-    done
-
-else
-    delete_term_lines 3
-
-fi
-
-if [ $subCity ]; then
-    timezone="$region/$city/$subCity"
-else
-    timezone="$region/$city"
-fi
-
-echo -e "${CHECK_MARK}    Time zone ${timezone} set."
-
-echo -e "\n${Purple}##############################    CONFIRMATION   ##########\
-#####################${Color_Off}"
-
-# Ask for confirmation to continue with installation
-while true; do
-    read -p $'\n'$QUEST_MARK"   Do you want to proceed the installation with \
-the given information (y/N)? " proceed
-    case $proceed in
-        [yY][eE][sS]|[yY])
-            delete_term_lines 2 0 1
-            break
-            ;;
-        [nN][oO]|[nN]|"")
-            delete_term_lines 2
-
-            echo -e "${CROSS_MARK}    The installation will be aborted. Press \
-any key to exit."
-            read -sp $'\n'
-
-            exit 0
-            ;;
-        *)
-            delete_term_lines 2
-
-            echo -e "${CROSS_MARK}    Invalid input..."
-            sleep 2
-
-            delete_term_lines 2 0 1
-            ;;
-    esac      
-done
-
-=======
 
 while true; do
     read -p $'\n'$squareYellowRead"    Please enter your region's number (1-\
@@ -865,7 +492,6 @@ any key to exit."
     esac      
 done
 
->>>>>>> iss005
 ##########   END MANUAL CONFIGURATION
 
 ##########   START HARDWARE DETECTION
@@ -887,9 +513,6 @@ ram=$(( $ram / 1000000 ))
 
 ##########   END HARDWARE DETECTION
 
-<<<<<<< HEAD
-##########   END HARDWARE DETECTION
-
 ##########   START SOFTWARE DETECTION
 
 # THAT'S NOT WORKING, SUBSTITUTE FOR INTERACTIVE MENU
@@ -898,16 +521,6 @@ ram=$(( $ram / 1000000 ))
 
 ##########   END SOFTWARE DETECTION
 
-=======
-##########   START SOFTWARE DETECTION
-
-# THAT'S NOT WORKING, SUBSTITUTE FOR INTERACTIVE MENU
-# Detect init system by getting process with pid 1
-#initSystem=$(ps -p 1 -o comm=)
-
-##########   END SOFTWARE DETECTION
-
->>>>>>> iss005
 ##########   START CONDITIONAL QUERIES
 
 # Do not know why this is done, yet. Will implement it when I figured it out.
@@ -945,9 +558,6 @@ swap="$(( $swap * 1024 ))"'M'
 
 ##########   START PARTITIONING
 
-<<<<<<< HEAD
-# In case of UEFI boot --> GPT/UEFI partitioning with 1 GiB disk space for boot partition
-=======
 swapDevice=$(cat /proc/swaps | grep "partition" | awk '{print $1}')
 if [[ $swapDevice ]]; then
     swapoff $swapDevice
@@ -959,7 +569,6 @@ done
 
 # In case of UEFI boot --> GPT/UEFI partitioning with 1 GiB disk space 
 # for boot partition
->>>>>>> iss005
 # In case of BIOS boot --> MBR/BIOS partitioning
 if [ "$boot" == 'uefi' ]; then
     wipefs --all --force "$baseDisk"
@@ -1063,10 +672,6 @@ rc-service ntpd start
 # TODO Add explanation to choice of packages
 # Base packages
     # base          - 
-<<<<<<< HEAD
-    # base-devel    - Package group with tools for building (compiling and linking) software
-    #base_devel='db diffutils gc guile libisl libmpc perl autoconf automake bash binutils bison esysusers /tempfilesfiles fakeroot file findutils flex gawk gcc gettext grep groff gzip libtool m4 make pacman pacman-contrib patch pkgconf python sed opendoas texinfo which bc udev'
-=======
     # base-devel    - Package group with tools for building 
     #                 (compiling and linking) software
     #base_devel="db diffutils gc guile libisl libmpc perl autoconf \
@@ -1074,7 +679,6 @@ rc-service ntpd start
     # file findutils flex gawk gcc gettext grep groff gzip libtool m4 \
     # make pacman pacman-contrib patch pkgconf python sed opendoas texinfo \
     # which bc udev"
->>>>>>> iss005
 basePackages="base base-devel"
 
 initSystem="openrc"
@@ -1093,17 +697,6 @@ kernel="linux-lts"
 firmware="linux-firmware"
 
 # Network
-<<<<<<< HEAD
-    # networkmanager                -
-    # networkmanager-$initSystem    -
-    # dhcpcd                        -
-network="networkmanager-$initSystem dhcpcd"
-
-basestrap /mnt $basePackages $initSystem $loginManager $kernel $firmware $network
-
-##########   END BASE INSTALLATION
-
-=======
 network="connman connman-$initSystem wpa_supplicant wpa_supplicant-$initSystem"
 
 basestrap /mnt $basePackages $initSystem $loginManager $kernel $firmware \
@@ -1111,7 +704,6 @@ $network
 
 ##########   END BASE INSTALLATION
 
->>>>>>> iss005
 ##########   START EXPORTING VARIABLES
 
 mkdir /mnt/tempfiles
@@ -1135,8 +727,6 @@ curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/iss005/\
 chrootInstall.sh -o /mnt/chrootInstall.sh
 chmod +x /mnt/chrootInstall.sh
 artix-chroot /mnt /chrootInstall.sh
-<<<<<<< HEAD
-=======
 
 echo -e "\n##############################################################################################"
 echo -e "#                                   ${Green}Installation completed                                   ${Color_Off}#"
@@ -1162,4 +752,3 @@ to exit the script without rebooting." reboot
             ;;
     esac      
 done
->>>>>>> iss005
