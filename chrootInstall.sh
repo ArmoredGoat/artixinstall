@@ -649,6 +649,14 @@ elif [[ $installationType == 'custom' ]]; then
             -o $homedir/.xprofile
         chmod +x $homedir/.xprofile
 
+        # Set wallpaper for lightdm with slickgreeter-pywal
+        git clone https://github.com/Paul-Houser/slickgreeter-pywal \
+            $homedir/git/cloned/slickgreeter-pywal
+        cd $homedir/git/cloned/slickgreeter-pywal
+        chmod +x install.sh
+        ./install.sh
+        reTheme $(cat $HOME/.cache/wal/wal)
+
     ### DISPLAY SERVER
 
         pacman -Syu xorg xorg-server xorg-xinit --needed --noconfirm
@@ -678,13 +686,7 @@ elif [[ $installationType == 'custom' ]]; then
         curl $downloadUrl/dotfiles/backgrounds/mushroom_town.png \
             -o $homedir/.local/share/backgrounds/mushroom_town.png
         
-        # Set wallpaper for lightdm with slickgreeter-pywal
-        git clone https://github.com/Paul-Houser/slickgreeter-pywal \
-            $homedir/git/cloned/slickgreeter-pywal
-        cd $homedir/git/cloned/slickgreeter-pywal
-        chmod +x install.sh
-        ./install.sh
-        reTheme $(cat $HOME/.cache/wal/wal)
+        
 
     ## GRAPHIC DRIVERS
 
