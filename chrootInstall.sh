@@ -37,6 +37,13 @@ install_nitrogen () {
         -o $homedir/.local/share/backgrounds/mushroom_town.png
 }
 
+install_pywal () {
+        ### PYWAL
+
+        pacman -Syu procps imagemagick --needed --noconfirm
+        runuser -l "$username" -c "pip3 install --user pywal"
+}
+
 install_qtile () {
     ### WINDOW MANAGER
 
@@ -681,10 +688,7 @@ elif [[ $installationType == 'custom' ]]; then
         curl $downloadUrl/dotfiles/xorg/xorg.conf \
             -o /etc/X11/xorg.conf
 
-    ### PYWAL
 
-        pacman -Syu procps imagemagick --needed --noconfirm
-        runuser -l "$username" -c "pip3 install --user pywal"
 
         wal -i $homedir/.local/share/backgrounds/mushroom_town.png
 
@@ -721,6 +725,7 @@ main () {
     ## OTHERS
 
     install_nitrogen
+    install_pywal
     install_qtile
     install_rofi
     install_wally
