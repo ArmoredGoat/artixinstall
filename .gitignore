@@ -1,2 +1,7 @@
+<<<<<<< HEAD
 test_*.sh
 tempfiles
+=======
+test_*
+todo_*
+>>>>>>> iss005
