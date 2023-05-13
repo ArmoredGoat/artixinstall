@@ -711,6 +711,7 @@ chown -R "$username":"$username" /home/"$username"
 main () {
 
     install_rofi
+    install_wally
 
     rm -rf /chrootInstall.sh /tempfiles
 
