@@ -24,6 +24,19 @@ create_directory () {
 	fi
 }
 
+install_nitrogen () {
+    ### WALLPAPER SETTER
+
+    pacman -Syu nitrogen --needed --noconfirm
+
+    # Create directory for nitrogen config.
+    create_directory $homedir/.config/nitrogen
+
+    # Download wallpaper
+    curl $downloadUrl/dotfiles/backgrounds/mushroom_town.png \
+        -o $homedir/.local/share/backgrounds/mushroom_town.png
+}
+
 install_qtile () {
     ### WINDOW MANAGER
 
@@ -675,16 +688,7 @@ elif [[ $installationType == 'custom' ]]; then
 
         wal -i $homedir/.local/share/backgrounds/mushroom_town.png
 
-    ### WALLPAPER SETTER
 
-        pacman -Syu nitrogen --needed --noconfirm
-
-        # Create directory for nitrogen config.
-        create_directory $homedir/.config/nitrogen
-
-        # Download wallpaper
-        curl $downloadUrl/dotfiles/backgrounds/mushroom_town.png \
-            -o $homedir/.local/share/backgrounds/mushroom_town.png
         
         
 
@@ -716,6 +720,7 @@ main () {
 
     ## OTHERS
 
+    install_nitrogen
     install_qtile
     install_rofi
     install_wally
