@@ -24,6 +24,22 @@ create_directory () {
 	fi
 }
 
+install_qtile () {
+    ### WINDOW MANAGER
+
+    pacman -Syu qtile --needed --noconfirm
+
+    # Fix for qtile. It seems there are issues with building cairocffi
+    # through pip and normal packages.
+    runuser -l "$username" -c "pip3 install --user --no-cache --upgrade \
+        --no-build-isolation cairocffi"
+
+    create_directory $homedir/.config/qtile
+    # Get config files repository and store them in corresponding directory
+    curl $downloadUrl/dotfiles/qtile/config.py \
+        -o $homedir/.config/qtile/config.py
+}
+
 install_rofi () {
     ### WINDOW SWITCHER
 
@@ -670,20 +686,6 @@ elif [[ $installationType == 'custom' ]]; then
         ./install.sh
         reTheme $(cat $HOME/.cache/wal/wal)
 
-    ### WINDOW MANAGER
-
-        pacman -Syu qtile --needed --noconfirm
-
-        # Fix for qtile. It seems there are issues with building cairocffi
-        # through pip and normal packages.
-        runuser -l "$username" -c "pip3 install --user --no-cache --upgrade \
-            --no-build-isolation cairocffi"
-
-        create_directory $homedir/.config/qtile
-        # Get config files repository and store them in corresponding directory
-        curl $downloadUrl/dotfiles/qtile/config.py \
-            -o $homedir/.config/qtile/config.py
-
     ## GRAPHIC DRIVERS
 
         # Install drivers depending on detected gpu
@@ -710,6 +712,9 @@ chown -R "$username":"$username" /home/"$username"
 
 main () {
 
+    ## OTHERS
+
+    install_qtile
     install_rofi
     install_wally
 
