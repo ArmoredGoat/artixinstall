@@ -24,6 +24,12 @@ create_directory () {
 	fi
 }
 
+install_rofi () {
+    ### WINDOW SWITCHER
+
+    pacman -Syu rofi --needed --noconfirm
+}
+
 ##########  END FUNCTIONS
 
 ##########  START IMPORTING VARIABLES
@@ -670,9 +676,7 @@ elif [[ $installationType == 'custom' ]]; then
         curl $downloadUrl/dotfiles/qtile/config.py \
             -o $homedir/.config/qtile/config.py
 
-    ### WINDOW SWITCHER
 
-        pacman -Syu rofi --needed --noconfirm
 
     ### ZSA KEYBOARD FLASHER
 
@@ -706,6 +710,8 @@ chown -R "$username":"$username" /home/"$username"
 
 main () {
 
+    install_rofi
+    
     rm -rf /chrootInstall.sh /tempfiles
 
     exit
