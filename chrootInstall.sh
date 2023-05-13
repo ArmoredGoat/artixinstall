@@ -704,6 +704,11 @@ chown -R "$username":"$username" /home/"$username"
 
 # Finish up and remove (temporary) files
 
-rm -rf /chrootInstall.sh /tempfiles
+main () {
 
-exit
+    rm -rf /chrootInstall.sh /tempfiles
+
+    exit
+}
+
+main
