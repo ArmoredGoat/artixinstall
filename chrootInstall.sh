@@ -30,6 +30,14 @@ install_rofi () {
     pacman -Syu rofi --needed --noconfirm
 }
 
+install_wally () {
+    ### ZSA KEYBOARD FLASHER
+
+    # I am using an ErgoDox EZ and this software is used to flash
+    # layouts on the device.
+    pacman -Syu zsa-wally --needed --noconfirm
+}
+
 ##########  END FUNCTIONS
 
 ##########  START IMPORTING VARIABLES
@@ -676,14 +684,6 @@ elif [[ $installationType == 'custom' ]]; then
         curl $downloadUrl/dotfiles/qtile/config.py \
             -o $homedir/.config/qtile/config.py
 
-
-
-    ### ZSA KEYBOARD FLASHER
-
-        # I am using an ErgoDox EZ and this software is used to flash
-        # layouts on the device.
-        pacman -Syu zsa-wally --needed --noconfirm
-
     ## GRAPHIC DRIVERS
 
         # Install drivers depending on detected gpu
@@ -711,7 +711,7 @@ chown -R "$username":"$username" /home/"$username"
 main () {
 
     install_rofi
-    
+
     rm -rf /chrootInstall.sh /tempfiles
 
     exit
