@@ -37,6 +37,12 @@ install_nitrogen () {
         -o $homedir/.local/share/backgrounds/mushroom_town.png
 }
 
+# Function to install multiple packages that do not require further attention
+# at once
+install_packages () {
+    pacman -Syuq $@ --needed --noconfirm
+}
+
 install_pywal () {
         ### PYWAL
 
@@ -80,7 +86,7 @@ install_wally () {
 
 #echo "$formfactor"="$(< /tempfiles/formfactor)"
 cpu="$(< /tempfiles/cpu)"
-threadsMinusOne="$(< /tempfiles/threadsMinusOne)"
+threadsMi$nusOne="$(< /tempfiles/threadsMinusOne)"
 gpu="$(< /tempfiles/gpu)"
 #"$intel_vaapi_driver"="$(< /tempfiles/intel_vaapi_driver
 boot="$(< /tempfiles/boot)"
