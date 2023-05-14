@@ -133,6 +133,16 @@ install_rofi () {
     pacman -Syu rofi --needed --noconfirm
 }
 
+install_trash_cli () {
+    pacman -Syu trash-cli --needed --noconfirm
+
+    # Create cron job to delete all files that are trashed longer than
+    # 90 days on a daily basis. The '2>/dev/null' is necessary to
+    # surpress 'no crontab for [username]' message.
+    (crontab -l 2>/dev/null ; echo "@daily $(which trash-empty) 90") | \
+        crontab -    
+}
+
 install_wally () {
     ### ZSA KEYBOARD FLASHER
 
@@ -575,16 +585,6 @@ elif [[ $installationType == 'custom' ]]; then
         # This way kitty can see it as an available font to use.
         create_directory $homedir/.fonts/ttf
 
-    ### TRASH MANAGEMENT
-
-        pacman -Syu trash-cli --needed --noconfirm
-
-        # Create cron job to delete all files that are trashed longer than
-        # 90 days on a daily basis. The '2>/dev/null' is necessary to
-        # surpress 'no crontab for username' message.
-        (crontab -l 2>/dev/null ; echo "@daily $(which trash-empty) 90") \
-            | crontab -
-
     ### VERSION CONTROL SYSTEM
 
         # See section ESSENTIALS above.
@@ -743,6 +743,10 @@ chown -R "$username":"$username" /home/"$username"
 main () {
 
     disable_root
+
+    ## UTILITY
+
+    install_trash_cli
 
     ## OTHERS
 
