@@ -47,6 +47,22 @@ disable_root () {
     fi
 }
 
+install_graphics_drivers () {
+    # Check which graphics card manufacturer was detected and select packages
+    # accordingly.
+    if [ "$gpu" == 'AMD' ]; then
+        graphicsDrivers='xf86-video-amdgpu mesa lib32-mesa vulkan-radeon'
+    elif [ "$gpu" == 'INTEL' ]; then
+        graphicsDrivers='xf86-video-intel mesa lib32-mesa vulkan-intel'
+    elif [ "$gpu" == 'NVIDIA' ]; then
+        graphicsDrivers='xf86-video-nouveau mesa lib32-mesa nvidia-utils'
+    elif [ "$gpu" == 'VMware' ]; then
+        graphicsDrivers='xf86-video-vmware xf86-input-vmmouse mesa lib32-mesa'
+    fi
+
+    install_packages $graphicsDrivers
+}
+
 install_grub () {
     # grub - 
     # efibootmgr - 
@@ -714,29 +730,7 @@ elif [[ $installationType == 'custom' ]]; then
         curl $downloadUrl/dotfiles/xorg/xorg.conf \
             -o /etc/X11/xorg.conf
 
-
-
         wal -i $homedir/.local/share/backgrounds/mushroom_town.png
-
-
-        
-        
-
-    ## GRAPHIC DRIVERS
-
-        # Install drivers depending on detected gpu
-        if [ "$gpu" == 'AMD' ]; then
-            graphicsDrivers='xf86-video-amdgpu mesa lib32-mesa vulkan-radeon'
-        elif [ "$gpu" == 'INTEL' ]; then
-            graphicsDrivers='xf86-video-intel mesa lib32-mesa vulkan-intel'
-        elif [ "$gpu" == 'NVIDIA' ]; then
-            graphicsDrivers='xf86-video-nouveau mesa lib32-mesa nvidia-utils'
-        elif [ "$gpu" == 'VMware' ]; then
-            graphicsDrivers='xf86-video-vmware xf86-input-vmmouse mesa lib32-mesa'
-        fi
-
-        pacman -Syu $graphicsDrivers --needed --noconfirm
-    
 fi
 
 # Set all permissions and ownership in home directory correctly.
@@ -751,6 +745,8 @@ main () {
     disable_root
 
     ## OTHERS
+
+    install_graphics_drivers
 
     install_nitrogen
     install_pywal
