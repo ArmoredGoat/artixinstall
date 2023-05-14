@@ -24,6 +24,29 @@ create_directory () {
 	fi
 }
 
+disable_root () {
+    # As your personal user will be granted privileged rights, a root user is
+    # not necessary. It is also the most targeted user of brute force attacks
+    # since it is existent on all devices. Without a root user to login to,
+    # users have to enter 'sudo' priot to their commands. It also is stopping 
+    # users from entering a full root shell which makes it easier to do 
+    # something wrong. Therefore, it is recommended to disable the root account
+    # by removing the password and locking it. Afterwards, no login or ssh
+    # connection into root is possible. You can, of course, change that later
+    # on by using 'sudo' and giving root a viable password
+
+    # Check if root password shall be set and set it. If not, lock it.
+    if [ "$setRootPassword" = true ]; then
+        echo "$rootpassword
+        $rootpassword
+        " | passwd
+    else
+        # Setting the password of a user to '!' looks the account, refer to
+        # manual page 'shadow(5)'. It has the same effect as 'passwd --lock'
+        usermod -p '!' root
+    fi
+}
+
 install_nitrogen () {
     ### WALLPAPER SETTER
 
@@ -155,14 +178,9 @@ grub-mkconfig -o /boot/grub/grub.cfg
 
 ##########  START USER MANAGEMENT
 
-# Set root password if given. Otherwise disable access.
-if [ "$setRootPassword" = true ]; then
-    echo "$rootpassword
-    $rootpassword
-    " | passwd
-else
-    usermod -p '!' root
-fi
+
+
+
 
 # Create user and set password
 useradd -m "$username"
@@ -180,7 +198,7 @@ sed -i '/%wheel ALL=(ALL:ALL) ALL/s/^#//g' /etc/sudoers
 echo "$username ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
 
 # set home directory permissions
-chmod 750 /home/"$username"
+chmod 755 /home/"$username"
 create_directory $homedir/{.config,.local/share}
 
 ##########  END USER MANAGEMENT
@@ -727,6 +745,8 @@ chown -R "$username":"$username" /home/"$username"
 # Finish up and remove (temporary) files
 
 main () {
+
+    disable_root
 
     ## OTHERS
 
