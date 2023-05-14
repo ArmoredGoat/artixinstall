@@ -47,6 +47,28 @@ disable_root () {
     fi
 }
 
+install_grub () {
+    # grub - 
+    # efibootmgr - 
+    # os-prober - Detection of other installed operating systems
+    packagesGrub="grub efibootmgr os-prober"
+
+    install_packages $packagesGrub
+
+    # Check boot type and install correct version
+    if [ "$boot" == 'uefi' ]; then
+        grub-install --target=x86_64-efi --efi-directory=/boot/efi \
+            --bootloader-id=grub --recheck
+        # grub-install --target=x86_64-efi --efi-directory=/boot/EFI \
+        #    --bootloader-id=GRUB-rwinkhart --recheck
+        # TODO Learn about bootloader-id
+    elif [ "$boot" == 'bios' ]; then
+        grub-install --target=i386-pc --recheck $baseDisk
+    fi
+
+    update_grub_config
+}
+
 install_nitrogen () {
     ### WALLPAPER SETTER
 
@@ -103,6 +125,12 @@ install_wally () {
     pacman -Syu zsa-wally --needed --noconfirm
 }
 
+update_grub_config () {
+    # Create grub configuration file in boot directory, if not existent.
+    # If it is already there, update it.
+    grub-mkconfig -o /boot/grub/grub.cfg    
+}
+
 ##########  END FUNCTIONS
 
 ##########  START IMPORTING VARIABLES
@@ -149,32 +177,6 @@ rc-update add connmand
 rc-service connmand start
 
 ##########  END CONFIGURATION
-
-##########  START GRUB INSTALLATION
-
-# Install grub
-    # grub - 
-    # efibootmgr - 
-    # os-prober - Detection of other installed operating systems
-
-pacman -Syu grub efibootmgr os-prober --needed --noconfirm
-
-# Check if BIOS or UEFI boot and install grub accordingly
-if [ "$boot" == 'uefi' ]; then
-    grub-install --target=x86_64-efi --efi-directory=/boot/efi \
-        --bootloader-id=grub --recheck
-    # grub-install --target=x86_64-efi --efi-directory=/boot/EFI \
-    #    --bootloader-id=GRUB-rwinkhart --recheck
-    # TODO Learn about bootloader-id
-fi
-if [ "$boot" == 'bios' ]; then
-    grub-install --target=i386-pc --recheck $baseDisk
-fi
-
-# Create grub configuration in boot directory
-grub-mkconfig -o /boot/grub/grub.cfg
-
-##########  END GRUB INSTALLATION
 
 ##########  START USER MANAGEMENT
 
@@ -470,7 +472,7 @@ elif [[ $installationType == 'custom' ]]; then
         /etc/default/grub
 
         # Update grub config
-        grub-mkconfig -o /boot/grub/grub.cfg
+        update_grub_config
 
     ### CLOCK SYNCHRONIZATION
 
