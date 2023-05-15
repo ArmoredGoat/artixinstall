@@ -16,7 +16,7 @@ main () {
 
     ## OTHERS
 
-    install_graphics_drivers
+    install_graphics_drivers $gpu
 
     install_nitrogen
     install_pywal
@@ -99,6 +99,8 @@ import_variables () {
 }
 
 install_graphics_drivers () {
+    # Set gpu variable to given value
+    gpu="$1"
     # Check which graphics card manufacturer was detected and select packages
     # accordingly.
     if [ "$gpu" == 'AMD' ]; then
