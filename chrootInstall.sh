@@ -85,8 +85,15 @@ import_variables () {
             varName="${fileName%.*}" # Remove file extenstion from file name
             varValue=$(cat "$file") # Read file contents
 
-            # Declare variable and assign value
-            declare "$varName"="$varValue"
+            # Declare a global (-g) read-only (-r) variable and assign value.
+            # Without -g, the variable would not be accessible outside the
+            # function's scope.
+            declare -rg "$varName"="$varValue"
+
+            # For traceability, the function will return the variables' name
+            # after declaring it. If something is wrong, you can check the
+            # logs to see if there are any errors regarding the variables.
+            echo "Declared variable: $varName"
         fi
     done 
 }
@@ -235,10 +242,6 @@ rc-service connmand start
 ##########  END CONFIGURATION
 
 ##########  START USER MANAGEMENT
-
-
-
-
 
 # Create user and set password
 useradd -m "$username"
