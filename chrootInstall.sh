@@ -5,6 +5,29 @@ gitRepo="ArmoredGoat/artixinstall"
 gitBranch="iss005"
 downloadUrl="$baseUrlRaw/$gitRepo/$gitBranch"
 
+main () {
+
+    disable_root
+
+    ## UTILITY
+
+    install_trash_cli
+
+    ## OTHERS
+
+    install_graphics_drivers
+
+    install_nitrogen
+    install_pywal
+    install_qtile
+    install_rofi
+    install_wally
+
+    rm -rf /chrootInstall.sh /tempfiles
+
+    exit
+}
+
 ##########  START FUNCTIONS
 
 create_directory () {
@@ -739,28 +762,5 @@ chown -R "$username":"$username" /home/"$username"
 ##########  END INSTALLATION TYPE SPEFIFIC INSTALLATION AND CONFIGURATION
 
 # Finish up and remove (temporary) files
-
-main () {
-
-    disable_root
-
-    ## UTILITY
-
-    install_trash_cli
-
-    ## OTHERS
-
-    install_graphics_drivers
-
-    install_nitrogen
-    install_pywal
-    install_qtile
-    install_rofi
-    install_wally
-
-    rm -rf /chrootInstall.sh /tempfiles
-
-    exit
-}
 
 main
