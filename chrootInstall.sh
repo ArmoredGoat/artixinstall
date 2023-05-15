@@ -6,6 +6,7 @@ gitBranch="iss005"
 downloadUrl="$baseUrlRaw/$gitRepo/$gitBranch"
 
 main () {
+    import_variables
 
     disable_root
 
@@ -24,8 +25,6 @@ main () {
     install_wally
 
     rm -rf /chrootInstall.sh /tempfiles
-
-    exit
 }
 
 ##########  START FUNCTIONS
@@ -68,6 +67,28 @@ disable_root () {
         # manual page 'shadow(5)'. It has the same effect as 'passwd --lock'
         usermod -p '!' root
     fi
+}
+
+import_variables () {
+    # If a directory is specified, use it. Otherwise, use '/tempfiles'.
+    if [[ $1 ]]; then
+        directory="$1"
+    else
+        directory="/tempfiles"
+    fi
+
+    # Loop through all files in directoy
+    for file in "$directory"/*; do
+        # Check if it is a regular file. It yes, do the stuff below.
+        if [[ -f "$file" ]]; then
+            fileName=$(basename "$file") # Get name of file without path
+            varName="${fileName%.*}" # Remove file extenstion from file name
+            varValue=$(cat "$file") # Read file contents
+
+            # Declare variable and assign value
+            declare "$varName"="$varValue"
+        fi
+    done 
 }
 
 install_graphics_drivers () {
@@ -183,20 +204,6 @@ update_grub_config () {
 ##########  END FUNCTIONS
 
 ##########  START IMPORTING VARIABLES
-
-#echo "$formfactor"="$(< /tempfiles/formfactor)"
-cpu="$(< /tempfiles/cpu)"
-threadsMi$nusOne="$(< /tempfiles/threadsMinusOne)"
-gpu="$(< /tempfiles/gpu)"
-#"$intel_vaapi_driver"="$(< /tempfiles/intel_vaapi_driver
-boot="$(< /tempfiles/boot)"
-installationType="$(< /tempfiles/installationType)"
-baseDisk="$(< /tempfiles/baseDisk)"
-username="$(< /tempfiles/username)"
-userPassword="$(< /tempfiles/userPassword)"
-setRootPassword="$(< /tempfiles/setRootPassword)"
-rootPassword="$(< /tempfiles/rootPassword)"
-timezone="$(< /tempfiles/timezone)"
 
 homedir=/home/"$username"
 
@@ -759,8 +766,8 @@ fi
 # Set all permissions and ownership in home directory correctly.
 chown -R "$username":"$username" /home/"$username"
 
-##########  END INSTALLATION TYPE SPEFIFIC INSTALLATION AND CONFIGURATION
-
-# Finish up and remove (temporary) files
+# Call main function
 
 main
+
+exit
