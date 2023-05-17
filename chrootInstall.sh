@@ -9,7 +9,8 @@ main () {
     import_variables
 
     configure_localization
-
+    configure_clock
+    
     create_user
     disable_root
 
@@ -31,6 +32,11 @@ main () {
 }
 
 ##########  START FUNCTIONS
+
+configure_clock () {
+    # TODO Explain
+    hwclock --systohc --utc
+}
 
 configure_localization () {
     # By uncommenting localizations/languages in /etc/locale.gen, the system
@@ -273,8 +279,7 @@ homedir=/home/"$username"
 
 ##########  START CONFIGURATION
 
-# Configure clock settings
-hwclock --systohc --utc
+
 
 # Enable and start connman
 rc-update add connmand
