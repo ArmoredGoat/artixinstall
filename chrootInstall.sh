@@ -23,6 +23,8 @@ main () {
     create_user
     disable_root
 
+    add_service connmand
+
     # Install basic packages. These are packages that are commonly necessary on
     # most machines like manuals, an editor, or tools to work with filesystems.
     install_base_packages
@@ -339,12 +341,6 @@ update_grub_config () {
 ##########  END FUNCTIONS
 
 homedir=/home/"$username"
-
-
-
-# Enable and start connman
-rc-update add connmand
-rc-service connmand start
 
 ## ESSENTIALS
 
