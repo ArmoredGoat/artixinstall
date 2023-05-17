@@ -5,15 +5,26 @@ gitRepo="ArmoredGoat/artixinstall"
 gitBranch="iss005"
 downloadUrl="$baseUrlRaw/$gitRepo/$gitBranch"
 
+# This 'main'-function is used to summarize and order all used functions in a
+# clear way. Also, it allows to swap out functions and rearrange them witout
+# much of an effort. In general, it seems to be good practice to break up
+# your code into managable functions and call them in a meta 'main'-function.
+
 main () {
+    # Import variables that were stored in temporary files by install.sh
+    # previously
     import_variables
 
+    # Configure localization and clock with given timezone
     configure_localization
     configure_clock
 
+    # Create user with given information and disable root access if wanted
     create_user
     disable_root
 
+    # Install basic packages. These are packages that are commonly necessary on
+    # most machines like manuals, an editor, or tools to work with filesystems.
     install_base_packages
 
     # If base installation was selected, everything is done at this point.
@@ -39,7 +50,13 @@ main () {
     rm -rf /chrootInstall.sh /tempfiles
 }
 
-##########  START FUNCTIONS
+
+# FUNCTION SECTION
+
+# Below, you will find all functions used above. They are listed alphabetically.
+# In general, the function's names are descriptive like 'install_stuff',
+# 'configure_stuff', and so on. It should be possible to guess what each
+# function does.
 
 add_service () {
     # Set service to given package/service
