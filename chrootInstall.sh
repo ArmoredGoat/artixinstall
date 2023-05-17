@@ -8,6 +8,7 @@ downloadUrl="$baseUrlRaw/$gitRepo/$gitBranch"
 main () {
     import_variables
 
+    create_user
     disable_root
 
     ## UTILITY
@@ -44,6 +45,33 @@ create_directory () {
         chmod 755 $@
 		chown -R "$username":"$username" $@
 	fi
+}
+
+create_user () {
+    # Create user with a personal directory in /home
+    useradd -m "$username"
+
+    # Set password
+    echo "$userPassword
+    $userPassword
+    " | passwd "$username"
+
+    # Add user to the following groups
+    usermod -aG wheel,audio,video,storage "$username"
+
+    # Uncomment the following line in /etc/sudoers grants users in wheel
+    # group sudo privileges. Therefore, there is no need for a root user
+    sed -i '/%wheel ALL=(ALL:ALL) ALL/s/^#//g' /etc/sudoers
+
+    # By appending this line to /etc/sudoers, it disables the password prompt
+    # for this user when using 'sudo'.
+    # TODO Instead of disabling the prompt, increase time before user has to
+    # enter the password again to 30 - 60 minutes,
+    echo "$username ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
+
+    # Set home directory permissions
+    chmod 755 /home/"$username"
+    create_directory $homedir/{.config,.local/share}
 }
 
 disable_root () {
@@ -242,29 +270,6 @@ rc-update add connmand
 rc-service connmand start
 
 ##########  END CONFIGURATION
-
-##########  START USER MANAGEMENT
-
-# Create user and set password
-useradd -m "$username"
-echo "$userPassword
-$userPassword
-" | passwd "$username"
-
-# Grant groups to user
-usermod -aG wheel,audio,video,storage "$username"
-
-# Give users in wheel group sudo privileges --> no need for root user
-sed -i '/%wheel ALL=(ALL:ALL) ALL/s/^#//g' /etc/sudoers
-
-# Disable sudo password prompts for this user
-echo "$username ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
-
-# set home directory permissions
-chmod 755 /home/"$username"
-create_directory $homedir/{.config,.local/share}
-
-##########  END USER MANAGEMENT
 
 ##########  START GENERAL PACKAGE INSTALLATION
 
