@@ -10,9 +10,17 @@ main () {
 
     configure_localization
     configure_clock
-    
+
     create_user
     disable_root
+
+    install_base_packages
+
+    # If base installation was selected, everything is done at this point.
+    # The script can now be exited.
+    if [[ $installationType == 'base' ]]; then
+        exit
+    fi
 
     ## UTILITY
 
@@ -157,6 +165,27 @@ import_variables () {
     done 
 }
 
+install_base_packages () {
+    # Manuals
+        # man-db    -
+        # man-pages -
+        # texinfo   -
+
+    # General administration
+        # sudo
+
+    # Filesystem adiminstration
+        # e2fsprogs -
+        # dosfstools    -
+
+    # Editor
+        # nano  -
+
+    baseInstallationPackages="man-db man-pages texinfo nano sudo e2fsprogs dosfstools" 
+
+    install_packages $baseInstallationPackages
+}
+
 install_graphics_drivers () {
     # Set gpu variable to given value
     gpu="$1"
@@ -271,412 +300,368 @@ update_grub_config () {
 
 ##########  END FUNCTIONS
 
-##########  START IMPORTING VARIABLES
-
 homedir=/home/"$username"
-
-##########  END IMPORTING VARIABLES
-
-##########  START CONFIGURATION
-
-
 
 # Enable and start connman
 rc-update add connmand
 rc-service connmand start
 
-##########  END CONFIGURATION
+## ESSENTIALS
 
-##########  START GENERAL PACKAGE INSTALLATION
+### FIRMWARE
 
-# Manuals
-    # man-db    -
-    # man-pages -
-    # texinfo   -
-    manuals="man-db man-pages texinfo"
+    pacman -Syu sof-firmware --needed --noconfirm
 
-# General administration
-    # sudo
-    generalAdministration="sudo"
+    if [[ $cpu == 'AuthenticAMD' ]]; then
+        microcodePackage='amd-ucode'
+    elif [[ $cpu == 'Intel' ]] || [[ $cpu == 'GenuineIntel' ]]; then
+        microcodePackage='intel-ucode'
+    fi 
 
-# Filesystem adiminstration
-    # e2fsprogs -
-    # dosfstools    -
-    filesystemAdministration="e2fsprogs dosfstools"
+    #
+    pacman -Syu $microcodePackage --needed --noconfirm
 
-pacman -Syu $manuals $generalAdministration $filesystemAdministration \
-    --needed --noconfirm
+### JAVA
 
-##########  END GENERAL PACKAGE INSTALLATION
+    pacman -Syu jdk17-openjdk --needed --noconfirm
 
-##########  START INSTALLATION TYPE SPEFIFIC INSTALLATION AND CONFIGURATION
+### PYTHON
 
-if [[ $installationType == 'base' ]]; then 
+    pacman -Syu python python-pip --needed --noconfirm
 
-    # Editor
-        # nano  -
-    editor='nano'
+    create_directory /home/"$username"/.local/lib
 
-    pacman -Syu $editor --needed --noconfirm
+    runuser -l "$username" -c "pip3 install --user setuptools"
 
-elif [[ $installationType == 'custom' ]]; then
+### PACMAN
 
-    ## ESSENTIALS
+    # Get config files repository and store them in corresponding directory
+    # Download pacman.conf with additional repositories and access to the 
+    # Arch repositories
+    curl $downloadUrl/dotfiles/pacman/pacman.conf \
+        -o /etc/pacman.conf
 
-    ### FIRMWARE
+create_directory /etc/pacman.d
 
-        pacman -Syu sof-firmware --needed --noconfirm
+    # Get recent mirror lists
+    archSvnRepo="archlinux/svntogit-packages/packages"
+    curl $baseUrlRaw/$archSvnRepo/pacman-mirrorlist/trunk/mirrorlist \
+        -o /etc/pacman.d/mirrorlist-arch
 
-        if [[ $cpu == 'AuthenticAMD' ]]; then
-            microcodePackage='amd-ucode'
-        elif [[ $cpu == 'Intel' ]] || [[ $cpu == 'GenuineIntel' ]]; then
-            microcodePackage='intel-ucode'
-        fi 
+    # Uncomment every mirror temporarily to download reflector
+    sed -i 's/^#Server/Server/' /etc/pacman.d/mirrorlist-arch
 
-        #
-        pacman -Syu $microcodePackage --needed --noconfirm
+    # Install and enable support of Arch repositories
+    pacman -Syu artix-archlinux-support --needed --noconfirm
+    # Retrieve keys
+    pacman-key --populate archlinux
 
-    ### JAVA
+    ### REFLECTOR
 
-        pacman -Syu jdk17-openjdk --needed --noconfirm
+        # reflector -
+        pacman -Syu reflector --needed --noconfirm
 
-    ### PYTHON
+        # Run reflector to select the best five servers for my country
+        reflector --save /etc/pacman.d/mirrorlist-arch --country Germany \
+            --protocol https --latest 5
 
-        pacman -Syu python python-pip --needed --noconfirm
-
-        create_directory /home/"$username"/.local/lib
-
-        runuser -l "$username" -c "pip3 install --user setuptools"
+        # Get config files repository and store them in corresponding 
+        # directory. Add file reflector.start to local.d directory to run 
+        # reflector at start without systemd
+        curl $downloadUrl/dotfiles/local.d/reflector.start \
+            -o /etc/local.d/reflector.start
+        # Make reflector.start executable
+        chmod +x /etc/local.d/reflector.start
+        #TODO add paccache to cron
     
-    ### PACMAN
+    ### ADDITIONALS
 
-        # Get config files repository and store them in corresponding directory
-        # Download pacman.conf with additional repositories and access to the 
-        # Arch repositories
-        curl $downloadUrl/dotfiles/pacman/pacman.conf \
-            -o /etc/pacman.conf
-	
-	create_directory /etc/pacman.d
+    pacman -Syu pacman-contrib --needed --noconfirm
 
-        # Get recent mirror lists
-        archSvnRepo="archlinux/svntogit-packages/packages"
-        curl $baseUrlRaw/$archSvnRepo/pacman-mirrorlist/trunk/mirrorlist \
-            -o /etc/pacman.d/mirrorlist-arch
+### VERSION CONTROL SYSTEM
 
-        # Uncomment every mirror temporarily to download reflector
-        sed -i 's/^#Server/Server/' /etc/pacman.d/mirrorlist-arch
+    pacman -Syu git --needed --noconfirm
 
-        # Install and enable support of Arch repositories
-        pacman -Syu artix-archlinux-support --needed --noconfirm
-        # Retrieve keys
-        pacman-key --populate archlinux
+    # Create directory for git repositories
+    create_directory $homedir/git/{own,cloned}
 
-        ### REFLECTOR
+### AUR HELPER
 
-            # reflector -
-            pacman -Syu reflector --needed --noconfirm
+    runuser -l "$username" -c "git clone https://aur.archlinux.org/yay.git \
+        $homedir/git/cloned/yay && \
+        cd $homedir/git/cloned/yay && \
+        makepkg -si --noconfirm"
 
-            # Run reflector to select the best five servers for my country
-            reflector --save /etc/pacman.d/mirrorlist-arch --country Germany \
-                --protocol https --latest 5
+    # Generate development package database for *-git packages that were
+    # installed without yay
+    runuser -l "$username" -c "yay -Y --gendb --noconfirm"
+    # Check for development packages updates
+    runuser -l "$username" -c "yay -Syu --devel --noconfirm"
+    # Enable development packages updates and combined upgrades permanently
+    runuser -l "$username" -c "yay -Y --devel --combinedupgrade \
+        --batchinstall --save --noconfirm"
 
-            # Get config files repository and store them in corresponding 
-            # directory. Add file reflector.start to local.d directory to run 
-            # reflector at start without systemd
-            curl $downloadUrl/dotfiles/local.d/reflector.start \
-                -o /etc/local.d/reflector.start
-            # Make reflector.start executable
-            chmod +x /etc/local.d/reflector.start
-            #TODO add paccache to cron
-        
-        ### ADDITIONALS
+### XDG
 
-        pacman -Syu pacman-contrib --needed --noconfirm
+    pacman -Syu xdg-user-dirs --needed --noconfirm
 
-    ### VERSION CONTROL SYSTEM
+create_directory /etc/xdg
 
-        pacman -Syu git --needed --noconfirm
+    # Get config files repository and store them in corresponding directory
+    curl $downloadUrl/dotfiles/xdg/user-dirs.defaults \
+        -o /etc/xdg/user-dirs.defaults
 
-        # Create directory for git repositories
-        create_directory $homedir/git/{own,cloned}
+create_directory $homedir/{downloads,documents/{music,public,desktop,templates,pictures,videos}}
 
-    ### AUR HELPER
+## INTERNET
 
-        runuser -l "$username" -c "git clone https://aur.archlinux.org/yay.git \
-            $homedir/git/cloned/yay && \
-            cd $homedir/git/cloned/yay && \
-            makepkg -si --noconfirm"
+### CLOUD SYNCHRONIZATION
 
-        # Generate development package database for *-git packages that were
-        # installed without yay
-        runuser -l "$username" -c "yay -Y --gendb --noconfirm"
-        # Check for development packages updates
-        runuser -l "$username" -c "yay -Syu --devel --noconfirm"
-        # Enable development packages updates and combined upgrades permanently
-        runuser -l "$username" -c "yay -Y --devel --combinedupgrade \
-            --batchinstall --save --noconfirm"
+    pacman -Syu nextcloud-client --needed --noconfirm
 
-    ### XDG
+### EMAIL CLIENT
 
-        pacman -Syu xdg-user-dirs --needed --noconfirm
-	
-	create_directory /etc/xdg
+    pacman -Syu neomutt --needed --noconfirm
 
-        # Get config files repository and store them in corresponding directory
-        curl $downloadUrl/dotfiles/xdg/user-dirs.defaults \
-            -o /etc/xdg/user-dirs.defaults
+### INSTANT MESSAGING
 
-	create_directory $homedir/{downloads,documents/{music,public,desktop,templates,pictures,videos}}
+#### MULTI-PROTOCOL CLIENT
 
-    ## INTERNET
+    pacman -Syu weechat --needed --noconfirm
 
-    ### CLOUD SYNCHRONIZATION
+#### OTHER INSTANT MESSAGING CLIENTS
 
-        pacman -Syu nextcloud-client --needed --noconfirm
+    pacman -Syu discord --needed --noconfirm
 
-    ### EMAIL CLIENT
+### NETWORK MANAGER
 
-        pacman -Syu neomutt --needed --noconfirm
+    # See install.sh. connman and wpa_supplicant are being used.
 
-    ### INSTANT MESSAGING
+### VPN CLIENT
 
-    #### MULTI-PROTOCOL CLIENT
+    pacman -Syu wireguard-tools wireguard-openrc --needed --noconfirm
 
-        pacman -Syu weechat --needed --noconfirm
+    #rc-update add wireguard
+    #rc-service wireguard start
 
-    #### OTHER INSTANT MESSAGING CLIENTS
+### WEB BROWSER
 
-        pacman -Syu discord --needed --noconfirm
+    pacman -Syu firefox-esr --needed --noconfirm
 
-    ### NETWORK MANAGER
+## MULTIMEDIA
 
-        # See install.sh. connman and wpa_supplicant are being used.
+### AUDIO
 
-    ### VPN CLIENT
+    pacman -Rdd jack2 --noconfirm
+    pacman -Syu pipewire lib32-pipewire pipewire-audio pipewire-alsa \
+        pipewire-pulse pipewire-jack pipewire-docs wireplumber pavucontrol \
+        --needed --noconfirm
 
-        pacman -Syu wireguard-tools wireguard-openrc --needed --noconfirm
+create_directory $homedir/.config/pipewire
 
-        #rc-update add wireguard
-        #rc-service wireguard start
+    curl $downloadUrl/dotfiles/pipewire/pipewire.conf \
+        -o $homedir/.config/pipewire/pipewire.conf
+    curl $downloadUrl/dotfiles/pipewire/.pipewire-start.sh \
+        -o $homedir/.config/pipewire/.pipewire-start.sh
+    chmod +x $homedir/.config/pipewire/.pipewire-start.sh
 
-    ### WEB BROWSER
+### AUDIO PLAYER
 
-        pacman -Syu firefox-esr --needed --noconfirm
+    pacman -Syu cmus --needed --noconfirm
 
-    ## MULTIMEDIA
+### AUDIO TAG EDITOR
 
-    ### AUDIO
+    pacman -Syu beets --needed --noconfirm
 
-        pacman -Rdd jack2 --noconfirm
-        pacman -Syu pipewire lib32-pipewire pipewire-audio pipewire-alsa \
-            pipewire-pulse pipewire-jack pipewire-docs wireplumber pavucontrol \
-            --needed --noconfirm
+### AUDIO VISUALIZER
 
-	create_directory $homedir/.config/pipewire
+    runuser -l "$username" -c "yay -Syu cli-visualizer-git \
+        --needed --noconfirm"
 
-        curl $downloadUrl/dotfiles/pipewire/pipewire.conf \
-            -o $homedir/.config/pipewire/pipewire.conf
-        curl $downloadUrl/dotfiles/pipewire/.pipewire-start.sh \
-            -o $homedir/.config/pipewire/.pipewire-start.sh
-        chmod +x $homedir/.config/pipewire/.pipewire-start.sh
+### IMAGE VIEWER
 
-    ### AUDIO PLAYER
+    pacman -Syu imv --needed --noconfirm
 
-        pacman -Syu cmus --needed --noconfirm
+### OPTICAL DISK RIPPING
 
-    ### AUDIO TAG EDITOR
+    # Installing makemkv-cli requires to accept the EULA, which pops up
+    # before finishing the process. The pager 'less' is used to display
+    # the text. To automatically leave less the command line option
+    # LESS='+q' is given along. Then it behaves as 'q' was entered manually.
+    # "yes 'yes'" outputs a constant stream of 'yes' strings 
+    # followed by a new line. This way as soon as the script leaves the
+    # pager, it accepts the EULA.
+    runuser -l "$username" -c "yes 'yes' | LESS='+q' yay -Syu makemkv-cli \
+        --needed --noconfirm"
 
-        pacman -Syu beets --needed --noconfirm
+### SCREENSHOTS
 
-    ### AUDIO VISUALIZER
+    pacman -Syu flameshot --needed --noconfirm
 
-        runuser -l "$username" -c "yay -Syu cli-visualizer-git \
-            --needed --noconfirm"
+### VIDEO PLAYER
 
-    ### IMAGE VIEWER
+    pacman -Syu mpv --needed --noconfirm
 
-        pacman -Syu imv --needed --noconfirm
+### VIDEO EDITOR
 
-    ### OPTICAL DISK RIPPING
+    runuser -l "$username" -c "yay -Syu losslesscut-bin \
+        --needed --noconfirm"
 
-        # Installing makemkv-cli requires to accept the EULA, which pops up
-        # before finishing the process. The pager 'less' is used to display
-        # the text. To automatically leave less the command line option
-        # LESS='+q' is given along. Then it behaves as 'q' was entered manually.
-        # "yes 'yes'" outputs a constant stream of 'yes' strings 
-        # followed by a new line. This way as soon as the script leaves the
-        # pager, it accepts the EULA.
-        runuser -l "$username" -c "yes 'yes' | LESS='+q' yay -Syu makemkv-cli \
-            --needed --noconfirm"
+### WEBCAM
 
-    ### SCREENSHOTS
+    pacman -Syu cameractrls --needed --noconfirm
 
-        pacman -Syu flameshot --needed --noconfirm
+##  UTILITY
+
+### ARCHIVE MANAGER
+
+    pacman -Syu p7zip --needed --noconfirm
+
+### AUR HELPER
+
+    # See section ESSENTIALS above.
+
+### BACKUP
+
+    # See SYNCHRONIZATION below. 
+
+### BLUETOOTH MANAGEMENT
+
+pacman -Syu bluez bluez-openrc bluez-utils --needed --noconfirm
+
+### BOOT MANAGEMENT
+
+    # Disable grub delay to speed up boot process
+    # If grub menu is needed, press ESC while booting
+
+    # Find and replace 'menu' with 'hidden'
+    sed -i 's/GRUB_TIMEOUT_STYLE=menu/GRUB_TIMEOUT_STYLE=hidden/g' \
+    /etc/default/grub
+
+    # Update grub config
+    update_grub_config
+
+### CLOCK SYNCHRONIZATION
+
+    # connman's native ntp service is used.
+
+### COMMAND-LINE SHELL
+
+    # Get config files repository and store them in corresponding directory
+    curl $downloadUrl/dotfiles/bash/.bashrc \
+        -o $homedir/.bashrc
+    curl $downloadUrl/dotfiles/bash/.bash_aliases \
+        -o $homedir/.bash_aliases
+
+    source $homedir/.bashrc
+
+    chmod +x $homedir/.bash*
+
+    pacman -Syu bash-completion --needed --noconfirm
+
+### FILE MANAGER
+
+    pacman -Syu ranger --needed --noconfirm
+
+### JOB SCHEDULER
+
+    pacman -Syu cronie cronie-openrc --needed --noconfirm
+    rc-update add cronie
+    rc-service cronie start
+
+    # Make sure that local service is running
+    rc-update add local
+    rc-service local start
+
+### MANUALS
+
+    pacman -Syu man-db man-pages texinfo --needed --noconfirm
+
+### PAGER
+
+    pacman -Syu less --needed --noconfirm
+
+### SECURE SHELL
+
+    pacman -Syu openssh openssh-openrc --needed --noconfirm
+    rc-update add sshd
+    rc-service sshd start
+
+### SYNCHRONIZATION
+
+    pacman -Syu rsync rsync-openrc --needed --noconfirm
+
+### SYSLOGS
+
+    pacman -Syu syslog-ng syslog-ng-openrc --needed --noconfirm
+    rc-update add syslog-ng
+    rc-service syslog-ng start
+
+### SYSTEM INFORMARTION VIEWER
+
+    pacman -Syu fastfetch --needed --noconfirm
+
+### TASK MANAGER
+
+    pacman -Syu bottom --needed --noconfirm
     
-    ### VIDEO PLAYER
+### TERMINAL EMULATOR
 
-        pacman -Syu mpv --needed --noconfirm
+    pacman -Syu kitty --needed --noconfirm
 
-    ### VIDEO EDITOR
+    # Create directories for kitty's general configs
+    create_directory $homedir/.config/kitty
 
-        runuser -l "$username" -c "yay -Syu losslesscut-bin \
-            --needed --noconfirm"
+    # Create directories for personal backgrounds, fonts, themes, etc.
+    create_directory $homedir/.local/share/{backgrounds,fonts,themes}
 
-    ### WEBCAM
+    ## General configuration
+    # Get config files repository and store them in corresponding directory
+    curl $downloadUrl/dotfiles/kitty/kitty.conf \
+        -o $homedir/.config/kitty/kitty.conf
 
-        pacman -Syu cameractrls --needed --noconfirm
+    ## Configure font
 
-    ##  UTILITY
+    # Create directory for fonts in home directory and download font to it.
+    # This way kitty can see it as an available font to use.
+    create_directory $homedir/.fonts/ttf
 
-    ### ARCHIVE MANAGER
+### VERSION CONTROL SYSTEM
 
-        pacman -Syu p7zip --needed --noconfirm
+    # See section ESSENTIALS above.
 
-    ### AUR HELPER
+### VIRTUALIZATION
 
-        # See section ESSENTIALS above.
+    pacman -Rdd iptables --noconfirm
+    pacman -Syu virt-manager qemu-desktop qemu-guest-agent-openrc \
+        dnsmasq iptables-nft --needed --noconfirm
 
-    ### BACKUP
+    # Set UNIX domain socket ownership to libvirt and permissions to read
+    # and write by uncommenting the following lines
 
-        # See SYNCHRONIZATION below. 
+    sed -i "/unix_sock_group = /s/^#//g" /etc/libvirt/libvirtd.conf
+    sed -i "/unix_sock_rw_perms = /s/^#//g" /etc/libvirt/libvirtd.conf
 
-    ### BLUETOOTH MANAGEMENT
+    usermod -aG libvirt "$username"
 
-    pacman -Syu bluez bluez-openrc bluez-utils --needed --noconfirm
+    sed -i "s/user = \"libvirt-qemu\"/user = \"$username\"/" \
+        /etc/libvirt/libvirtd.conf
+    sed -i "s/group = \"libvirt-qemu\"/group = \"$username\"/" \
+        /etc/libvirt/libvirtd.conf
 
-    ### BOOT MANAGEMENT
+## DOCUMENTS
 
-        # Disable grub delay to speed up boot process
-        # If grub menu is needed, press ESC while booting
+### TEXT EDITOR EDITOR
+    
+    pacman -Syu neovim --needed --noconfirm
 
-        # Find and replace 'menu' with 'hidden'
-        sed -i 's/GRUB_TIMEOUT_STYLE=menu/GRUB_TIMEOUT_STYLE=hidden/g' \
-        /etc/default/grub
+## GAMING
 
-        # Update grub config
-        update_grub_config
+### GAME DISTRIBUTION PLATFORM
 
-    ### CLOCK SYNCHRONIZATION
+    pacman -Syu steam --needed --noconfirm
 
-        # connman's native ntp service is used.
-
-    ### COMMAND-LINE SHELL
-
-        # Get config files repository and store them in corresponding directory
-        curl $downloadUrl/dotfiles/bash/.bashrc \
-            -o $homedir/.bashrc
-        curl $downloadUrl/dotfiles/bash/.bash_aliases \
-            -o $homedir/.bash_aliases
-
-        source $homedir/.bashrc
-
-        chmod +x $homedir/.bash*
-
-        pacman -Syu bash-completion --needed --noconfirm
-
-    ### FILE MANAGER
-
-        pacman -Syu ranger --needed --noconfirm
-
-    ### JOB SCHEDULER
-
-        pacman -Syu cronie cronie-openrc --needed --noconfirm
-        rc-update add cronie
-        rc-service cronie start
-
-        # Make sure that local service is running
-        rc-update add local
-        rc-service local start
-
-    ### MANUALS
-
-        pacman -Syu man-db man-pages texinfo --needed --noconfirm
-
-    ### PAGER
-
-        pacman -Syu less --needed --noconfirm
-
-    ### SECURE SHELL
-
-        pacman -Syu openssh openssh-openrc --needed --noconfirm
-        rc-update add sshd
-        rc-service sshd start
-
-    ### SYNCHRONIZATION
-
-        pacman -Syu rsync rsync-openrc --needed --noconfirm
-
-    ### SYSLOGS
-
-        pacman -Syu syslog-ng syslog-ng-openrc --needed --noconfirm
-        rc-update add syslog-ng
-        rc-service syslog-ng start
-
-    ### SYSTEM INFORMARTION VIEWER
-
-        pacman -Syu fastfetch --needed --noconfirm
-
-    ### TASK MANAGER
-
-        pacman -Syu bottom --needed --noconfirm
-        
-    ### TERMINAL EMULATOR
-
-        pacman -Syu kitty --needed --noconfirm
-	
-        # Create directories for kitty's general configs
-        create_directory $homedir/.config/kitty
-
-        # Create directories for personal backgrounds, fonts, themes, etc.
-        create_directory $homedir/.local/share/{backgrounds,fonts,themes}
-
-        ## General configuration
-        # Get config files repository and store them in corresponding directory
-        curl $downloadUrl/dotfiles/kitty/kitty.conf \
-            -o $homedir/.config/kitty/kitty.conf
-
-        ## Configure font
-
-        # Create directory for fonts in home directory and download font to it.
-        # This way kitty can see it as an available font to use.
-        create_directory $homedir/.fonts/ttf
-
-    ### VERSION CONTROL SYSTEM
-
-        # See section ESSENTIALS above.
-
-    ### VIRTUALIZATION
-
-        pacman -Rdd iptables --noconfirm
-        pacman -Syu virt-manager qemu-desktop qemu-guest-agent-openrc \
-            dnsmasq iptables-nft --needed --noconfirm
-
-        # Set UNIX domain socket ownership to libvirt and permissions to read
-        # and write by uncommenting the following lines
-
-        sed -i "/unix_sock_group = /s/^#//g" /etc/libvirt/libvirtd.conf
-        sed -i "/unix_sock_rw_perms = /s/^#//g" /etc/libvirt/libvirtd.conf
-
-        usermod -aG libvirt "$username"
-
-        sed -i "s/user = \"libvirt-qemu\"/user = \"$username\"/" \
-            /etc/libvirt/libvirtd.conf
-        sed -i "s/group = \"libvirt-qemu\"/group = \"$username\"/" \
-            /etc/libvirt/libvirtd.conf
-
-    ## DOCUMENTS
-
-    ### TEXT EDITOR EDITOR
-        
-        pacman -Syu neovim --needed --noconfirm
-
-    ## GAMING
-
-    ### GAME DISTRIBUTION PLATFORM
-
-        pacman -Syu steam --needed --noconfirm
-
-    ### MINECRAFT LAUNCHER
+### MINECRAFT LAUNCHER
 
 #        # Build dependencies
 #        pacman -Syu qt6 ninja cmake extra-cmake-modules zlib\
@@ -694,100 +679,99 @@ elif [[ $installationType == 'custom' ]]; then
 #        cmake --build build
 #        cmake --install build
 
-    ## SECURITY
+## SECURITY
 
-    ### FIREWALL MANAGEMENT
+### FIREWALL MANAGEMENT
 
-        # ufw - 
-        #pacman -Syu ufw ufw-openrc --needed --noconfirm
-        
-        # Enable ufw to start on boot
-        #rc-update add ufw
+    # ufw - 
+    #pacman -Syu ufw ufw-openrc --needed --noconfirm
+    
+    # Enable ufw to start on boot
+    #rc-update add ufw
 
-        # Disable any traffic by default
-        #ufw default deny
+    # Disable any traffic by default
+    #ufw default deny
 
-        # Activate logging
-        #ufw logging low
+    # Activate logging
+    #ufw logging low
 
-        # Limit SSH connections
-        #ufw limit ssh comment 'Limit Connections On SSH Port'
+    # Limit SSH connections
+    #ufw limit ssh comment 'Limit Connections On SSH Port'
 
-        # Allow traffic from home network and specific ports/protocols
-        #ufw allow from 192.168.1.0/24
-        
-        #ufw allow in 25,53,80,123,143,443,465,587,993/tcp comment 'Standard Incomming Ports'
-        #ufw allow out 22,25,53,80,123,143,443,587,993/tcp comment 'Standard Outgoing Ports'
-        #ufw allow in 53,123/udp comment 'Allow NTP and DNS in'
-        #ufw allow out 53,123/udp comment 'Allow NTP and DNS out'
+    # Allow traffic from home network and specific ports/protocols
+    #ufw allow from 192.168.1.0/24
+    
+    #ufw allow in 25,53,80,123,143,443,465,587,993/tcp comment 'Standard Incomming Ports'
+    #ufw allow out 22,25,53,80,123,143,443,587,993/tcp comment 'Standard Outgoing Ports'
+    #ufw allow in 53,123/udp comment 'Allow NTP and DNS in'
+    #ufw allow out 53,123/udp comment 'Allow NTP and DNS out'
 
-        # https://hackspoiler.de/ufw-linux-server-firewall-skript/
-        #TODO Explain ports
-        #TODO If email client is used, add ports of outgoing servers
-        # https://askubuntu.com/questions/448836/how-do-i-with-ufw-deny-all-outgoing-ports-excepting-the-ones-i-need
+    # https://hackspoiler.de/ufw-linux-server-firewall-skript/
+    #TODO Explain ports
+    #TODO If email client is used, add ports of outgoing servers
+    # https://askubuntu.com/questions/448836/how-do-i-with-ufw-deny-all-outgoing-ports-excepting-the-ones-i-need
 
-        # Reload ufw
-        #ufw --force enable
+    # Reload ufw
+    #ufw --force enable
 
-    ## SCIENCE
+## SCIENCE
 
 
 
-    ## OTHERS
+## OTHERS
 
-    ### COMPOSITE MANAGER
+### COMPOSITE MANAGER
 
-        pacman -Syu picom --needed --noconfirm
+    pacman -Syu picom --needed --noconfirm
 
-    ### DISPLAY MANAGER
+### DISPLAY MANAGER
 
-        pacman -Syu lightdm lightdm-openrc light-locker lightdm-slick-greeter \
-            --needed --noconfirm
+    pacman -Syu lightdm lightdm-openrc light-locker lightdm-slick-greeter \
+        --needed --noconfirm
 
-        # lightdm
-        # lightdm-openrc
-        # lightdm-gtk-greeter
-        # light-locker
+    # lightdm
+    # lightdm-openrc
+    # lightdm-gtk-greeter
+    # light-locker
 
-        # Enable lightdmto start at boot
-        rc-update add lightdm
+    # Enable lightdmto start at boot
+    rc-update add lightdm
 
-        # Create directory for lightdm config files
-        create_directory /etc/lightdm
+    # Create directory for lightdm config files
+    create_directory /etc/lightdm
 
-        # Get config files repository and store them in corresponding directory
-        curl $downloadUrl/dotfiles/lightdm/lightdm.conf \
-            -o /etc/lightdm/lightdm.conf
-        curl $downloadUrl/dotfiles/lightdm/slick-greeter.conf \
-            -o /etc/lightdm/slick-greeter.conf
-        curl $downloadUrl/dotfiles/lightdm/users.conf \
-            -o /etc/lightdm/users.conf
+    # Get config files repository and store them in corresponding directory
+    curl $downloadUrl/dotfiles/lightdm/lightdm.conf \
+        -o /etc/lightdm/lightdm.conf
+    curl $downloadUrl/dotfiles/lightdm/slick-greeter.conf \
+        -o /etc/lightdm/slick-greeter.conf
+    curl $downloadUrl/dotfiles/lightdm/users.conf \
+        -o /etc/lightdm/users.conf
 
-        curl $downloadUrl/dotfiles/xorg/.xprofile \
-            -o $homedir/.xprofile
-        chmod +x $homedir/.xprofile
+    curl $downloadUrl/dotfiles/xorg/.xprofile \
+        -o $homedir/.xprofile
+    chmod +x $homedir/.xprofile
 
-        # Set wallpaper for lightdm with slickgreeter-pywal
-        git clone https://github.com/Paul-Houser/slickgreeter-pywal \
-            $homedir/git/cloned/slickgreeter-pywal
-        cd $homedir/git/cloned/slickgreeter-pywal
-        chmod +x install.sh
-        ./install.sh
-        reTheme $(cat $HOME/.cache/wal/wal)
+    # Set wallpaper for lightdm with slickgreeter-pywal
+    git clone https://github.com/Paul-Houser/slickgreeter-pywal \
+        $homedir/git/cloned/slickgreeter-pywal
+    cd $homedir/git/cloned/slickgreeter-pywal
+    chmod +x install.sh
+    ./install.sh
+    reTheme $(cat $HOME/.cache/wal/wal)
 
-    ### DISPLAY SERVER
+### DISPLAY SERVER
 
-        pacman -Syu xorg xorg-server xorg-xinit --needed --noconfirm
+    pacman -Syu xorg xorg-server xorg-xinit --needed --noconfirm
 
-        # Get config files repository and store them in corresponding directory
-        curl $downloadUrl/dotfiles/xorg/.xinitrc \
-            -o $homedir/.xinitrc
-        chmod +x $homedir/.xinitrc
-        curl $downloadUrl/dotfiles/xorg/xorg.conf \
-            -o /etc/X11/xorg.conf
+    # Get config files repository and store them in corresponding directory
+    curl $downloadUrl/dotfiles/xorg/.xinitrc \
+        -o $homedir/.xinitrc
+    chmod +x $homedir/.xinitrc
+    curl $downloadUrl/dotfiles/xorg/xorg.conf \
+        -o /etc/X11/xorg.conf
 
-        wal -i $homedir/.local/share/backgrounds/mushroom_town.png
-fi
+    wal -i $homedir/.local/share/backgrounds/mushroom_town.png
 
 # Set all permissions and ownership in home directory correctly.
 chown -R "$username":"$username" /home/"$username"
