@@ -4,6 +4,7 @@ baseUrlRaw="https://raw.githubusercontent.com"
 gitRepo="ArmoredGoat/artixinstall"
 gitBranch="iss005"
 downloadUrl="$baseUrlRaw/$gitRepo/$gitBranch"
+homedir=/home/"$username"
 
 # This 'main'-function is used to summarize and order all used functions in a
 # clear way. Also, it allows to swap out functions and rearrange them witout
@@ -339,8 +340,6 @@ update_grub_config () {
 }
 
 ##########  END FUNCTIONS
-
-homedir=/home/"$username"
 
 ## ESSENTIALS
 
