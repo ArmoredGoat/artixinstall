@@ -41,6 +41,27 @@ main () {
 
 ##########  START FUNCTIONS
 
+add_service () {
+    # Set service to given package/service
+    service="$1"
+    
+    # If no runlevel is given, set runlevel to default. Otherwise, use given
+    # runlevel.
+    if [[ ! "$2" ]]; then
+        runlevel="default"
+    else
+        runlevel="$2"
+    fi
+
+    # Add service to a runlevel to run it automatically if runlevel is met.
+    # TODO Explain runlevels
+    rc-update add $service $runlevel
+
+    # Start service now. Most of the time, the service is already running
+    # after installation but it never hurts to make sure.
+    rc-service $service start
+}
+
 configure_clock () {
     # TODO Explain
     hwclock --systohc --utc
@@ -301,6 +322,8 @@ update_grub_config () {
 ##########  END FUNCTIONS
 
 homedir=/home/"$username"
+
+
 
 # Enable and start connman
 rc-update add connmand
