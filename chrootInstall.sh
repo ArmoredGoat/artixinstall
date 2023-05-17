@@ -8,6 +8,8 @@ downloadUrl="$baseUrlRaw/$gitRepo/$gitBranch"
 main () {
     import_variables
 
+    configure_localization
+
     create_user
     disable_root
 
@@ -29,6 +31,29 @@ main () {
 }
 
 ##########  START FUNCTIONS
+
+configure_localization () {
+    # By uncommenting localizations/languages in /etc/locale.gen, the system
+    # create the necessary files for using it the next time 'locale-gen' is run.
+    sed -i '/en_US.UTF-8 UTF-8/s/^#//g' /etc/locale.gen
+
+    # Set desired locale system-wide by setting and exporting the LANG
+    # environment variable.
+    echo 'export LANG="en_US.UTF-8"' > /etc/locale.conf
+    
+    # Set collation rules (rules for sorting and regular expresions) 
+    # system-wide by setting and exporting the LC_COLLATE environment variable.
+    # The value 'C' tell the system to list dotfiles first, followed by 
+    # uppercase and lowercase filenames.
+    echo 'export LC_COLLATE="C"' >> /etc/locale.conf
+    
+    # Set time zone by creating a symbolic link to the according file in
+    # time zone directory.
+    ln -sf /usr/share/zoneinfo/$timezone /etc/localtime
+    
+    # Generate localization
+    locale-gen
+}
 
 create_directory () {
 	# Check if directories exists. If not, create them.
@@ -247,20 +272,6 @@ homedir=/home/"$username"
 ##########  END IMPORTING VARIABLES
 
 ##########  START CONFIGURATION
-
-# Configure localization
-# Enable desired locale by uncommenting line
-sed -i '/en_US.UTF-8 UTF-8/s/^#//g' /etc/locale.gen
-
-# Set desired locale systemwide
-echo 'export LANG="en_US.UTF-8"' > /etc/locale.conf
-# Set collation rules (rules for sorting and regular expresions)
-# C - dotfiles first, followed by uppercase and lowercase filenames
-echo 'export LC_COLLATE="C"' >> /etc/locale.conf
-# Set time zone
-ln -sf /usr/share/zoneinfo/$timezone /etc/localtime
-# Generate locales
-locale-gen
 
 # Configure clock settings
 hwclock --systohc --utc
