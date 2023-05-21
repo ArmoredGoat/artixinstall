@@ -1,8 +1,9 @@
 #! /bin/bash
 
+gitUrl="https://github.com/ArmoredGoat/artixinstall.git"
 baseUrlRaw="https://raw.githubusercontent.com"
 gitRepo="ArmoredGoat/artixinstall"
-gitBranch="iss005"
+gitBranch="iss008"
 downloadUrl="$baseUrlRaw/$gitRepo/$gitBranch"
 homedir=/home/"$username"
 
@@ -35,6 +36,8 @@ main () {
     if [[ $installationType == 'base' ]]; then
         exit
     fi
+
+    clone_repository
 
     ## UTILITY
 
@@ -80,6 +83,21 @@ add_service () {
     # Start service now. Most of the time, the service is already running
     # after installation but it never hurts to make sure.
     rc-service $service start
+}
+
+clone_repository () {
+    # Clone git repository to /home/git
+    git clone $gitUrl $homedir/git/artixinstall
+    # Move into repo directory
+    cd $homedir/git/artixinstall
+    # Get current branch
+    currentBranch=$(git status | grep 'On branch' | awk '{print $3}')
+
+    # Compare current branch with working branch. If it does not match,
+    # switch to working branch.
+    if [[ ! "$currentBranch" == "$gitBranch" ]]; then
+        git checkout $gitBranch
+    fi
 }
 
 configure_clock () {
