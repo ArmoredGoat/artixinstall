@@ -40,6 +40,10 @@ main () {
 
     clone_repository
 
+    ## INTERNET
+
+        install_internet_packages
+        
     ## MULTIMEDIA
 
     install_mulitmedia_packages
@@ -295,6 +299,32 @@ install_grub () {
     update_grub_config
 }
 
+install_internet_packages () {
+    ### CLOUD SYNCHRONIZATION
+        # nextcloud-client - 
+    ### EMAIL CLIENT
+        # neomutt - 
+    ### INSTANT MESSAGING
+    #### MULTI-PROTOCOL CLIENT
+        # weechat -
+    #### OTHER INSTANT MESSAGING CLIENTS
+        # discord -
+    ### NETWORK MANAGER
+        # See install.sh. connman and wpa_supplicant are being used.
+    ### VPN CLIENT
+        # wireguard-tools - 
+        # wireguard-openrc -
+    ### WEB BROWSER
+        # firefox-esr - 
+
+    internetPackages="nextcloud-client neomutt weechat discord wireguard-tools \
+        wireguard-openrc firefox-esr"
+
+    install_packages $internetPackages
+
+    add_service wireguard
+}
+
 install_mulitmedia_packages () {
     ### AUDIO PLAYER
         # cmus - 
@@ -535,42 +565,6 @@ create_directory /etc/xdg
         -o /etc/xdg/user-dirs.defaults
 
 create_directory $homedir/{downloads,documents/{music,public,desktop,templates,pictures,videos}}
-
-## INTERNET
-
-### CLOUD SYNCHRONIZATION
-
-    pacman -Syu nextcloud-client --needed --noconfirm
-
-### EMAIL CLIENT
-
-    pacman -Syu neomutt --needed --noconfirm
-
-### INSTANT MESSAGING
-
-#### MULTI-PROTOCOL CLIENT
-
-    pacman -Syu weechat --needed --noconfirm
-
-#### OTHER INSTANT MESSAGING CLIENTS
-
-    pacman -Syu discord --needed --noconfirm
-
-### NETWORK MANAGER
-
-    # See install.sh. connman and wpa_supplicant are being used.
-
-### VPN CLIENT
-
-    pacman -Syu wireguard-tools wireguard-openrc --needed --noconfirm
-
-    #rc-update add wireguard
-    #rc-service wireguard start
-
-### WEB BROWSER
-
-    pacman -Syu firefox-esr --needed --noconfirm
-
 
 ##  UTILITY
 
