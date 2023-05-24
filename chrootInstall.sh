@@ -229,6 +229,11 @@ import_variables () {
     done 
 }
 
+install_aur_package () {
+    runuser -l "$username" -c "yay -Syu $@ \
+        --needed --noconfirm"
+}
+
 install_base_packages () {
     # Manuals
         # man-db    -
@@ -541,8 +546,7 @@ create_directory $homedir/{downloads,documents/{music,public,desktop,templates,p
 
 ### AUDIO VISUALIZER
 
-    runuser -l "$username" -c "yay -Syu cli-visualizer-git \
-        --needed --noconfirm"
+
 
 ### IMAGE VIEWER
 
