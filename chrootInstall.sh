@@ -42,6 +42,8 @@ main () {
 
     ## MULTIMEDIA
 
+    install_aur_package cli-visualizer-git
+
     install_pipewire
 
     ## UTILITY
