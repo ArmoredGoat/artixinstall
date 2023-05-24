@@ -544,8 +544,8 @@ create_directory $homedir/.config/pipewire
     # "yes 'yes'" outputs a constant stream of 'yes' strings 
     # followed by a new line. This way as soon as the script leaves the
     # pager, it accepts the EULA.
-    runuser -l "$username" -c "yes 'yes' | LESS='+q' yay -Syu makemkv-cli \
-        --needed --noconfirm"
+    #runuser -l "$username" -c "yes 'yes' | LESS='+q' yay -Syu makemkv-cli \
+    #    --needed --noconfirm"
 
 ### SCREENSHOTS
 
