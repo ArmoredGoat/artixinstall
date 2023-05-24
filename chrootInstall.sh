@@ -42,9 +42,7 @@ main () {
 
     ## MULTIMEDIA
 
-    install_aur_package cli-visualizer-git
-
-    install_pipewire
+    install_mulitmedia_packages
 
     ## UTILITY
 
@@ -297,6 +295,46 @@ install_grub () {
     update_grub_config
 }
 
+install_mulitmedia_packages () {
+    ### AUDIO PLAYER
+        # cmus - 
+    ### AUDIO TAG EDITOR
+        # beets - 
+    ### AUDIO VISUALIZER
+        # cli-visualizer-git - 
+    ### IMAGE VIEWER
+        # imv -
+    ### SCREENSHOTS
+        # flameshot - 
+    ### VIDEO PLAYER
+        # mpv -
+    ### VIDEO EDITOR
+        # losslesscut
+    ### WEBCAM
+        # cameractrls - 
+    
+    ### OPTICAL DISK RIPPING
+
+    # Installing makemkv-cli requires to accept the EULA, which pops up
+    # before finishing the process. The pager 'less' is used to display
+    # the text. To automatically leave less the command line option
+    # LESS='+q' is given along. Then it behaves as 'q' was entered manually.
+    # "yes 'yes'" outputs a constant stream of 'yes' strings 
+    # followed by a new line. This way as soon as the script leaves the
+    # pager, it accepts the EULA.
+    #runuser -l "$username" -c "yes 'yes' | LESS='+q' yay -Syu makemkv-cli \
+    #    --needed --noconfirm"
+
+    mulitmediaPackages="cmus beets imv flameshot mpv cameracrtls"
+    mulitmediaPackagesAur="losslesscut-bin cli-visualizer-git"
+
+    install_packages $mulitmediaPackages
+    install_aur_package $mulitmediaPackagesAur
+
+    install_pipewire
+}
+
+
 install_nitrogen () {
     ### WALLPAPER SETTER
 
@@ -533,55 +571,6 @@ create_directory $homedir/{downloads,documents/{music,public,desktop,templates,p
 
     pacman -Syu firefox-esr --needed --noconfirm
 
-## MULTIMEDIA
-
-
-### AUDIO
-
-### AUDIO PLAYER
-
-    pacman -Syu cmus --needed --noconfirm
-
-### AUDIO TAG EDITOR
-
-    pacman -Syu beets --needed --noconfirm
-
-### AUDIO VISUALIZER
-
-
-
-### IMAGE VIEWER
-
-    pacman -Syu imv --needed --noconfirm
-
-### OPTICAL DISK RIPPING
-
-    # Installing makemkv-cli requires to accept the EULA, which pops up
-    # before finishing the process. The pager 'less' is used to display
-    # the text. To automatically leave less the command line option
-    # LESS='+q' is given along. Then it behaves as 'q' was entered manually.
-    # "yes 'yes'" outputs a constant stream of 'yes' strings 
-    # followed by a new line. This way as soon as the script leaves the
-    # pager, it accepts the EULA.
-    #runuser -l "$username" -c "yes 'yes' | LESS='+q' yay -Syu makemkv-cli \
-    #    --needed --noconfirm"
-
-### SCREENSHOTS
-
-    pacman -Syu flameshot --needed --noconfirm
-
-### VIDEO PLAYER
-
-    pacman -Syu mpv --needed --noconfirm
-
-### VIDEO EDITOR
-
-    runuser -l "$username" -c "yay -Syu losslesscut-bin \
-        --needed --noconfirm"
-
-### WEBCAM
-
-    pacman -Syu cameractrls --needed --noconfirm
 
 ##  UTILITY
 
@@ -593,7 +582,7 @@ create_directory $homedir/{downloads,documents/{music,public,desktop,templates,p
 
     # See section ESSENTIALS above.
 
-### BACKUP
+    ### BACKUP
 
     # See SYNCHRONIZATION below. 
 
