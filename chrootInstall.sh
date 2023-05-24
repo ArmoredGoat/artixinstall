@@ -6,6 +6,7 @@ gitRepo="ArmoredGoat/artixinstall"
 gitBranch="iss008"
 downloadUrl="$baseUrlRaw/$gitRepo/$gitBranch"
 homedir=/home/"$username"
+repoDirectory="$homedir/git/artixinstall"
 
 # This 'main'-function is used to summarize and order all used functions in a
 # clear way. Also, it allows to swap out functions and rearrange them witout
@@ -38,6 +39,10 @@ main () {
     fi
 
     clone_repository
+
+    ## MULTIMEDIA
+
+    install_pipewire
 
     ## UTILITY
 
@@ -304,6 +309,26 @@ install_packages () {
     pacman -Syuq $@ --needed --noconfirm
 }
 
+
+install_pipewire () {
+    # Remove jack2 as it creates conflicts with pipewire-jack
+    pacman -Rdd jack2 --noconfirm
+    # Install pipewire and related packages
+    pacman -Syu pipewire lib32-pipewire pipewire-audio pipewire-alsa \
+        pipewire-pulse pipewire-jack pipewire-docs wireplumber pavucontrol \
+        --needed --noconfirm
+    # Create configuration directory
+    create_directory $homedir/.config/pipewire
+    # Copy configuration file into according directory
+    cp $repoDirectory/dotfiles/pipewire/pipewire.conf \
+        $homedir/.config/pipewire/pipewire.conf
+    # Copy start-up script into configuration directory
+    cp $repoDirectory/dotfiles/pipewire/.pipewire-start.sh \
+        $homedir/.config/pipewire/.pipewire-start.sh
+    # Make start-up script executable
+    chmod +x $homedir/.config/pipewire/.pipewire-start.sh
+}
+
 install_pywal () {
         ### PYWAL
 
@@ -503,20 +528,8 @@ create_directory $homedir/{downloads,documents/{music,public,desktop,templates,p
 
 ## MULTIMEDIA
 
+
 ### AUDIO
-
-    pacman -Rdd jack2 --noconfirm
-    pacman -Syu pipewire lib32-pipewire pipewire-audio pipewire-alsa \
-        pipewire-pulse pipewire-jack pipewire-docs wireplumber pavucontrol \
-        --needed --noconfirm
-
-create_directory $homedir/.config/pipewire
-
-    curl $downloadUrl/dotfiles/pipewire/pipewire.conf \
-        -o $homedir/.config/pipewire/pipewire.conf
-    curl $downloadUrl/dotfiles/pipewire/.pipewire-start.sh \
-        -o $homedir/.config/pipewire/.pipewire-start.sh
-    chmod +x $homedir/.config/pipewire/.pipewire-start.sh
 
 ### AUDIO PLAYER
 
