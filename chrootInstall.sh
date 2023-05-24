@@ -43,7 +43,7 @@ main () {
     ## INTERNET
 
         install_internet_packages
-        
+
     ## MULTIMEDIA
 
     install_mulitmedia_packages
@@ -234,7 +234,7 @@ import_variables () {
 }
 
 install_aur_package () {
-    runuser -l "$username" -c "yay -Syu $@ \
+    runuser -l "$username" -c "yay -Syuq $@ \
         --needed --noconfirm"
 }
 
