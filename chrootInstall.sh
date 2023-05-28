@@ -40,9 +40,13 @@ main () {
 
     clone_repository
 
+    ## ESSENTIALS
+
+    install_essential_packages
+
     ## INTERNET
 
-        install_internet_packages
+    install_internet_packages
 
     ## MULTIMEDIA
 
@@ -95,6 +99,13 @@ add_service () {
 }
 
 clone_repository () {
+    # Check if git is already installed on the system. If not, install it.
+    checkGit=$(pacman -Q git)
+
+    if [[ ! $checkGit ]]; then
+        install_packages git
+    fi
+
     # Clone git repository to /home/git
     git clone $gitUrl $homedir/git/artixinstall
     # Move into repo directory
@@ -135,6 +146,49 @@ configure_localization () {
     
     # Generate localization
     locale-gen
+}
+
+configure_pacman () {
+    ### PACMAN
+
+    # Copy configuration file into according directory
+    cp $repoDirectory/dotfiles/pacman/pacman.conf \
+        /etc/pacman.conf
+
+    create_directory /etc/pacman.d
+
+    # Get recent mirror lists
+    archSvnRepo="archlinux/svntogit-packages/packages"
+    curl $baseUrlRaw/$archSvnRepo/pacman-mirrorlist/trunk/mirrorlist \
+        -o /etc/pacman.d/mirrorlist-arch
+
+    # Uncomment every mirror temporarily to download reflector
+    sed -i 's/^#Server/Server/' /etc/pacman.d/mirrorlist-arch
+
+    # Install and enable support of Arch repositories
+    install_packages artix-archlinux-support
+    # Retrieve keys
+    pacman-key --populate archlinux
+
+    # Install additional packages
+    install_reflector
+
+    install_packages pacman-contrib
+
+    #TODO add paccache to cron    
+}
+
+configure_xdg () {
+    ### XDG
+    install_packages xdg-user-dirs
+
+    create_directory /etc/xdg
+
+    # Get config files repository and store them in corresponding directory
+    cp $repoDirectory/dotfiles/xdg/user-dirs.defaults \
+        /etc/xdg/user-dirs.defaults
+
+    create_directory $homedir/{downloads,documents/{music,public,desktop,templates,pictures,videos}}
 }
 
 create_directory () {
@@ -233,6 +287,24 @@ import_variables () {
     done 
 }
 
+install_aur_helper () {
+    ### AUR HELPER
+
+    runuser -l "$username" -c "git clone https://aur.archlinux.org/yay.git \
+        $homedir/git/cloned/yay && \
+        cd $homedir/git/cloned/yay && \
+        makepkg -si --noconfirm"
+
+    # Generate development package database for *-git packages that were
+    # installed without yay
+    runuser -l "$username" -c "yay -Y --gendb --noconfirm"
+    # Check for development packages updates
+    runuser -l "$username" -c "yay -Syu --devel --noconfirm"
+    # Enable development packages updates and combined upgrades permanently
+    runuser -l "$username" -c "yay -Y --devel --combinedupgrade \
+        --batchinstall --save --noconfirm"
+}
+
 install_aur_package () {
     runuser -l "$username" -c "yay -Syuq $@ \
         --needed --noconfirm"
@@ -257,6 +329,29 @@ install_base_packages () {
     baseInstallationPackages="man-db man-pages texinfo nano sudo e2fsprogs dosfstools" 
 
     install_packages $baseInstallationPackages
+}
+
+install_essential_packages () {
+    ### FIRMWARE
+        # sof-firmware -
+    ### JAVA
+        # jdk17-openjdk - 
+    essentialPackages="sof-firmware jdk17-openjdk"
+
+    install_packages $essentialPackages
+    install_microcode
+    install_python
+    install_git
+    configure_pacman
+    install_aur_helper
+    configure_xdg
+}
+
+install_git () {
+    install_packages git
+
+    # Create directory for git repositories
+    create_directory $homedir/git/{own,cloned}
 }
 
 install_graphics_drivers () {
@@ -323,6 +418,16 @@ install_internet_packages () {
     install_packages $internetPackages
 
     add_service wireguard
+}
+
+install_microcode () {
+    if [[ $cpu == 'AuthenticAMD' ]]; then
+        microcodePackage='amd-ucode'
+    elif [[ $cpu == 'Intel' ]] || [[ $cpu == 'GenuineIntel' ]]; then
+        microcodePackage='intel-ucode'
+    fi
+
+    install_packages $microcodePackage
 }
 
 install_mulitmedia_packages () {
@@ -404,6 +509,20 @@ install_pipewire () {
     chmod +x $homedir/.config/pipewire/.pipewire-start.sh
 }
 
+install_python () {
+    ### PYTHON
+        # python -
+        # python-pip - 
+    pythonPackages="python python-pip"
+
+    # Make sure this directory exists and the user has permissions
+    # This directory has to be accessed when installing python modules
+    create_directory /home/"$homedir"/.local/lib
+
+    # Install python module 'setuptools' for user with pip
+    runuser -l "$username" -c "pip3 install --user setuptools"
+}
+
 install_pywal () {
         ### PYWAL
 
@@ -425,6 +544,25 @@ install_qtile () {
     # Get config files repository and store them in corresponding directory
     curl $downloadUrl/dotfiles/qtile/config.py \
         -o $homedir/.config/qtile/config.py
+}
+
+install_reflector () {
+    ### REFLECTOR
+
+    # reflector -
+    install_packages reflector
+
+    # Run reflector to select the best five servers for my country
+    reflector --save /etc/pacman.d/mirrorlist-arch --country Germany \
+        --protocol https --latest 5
+
+    # Copy config file and store them in corresponding 
+    # directory. Add file reflector.start to local.d directory to run 
+    # reflector at start without systemd
+    cp $repoDirectory/dotfiles/local.d/reflector.start \
+        /etc/local.d/reflector.start
+    # Make reflector.start executable
+    chmod +x /etc/local.d/reflector.start
 }
 
 install_rofi () {
@@ -458,113 +596,6 @@ update_grub_config () {
 }
 
 ##########  END FUNCTIONS
-
-## ESSENTIALS
-
-### FIRMWARE
-
-    pacman -Syu sof-firmware --needed --noconfirm
-
-    if [[ $cpu == 'AuthenticAMD' ]]; then
-        microcodePackage='amd-ucode'
-    elif [[ $cpu == 'Intel' ]] || [[ $cpu == 'GenuineIntel' ]]; then
-        microcodePackage='intel-ucode'
-    fi 
-
-    #
-    pacman -Syu $microcodePackage --needed --noconfirm
-
-### JAVA
-
-    pacman -Syu jdk17-openjdk --needed --noconfirm
-
-### PYTHON
-
-    pacman -Syu python python-pip --needed --noconfirm
-
-    create_directory /home/"$username"/.local/lib
-
-    runuser -l "$username" -c "pip3 install --user setuptools"
-
-### PACMAN
-
-    # Get config files repository and store them in corresponding directory
-    # Download pacman.conf with additional repositories and access to the 
-    # Arch repositories
-    curl $downloadUrl/dotfiles/pacman/pacman.conf \
-        -o /etc/pacman.conf
-
-create_directory /etc/pacman.d
-
-    # Get recent mirror lists
-    archSvnRepo="archlinux/svntogit-packages/packages"
-    curl $baseUrlRaw/$archSvnRepo/pacman-mirrorlist/trunk/mirrorlist \
-        -o /etc/pacman.d/mirrorlist-arch
-
-    # Uncomment every mirror temporarily to download reflector
-    sed -i 's/^#Server/Server/' /etc/pacman.d/mirrorlist-arch
-
-    # Install and enable support of Arch repositories
-    pacman -Syu artix-archlinux-support --needed --noconfirm
-    # Retrieve keys
-    pacman-key --populate archlinux
-
-    ### REFLECTOR
-
-        # reflector -
-        pacman -Syu reflector --needed --noconfirm
-
-        # Run reflector to select the best five servers for my country
-        reflector --save /etc/pacman.d/mirrorlist-arch --country Germany \
-            --protocol https --latest 5
-
-        # Get config files repository and store them in corresponding 
-        # directory. Add file reflector.start to local.d directory to run 
-        # reflector at start without systemd
-        curl $downloadUrl/dotfiles/local.d/reflector.start \
-            -o /etc/local.d/reflector.start
-        # Make reflector.start executable
-        chmod +x /etc/local.d/reflector.start
-        #TODO add paccache to cron
-    
-    ### ADDITIONALS
-
-    pacman -Syu pacman-contrib --needed --noconfirm
-
-### VERSION CONTROL SYSTEM
-
-    pacman -Syu git --needed --noconfirm
-
-    # Create directory for git repositories
-    create_directory $homedir/git/{own,cloned}
-
-### AUR HELPER
-
-    runuser -l "$username" -c "git clone https://aur.archlinux.org/yay.git \
-        $homedir/git/cloned/yay && \
-        cd $homedir/git/cloned/yay && \
-        makepkg -si --noconfirm"
-
-    # Generate development package database for *-git packages that were
-    # installed without yay
-    runuser -l "$username" -c "yay -Y --gendb --noconfirm"
-    # Check for development packages updates
-    runuser -l "$username" -c "yay -Syu --devel --noconfirm"
-    # Enable development packages updates and combined upgrades permanently
-    runuser -l "$username" -c "yay -Y --devel --combinedupgrade \
-        --batchinstall --save --noconfirm"
-
-### XDG
-
-    pacman -Syu xdg-user-dirs --needed --noconfirm
-
-create_directory /etc/xdg
-
-    # Get config files repository and store them in corresponding directory
-    curl $downloadUrl/dotfiles/xdg/user-dirs.defaults \
-        -o /etc/xdg/user-dirs.defaults
-
-create_directory $homedir/{downloads,documents/{music,public,desktop,templates,pictures,videos}}
 
 ##  UTILITY
 
