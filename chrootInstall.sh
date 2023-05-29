@@ -54,7 +54,7 @@ main () {
 
     ## UTILITY
 
-    install_trash_cli
+    install_utiliy_packages
 
     ## OTHERS
 
@@ -125,6 +125,15 @@ configure_clock () {
     hwclock --systohc --utc
 }
 
+configure_grub () {
+    # Find and replace 'menu' with 'hidden' to disable grub delay to speed up 
+    # boot process. If grub menu is needed, press ESC while booting
+    sed -i 's/GRUB_TIMEOUT_STYLE=menu/GRUB_TIMEOUT_STYLE=hidden/g' \
+        /etc/default/grub
+    # Update grub config to make changes persistent
+    update_grub_config
+}
+
 configure_localization () {
     # By uncommenting localizations/languages in /etc/locale.gen, the system
     # create the necessary files for using it the next time 'locale-gen' is run.
@@ -176,6 +185,24 @@ configure_pacman () {
     install_packages pacman-contrib
 
     #TODO add paccache to cron    
+}
+
+configure_shell () {
+    ### COMMAND-LINE SHELL
+
+    # Copy config files and store them in corresponding directory
+    cp $repoDirectory/dotfiles/bash/.bashrc \
+        $homedir/.bashrc
+    cp $repoDirectory/dotfiles/bash/.bash_aliases \
+        -$homedir/.bash_aliases
+
+    # Source .bashrc to make configuration active.
+    source $homedir/.bashrc
+
+    # Make bash* files executable. Necessary for some applications.
+    chmod +x $homedir/.bash*
+
+    install_packages bash-completion
 }
 
 configure_xdg () {
@@ -420,6 +447,27 @@ install_internet_packages () {
     add_service wireguard
 }
 
+install_kitty () {
+    ### TERMINAL EMULATOR
+
+    install_packages kitty
+
+    # Create directories for kitty's general configs
+    create_directory $homedir/.config/kitty
+
+    # Create directories for personal backgrounds, fonts, themes, etc.
+    create_directory $homedir/.local/share/{backgrounds,fonts/ttf,themes}
+
+    ## General configuration
+    # Get config files repository and store them in corresponding directory
+    cp $repoDirectory/dotfiles/kitty/kitty.conf \
+        $homedir/.config/kitty/kitty.conf
+
+    # Copy hack fonts to directory
+    cp $repoDirectory/dotfiles/fonts/ttf/hack \
+        $homedir/.local/share/fonts/ttf/hack
+}
+
 install_microcode () {
     if [[ $cpu == 'AuthenticAMD' ]]; then
         microcodePackage='amd-ucode'
@@ -581,6 +629,98 @@ install_trash_cli () {
         crontab -    
 }
 
+install_utiliy_packages () {
+    ### ARCHIVE MANAGER
+        # p7zip
+    ### AUR HELPER
+
+    # See section ESSENTIALS above.
+
+    ### BACKUP
+
+    # See SYNCHRONIZATION below. 
+
+    ### BLUETOOTH MANAGEMENT
+        # bluez
+        # bluez-openrc
+        # bluez-utils
+
+    ### CLOCK SYNCHRONIZATION
+        # connman's native ntp service is used.
+    
+    ### FILE MANAGER
+        # ranger - 
+
+    ### JOB SCHEDULER
+        # cronie
+        # local
+    ### MANUALS
+        # man-db
+        # man-pages
+        # texinfo
+    ### PAGER
+        # less
+    ### SECURE SHELL
+        # openssh
+    ### SYNCHRONIZATION
+        # rsync
+        # rsync-openrc
+    ### SYSLOGS
+        # syslog-ng
+        # syslog-ng-openrc
+    ### SYSTEM INFORMARTION VIEWER
+        # fastfetch
+    ### TASK MANAGER
+        # bottom
+    ### VERSION CONTROL SYSTEM
+        # See section ESSENTIALS above.
+
+    utilityPackages="p7zip bluez bluez-openrc bluez-utils ranger cronie \
+        cronie-openrc man-db man-pages texinfo less openssh openssh-openrc \
+        rsync rsync-openrc syslog-ng syslog-ng-openrc fastfetch bottom"
+
+    # Add cronie and local services (job scheduler) to default run level
+    add_service cronie
+    add_service local
+
+    # Add openssh service to enable ssh connections to machine
+    add_service sshd
+
+    # Add syslog-ng service to default runlevel to enable system logging
+    add_service syslog-ng
+
+    configure_shell
+    configure_grub
+    install_kitty
+    install_virt_manager
+
+    install_trash_cli
+}
+
+install_virt_manager () {
+    ### VIRTUALIZATION
+
+    pacman -Rdd iptables --noconfirm
+    virtualizationPackages="virt-manager qemu-desktop qemu-guest-agent-openrc \
+        dnsmasq iptables-nft"
+
+    install_packages $virtualizationPackages
+
+    # Set UNIX domain socket ownership to libvirt and permissions to read
+    # and write by uncommenting the following lines
+
+    sed -i "/unix_sock_group = /s/^#//g" /etc/libvirt/libvirtd.conf
+    sed -i "/unix_sock_rw_perms = /s/^#//g" /etc/libvirt/libvirtd.conf
+
+    # Add user to libvirt group
+    usermod -aG libvirt "$username"
+
+    sed -i "s/user = \"libvirt-qemu\"/user = \"$username\"/" \
+        /etc/libvirt/libvirtd.conf
+    sed -i "s/group = \"libvirt-qemu\"/group = \"$username\"/" \
+        /etc/libvirt/libvirtd.conf
+}
+
 install_wally () {
     ### ZSA KEYBOARD FLASHER
 
@@ -597,143 +737,7 @@ update_grub_config () {
 
 ##########  END FUNCTIONS
 
-##  UTILITY
 
-### ARCHIVE MANAGER
-
-    pacman -Syu p7zip --needed --noconfirm
-
-### AUR HELPER
-
-    # See section ESSENTIALS above.
-
-    ### BACKUP
-
-    # See SYNCHRONIZATION below. 
-
-### BLUETOOTH MANAGEMENT
-
-pacman -Syu bluez bluez-openrc bluez-utils --needed --noconfirm
-
-### BOOT MANAGEMENT
-
-    # Disable grub delay to speed up boot process
-    # If grub menu is needed, press ESC while booting
-
-    # Find and replace 'menu' with 'hidden'
-    sed -i 's/GRUB_TIMEOUT_STYLE=menu/GRUB_TIMEOUT_STYLE=hidden/g' \
-    /etc/default/grub
-
-    # Update grub config
-    update_grub_config
-
-### CLOCK SYNCHRONIZATION
-
-    # connman's native ntp service is used.
-
-### COMMAND-LINE SHELL
-
-    # Get config files repository and store them in corresponding directory
-    curl $downloadUrl/dotfiles/bash/.bashrc \
-        -o $homedir/.bashrc
-    curl $downloadUrl/dotfiles/bash/.bash_aliases \
-        -o $homedir/.bash_aliases
-
-    source $homedir/.bashrc
-
-    chmod +x $homedir/.bash*
-
-    pacman -Syu bash-completion --needed --noconfirm
-
-### FILE MANAGER
-
-    pacman -Syu ranger --needed --noconfirm
-
-### JOB SCHEDULER
-
-    pacman -Syu cronie cronie-openrc --needed --noconfirm
-    rc-update add cronie
-    rc-service cronie start
-
-    # Make sure that local service is running
-    rc-update add local
-    rc-service local start
-
-### MANUALS
-
-    pacman -Syu man-db man-pages texinfo --needed --noconfirm
-
-### PAGER
-
-    pacman -Syu less --needed --noconfirm
-
-### SECURE SHELL
-
-    pacman -Syu openssh openssh-openrc --needed --noconfirm
-    rc-update add sshd
-    rc-service sshd start
-
-### SYNCHRONIZATION
-
-    pacman -Syu rsync rsync-openrc --needed --noconfirm
-
-### SYSLOGS
-
-    pacman -Syu syslog-ng syslog-ng-openrc --needed --noconfirm
-    rc-update add syslog-ng
-    rc-service syslog-ng start
-
-### SYSTEM INFORMARTION VIEWER
-
-    pacman -Syu fastfetch --needed --noconfirm
-
-### TASK MANAGER
-
-    pacman -Syu bottom --needed --noconfirm
-    
-### TERMINAL EMULATOR
-
-    pacman -Syu kitty --needed --noconfirm
-
-    # Create directories for kitty's general configs
-    create_directory $homedir/.config/kitty
-
-    # Create directories for personal backgrounds, fonts, themes, etc.
-    create_directory $homedir/.local/share/{backgrounds,fonts,themes}
-
-    ## General configuration
-    # Get config files repository and store them in corresponding directory
-    curl $downloadUrl/dotfiles/kitty/kitty.conf \
-        -o $homedir/.config/kitty/kitty.conf
-
-    ## Configure font
-
-    # Create directory for fonts in home directory and download font to it.
-    # This way kitty can see it as an available font to use.
-    create_directory $homedir/.fonts/ttf
-
-### VERSION CONTROL SYSTEM
-
-    # See section ESSENTIALS above.
-
-### VIRTUALIZATION
-
-    pacman -Rdd iptables --noconfirm
-    pacman -Syu virt-manager qemu-desktop qemu-guest-agent-openrc \
-        dnsmasq iptables-nft --needed --noconfirm
-
-    # Set UNIX domain socket ownership to libvirt and permissions to read
-    # and write by uncommenting the following lines
-
-    sed -i "/unix_sock_group = /s/^#//g" /etc/libvirt/libvirtd.conf
-    sed -i "/unix_sock_rw_perms = /s/^#//g" /etc/libvirt/libvirtd.conf
-
-    usermod -aG libvirt "$username"
-
-    sed -i "s/user = \"libvirt-qemu\"/user = \"$username\"/" \
-        /etc/libvirt/libvirtd.conf
-    sed -i "s/group = \"libvirt-qemu\"/group = \"$username\"/" \
-        /etc/libvirt/libvirtd.conf
 
 ## DOCUMENTS
 
