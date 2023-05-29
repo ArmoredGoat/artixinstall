@@ -733,7 +733,7 @@ install_rofi () {
 }
 
 install_science_packages () {
-
+    echo "Nothing here yet."
 }
 
 install_security_packages () {
