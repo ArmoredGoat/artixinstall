@@ -60,17 +60,24 @@ main () {
 
     install_gaming_packages
 
+    ## SCIENCE
+
+    install_science_packages
+
+    ## SECURITY
+
+    install_security_packages
+
     ## OTHERS
 
-    install_graphics_drivers $gpu
+    install_others_packages
 
-    install_nitrogen
-    install_pywal
-    install_qtile
-    install_rofi
-    install_wally
+    # Set ownership for home folder and all created files during installation
+    # process to user. 
+    set_ownership "$username" $homedir
 
-    rm -rf /chrootInstall.sh /tempfiles
+    # Remove temporary files and no longer needed scripts
+    remove_temporary_files
 }
 
 
@@ -486,6 +493,45 @@ install_kitty () {
         $homedir/.local/share/fonts/ttf/hack
 }
 
+install_lightdm () {
+    ### DISPLAY MANAGER
+        # lightdm
+        # lightdm-openrc
+        # lightdm-gtk-greeter
+        # light-locker
+    lightdmPackages="lightdm lightdm-openrc light-locker lightdm-slick-greeter"
+    install_packages $lightdmPackages
+
+    # Enable lightdm to start at boot
+    rc-update add lightdm
+
+    # Create directory for lightdm config files
+    create_directory /etc/lightdm
+
+    # Get config files repository and store them in corresponding directory
+    cp $repoDirectory/dotfiles/lightdm/lightdm.conf \
+        /etc/lightdm/lightdm.conf
+    cp $repoDirectory/dotfiles/lightdm/slick-greeter.conf \
+        /etc/lightdm/slick-greeter.conf
+    cp $repoDirectory/dotfiles/lightdm/users.conf \
+        /etc/lightdm/users.conf
+
+    cp $repoDirectory/dotfiles/xorg/.xprofile \
+        $homedir/.xprofile
+    chmod +x $homedir/.xprofile
+
+    # Set wallpaper
+    wal -i $homedir/.local/share/backgrounds/mushroom_town.png
+
+    # Set wallpaper for lightdm with slickgreeter-pywal
+    git clone https://github.com/Paul-Houser/slickgreeter-pywal \
+        $homedir/git/cloned/slickgreeter-pywal
+    cd $homedir/git/cloned/slickgreeter-pywal
+    chmod +x install.sh
+    ./install.sh
+    reTheme $(cat $HOME/.cache/wal/wal)
+}
+
 install_microcode () {
     if [[ $cpu == 'AuthenticAMD' ]]; then
         microcodePackage='amd-ucode'
@@ -577,8 +623,20 @@ install_nitrogen () {
     create_directory $homedir/.config/nitrogen
 
     # Download wallpaper
-    curl $downloadUrl/dotfiles/backgrounds/mushroom_town.png \
-        -o $homedir/.local/share/backgrounds/mushroom_town.png
+    cp $repoDirectory/dotfiles/backgrounds/mushroom_town.png \
+        $homedir/.local/share/backgrounds/mushroom_town.png
+}
+
+install_others_packages () {
+    install_graphics_drivers $gpu
+    install_nitrogen
+    install_picom
+    install_pywal
+    install_qtile
+    install_lightdm
+    install_rofi
+    install_xorg
+    install_wally
 }
 
 # Function to install multiple packages that do not require further attention
@@ -587,6 +645,11 @@ install_packages () {
     pacman -Syuq $@ --needed --noconfirm
 }
 
+install_picom () {
+    ### COMPOSITE MANAGER
+    install_packages picom
+
+}
 
 install_pipewire () {
     # Remove jack2 as it creates conflicts with pipewire-jack
@@ -640,8 +703,8 @@ install_qtile () {
 
     create_directory $homedir/.config/qtile
     # Get config files repository and store them in corresponding directory
-    curl $downloadUrl/dotfiles/qtile/config.py \
-        -o $homedir/.config/qtile/config.py
+    cp $repoDirectory/dotfiles/qtile/config.py \
+        $homedir/.config/qtile/config.py
 }
 
 install_reflector () {
@@ -669,14 +732,57 @@ install_rofi () {
     pacman -Syu rofi --needed --noconfirm
 }
 
+install_science_packages () {
+
+}
+
+install_security_packages () {
+    install_ufw
+}
+
 install_trash_cli () {
-    pacman -Syu trash-cli --needed --noconfirm
+    install_packages trash-cli
 
     # Create cron job to delete all files that are trashed longer than
     # 90 days on a daily basis. The '2>/dev/null' is necessary to
     # surpress 'no crontab for [username]' message.
     (crontab -l 2>/dev/null ; echo "@daily $(which trash-empty) 90") | \
         crontab -    
+}
+
+install_ufw () {
+    ### FIREWALL MANAGEMENT
+
+    # ufw - 
+    install_packages "ufw ufw-openrc"
+    
+    # Enable ufw to start on boot
+    #rc-update add ufw
+
+    # Disable any traffic by default
+    #ufw default deny
+
+    # Activate logging
+    #ufw logging low
+
+    # Limit SSH connections
+    #ufw limit ssh comment 'Limit Connections On SSH Port'
+
+    # Allow traffic from home network and specific ports/protocols
+    #ufw allow from 192.168.1.0/24
+    
+    #ufw allow in 25,53,80,123,143,443,465,587,993/tcp comment 'Standard Incomming Ports'
+    #ufw allow out 22,25,53,80,123,143,443,587,993/tcp comment 'Standard Outgoing Ports'
+    #ufw allow in 53,123/udp comment 'Allow NTP and DNS in'
+    #ufw allow out 53,123/udp comment 'Allow NTP and DNS out'
+
+    # https://hackspoiler.de/ufw-linux-server-firewall-skript/
+    #TODO Explain ports
+    #TODO If email client is used, add ports of outgoing servers
+    # https://askubuntu.com/questions/448836/how-do-i-with-ufw-deny-all-outgoing-ports-excepting-the-ones-i-need
+
+    # Reload ufw
+    #ufw --force enable
 }
 
 install_utiliy_packages () {
@@ -779,6 +885,28 @@ install_wally () {
     pacman -Syu zsa-wally --needed --noconfirm
 }
 
+install_xorg () {
+    ### DISPLAY SERVER
+    xorgPackages="xorg xorg-server xorg-xinit"
+    install_packages $xorgPackages
+
+    # Get config files repository and store them in corresponding directory
+    cp $repoDirectory/dotfiles/xorg/.xinitrc \
+        $homedir/.xinitrc
+    chmod +x $homedir/.xinitrc
+    cp $repoDirectory/dotfiles/xorg/xorg.conf \
+        /etc/X11/xorg.conf
+}
+
+remove_temporary_files () {
+    rm -rf /chrootInstall.sh /tempfiles
+}
+
+set_ownership () {
+    # Set ownership recursivly for given directory.
+    chown -R "$1":"$1" $2
+}
+
 update_grub_config () {
     # Create grub configuration file in boot directory, if not existent.
     # If it is already there, update it.
@@ -786,103 +914,6 @@ update_grub_config () {
 }
 
 ##########  END FUNCTIONS
-
-## SECURITY
-
-### FIREWALL MANAGEMENT
-
-    # ufw - 
-    #pacman -Syu ufw ufw-openrc --needed --noconfirm
-    
-    # Enable ufw to start on boot
-    #rc-update add ufw
-
-    # Disable any traffic by default
-    #ufw default deny
-
-    # Activate logging
-    #ufw logging low
-
-    # Limit SSH connections
-    #ufw limit ssh comment 'Limit Connections On SSH Port'
-
-    # Allow traffic from home network and specific ports/protocols
-    #ufw allow from 192.168.1.0/24
-    
-    #ufw allow in 25,53,80,123,143,443,465,587,993/tcp comment 'Standard Incomming Ports'
-    #ufw allow out 22,25,53,80,123,143,443,587,993/tcp comment 'Standard Outgoing Ports'
-    #ufw allow in 53,123/udp comment 'Allow NTP and DNS in'
-    #ufw allow out 53,123/udp comment 'Allow NTP and DNS out'
-
-    # https://hackspoiler.de/ufw-linux-server-firewall-skript/
-    #TODO Explain ports
-    #TODO If email client is used, add ports of outgoing servers
-    # https://askubuntu.com/questions/448836/how-do-i-with-ufw-deny-all-outgoing-ports-excepting-the-ones-i-need
-
-    # Reload ufw
-    #ufw --force enable
-
-## SCIENCE
-
-
-
-## OTHERS
-
-### COMPOSITE MANAGER
-
-    pacman -Syu picom --needed --noconfirm
-
-### DISPLAY MANAGER
-
-    pacman -Syu lightdm lightdm-openrc light-locker lightdm-slick-greeter \
-        --needed --noconfirm
-
-    # lightdm
-    # lightdm-openrc
-    # lightdm-gtk-greeter
-    # light-locker
-
-    # Enable lightdmto start at boot
-    rc-update add lightdm
-
-    # Create directory for lightdm config files
-    create_directory /etc/lightdm
-
-    # Get config files repository and store them in corresponding directory
-    curl $downloadUrl/dotfiles/lightdm/lightdm.conf \
-        -o /etc/lightdm/lightdm.conf
-    curl $downloadUrl/dotfiles/lightdm/slick-greeter.conf \
-        -o /etc/lightdm/slick-greeter.conf
-    curl $downloadUrl/dotfiles/lightdm/users.conf \
-        -o /etc/lightdm/users.conf
-
-    curl $downloadUrl/dotfiles/xorg/.xprofile \
-        -o $homedir/.xprofile
-    chmod +x $homedir/.xprofile
-
-    # Set wallpaper for lightdm with slickgreeter-pywal
-    git clone https://github.com/Paul-Houser/slickgreeter-pywal \
-        $homedir/git/cloned/slickgreeter-pywal
-    cd $homedir/git/cloned/slickgreeter-pywal
-    chmod +x install.sh
-    ./install.sh
-    reTheme $(cat $HOME/.cache/wal/wal)
-
-### DISPLAY SERVER
-
-    pacman -Syu xorg xorg-server xorg-xinit --needed --noconfirm
-
-    # Get config files repository and store them in corresponding directory
-    curl $downloadUrl/dotfiles/xorg/.xinitrc \
-        -o $homedir/.xinitrc
-    chmod +x $homedir/.xinitrc
-    curl $downloadUrl/dotfiles/xorg/xorg.conf \
-        -o /etc/X11/xorg.conf
-
-    wal -i $homedir/.local/share/backgrounds/mushroom_town.png
-
-# Set all permissions and ownership in home directory correctly.
-chown -R "$username":"$username" /home/"$username"
 
 main # Call main function
 
