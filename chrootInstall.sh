@@ -681,14 +681,14 @@ install_python () {
     create_directory /home/"$homedir"/.local/lib
 
     # Install python module 'setuptools' for user with pip
-    runuser -l "$username" -c "pip3 install --user setuptools"
+    runuser -l "$username" -c "python -m pip3 install --user setuptools"
 }
 
 install_pywal () {
         ### PYWAL
 
         pacman -Syu procps imagemagick --needed --noconfirm
-        runuser -l "$username" -c "pip3 install --user pywal"
+        runuser -l "$username" -c "python -m pip3 install --user pywal"
 }
 
 install_qtile () {
