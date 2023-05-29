@@ -113,7 +113,7 @@ clone_repository () {
     # Check if git is already installed on the system. If not, install it.
     checkGit=$(pacman -Q git)
 
-    if [[ ! $checkGit ]]; then
+    if [[ "$checkGit" == "error: package 'git' was not found" ]]; then
         install_packages git
     fi
 
