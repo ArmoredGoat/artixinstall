@@ -8,10 +8,10 @@ downloadUrl="$baseUrlRaw/$gitRepo/$gitBranch"
 homedir=/home/"$username"
 repoDirectory="$homedir/git/artixinstall"
 
-# This 'main'-function is used to summarize and order all used functions in a
+# This 'main' function is used to summarize and order all used functions in a
 # clear way. Also, it allows to swap out functions and rearrange them witout
 # much of an effort. In general, it seems to be good practice to break up
-# your code into managable functions and call them in a meta 'main'-function.
+# your code into managable functions and call them in a meta main function.
 
 main () {
     # Import variables that were stored in temporary files by install.sh
@@ -55,6 +55,10 @@ main () {
     ## UTILITY
 
     install_utiliy_packages
+
+    ## GAMING
+
+    install_gaming_packages
 
     ## OTHERS
 
@@ -358,6 +362,10 @@ install_base_packages () {
     install_packages $baseInstallationPackages
 }
 
+install_documents_packages () {
+    install_neovim
+}
+
 install_essential_packages () {
     ### FIRMWARE
         # sof-firmware -
@@ -372,6 +380,16 @@ install_essential_packages () {
     configure_pacman
     install_aur_helper
     configure_xdg
+}
+
+install_gaming_packages () {
+    ### GAME DISTRIBUTION PLATFORM
+        # steam
+    gamingPackages="steam"
+
+    install_packages $gamingPackages
+
+    #install_minecraft
 }
 
 install_git () {
@@ -478,6 +496,35 @@ install_microcode () {
     install_packages $microcodePackage
 }
 
+install_minecraft () {
+    ### MINECRAFT LAUNCHER
+
+    # Build dependencies
+        # qt6
+        # ninja
+        # cmake
+        # extra-cmake-modules
+        # zlib
+    minecraftPackages="qt6 ninja cmake extra-cmake-modules zlib"
+    install_packages $minecraftPackages
+
+    # Clone repository and move into it
+    git clone --recursive https://github.com/Diegiwg/PrismLauncher-Cracked.git \
+        $homedir/git/cloned/prismlauncher
+    cd $homedir/git/cloned/prismlauncher
+
+    # Create build
+    cmake -S . -B build -G Ninja \
+        -DCMAKE_BUILD_TYPE=Release \
+        -DCMAKE_INSTALL_PREFIX="/usr" \
+        -DENABLE_LTO=ON \
+        -DLauncher_QT_VERSION_MAJOR="6"
+
+    # Build and install previously prepared build
+    cmake --build build
+    cmake --install build
+}
+
 install_mulitmedia_packages () {
     ### AUDIO PLAYER
         # cmus - 
@@ -517,6 +564,9 @@ install_mulitmedia_packages () {
     install_pipewire
 }
 
+install_neovim () {
+    install_packages neovim
+}
 
 install_nitrogen () {
     ### WALLPAPER SETTER
@@ -737,38 +787,6 @@ update_grub_config () {
 
 ##########  END FUNCTIONS
 
-
-
-## DOCUMENTS
-
-### TEXT EDITOR EDITOR
-    
-    pacman -Syu neovim --needed --noconfirm
-
-## GAMING
-
-### GAME DISTRIBUTION PLATFORM
-
-    pacman -Syu steam --needed --noconfirm
-
-### MINECRAFT LAUNCHER
-
-#        # Build dependencies
-#        pacman -Syu qt6 ninja cmake extra-cmake-modules zlib\
-#            --needed --noconfirm
-#        git clone --recursive https://github.com/Diegiwg/PrismLauncher-Cracked.git \
-#            $homedir/git/cloned/prismlauncher
-#        cd $homedir/git/cloned/prismlauncher
-#
-#        cmake -S . -B build -G Ninja \
-#            -DCMAKE_BUILD_TYPE=Release \
-#            -DCMAKE_INSTALL_PREFIX="/usr" \
-#            -DENABLE_LTO=ON \
-#            -DLauncher_QT_VERSION_MAJOR="6"
-#
-#        cmake --build build
-#        cmake --install build
-
 ## SECURITY
 
 ### FIREWALL MANAGEMENT
@@ -866,8 +884,6 @@ update_grub_config () {
 # Set all permissions and ownership in home directory correctly.
 chown -R "$username":"$username" /home/"$username"
 
-# Call main function
+main # Call main function
 
-main
-
-exit
+exit # Exit chrootInstall.sh and return to the remaining part of install.sh
