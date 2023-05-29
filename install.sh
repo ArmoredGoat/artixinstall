@@ -1,5 +1,11 @@
 #! /bin/bash
 
+gitUrl="https://github.com/ArmoredGoat/artixinstall.git"
+baseUrlRaw="https://raw.githubusercontent.com"
+gitRepo="ArmoredGoat/artixinstall"
+gitBranch="iss008"
+downloadUrl="$baseUrlRaw/$gitRepo/$gitBranch"
+
 ##########   START COLORS   
 
 # Reset
@@ -723,8 +729,7 @@ echo "$timezone" > /mnt/tempfiles/timezone
 
 ##########   END EXPORTING VARIABLES
 
-curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/iss005/\
-chrootInstall.sh -o /mnt/chrootInstall.sh
+curl $downloadUrl/chrootInstall.sh -o /mnt/chrootInstall.sh
 chmod +x /mnt/chrootInstall.sh
 artix-chroot /mnt /chrootInstall.sh
 
