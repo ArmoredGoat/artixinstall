@@ -1,12 +1,10 @@
 #! /bin/bash
 
-gitUrl="https://github.com/ArmoredGoat/artixinstall.git"
-baseUrlRaw="https://raw.githubusercontent.com"
-gitRepo="ArmoredGoat/artixinstall"
-gitBranch="iss008"
-downloadUrl="$baseUrlRaw/$gitRepo/$gitBranch"
-homedir=/home/"$username"
-repoDirectory="$homedir/git/artixinstall"
+    gitUrl="https://github.com/ArmoredGoat/artixinstall.git"
+    baseUrlRaw="https://raw.githubusercontent.com"
+    gitRepo="ArmoredGoat/artixinstall"
+    gitBranch="iss008"
+    downloadUrl="$baseUrlRaw/$gitRepo/$gitBranch"
 
 # This 'main' function is used to summarize and order all used functions in a
 # clear way. Also, it allows to swap out functions and rearrange them witout
@@ -325,7 +323,10 @@ import_variables () {
             # logs to see if there are any errors regarding the variables.
             echo "Declared variable: $varName"
         fi
-    done 
+    done
+
+    homedir=/home/"$username"
+    repoDirectory="$homedir/git/artixinstall"
 }
 
 install_aur_helper () {
