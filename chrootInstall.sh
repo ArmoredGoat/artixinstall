@@ -111,12 +111,8 @@ add_service () {
 }
 
 clone_repository () {
-    # Check if git is already installed on the system. If not, install it.
-    checkGit=$(pacman -Q git)
-
-    if [[ $checkGit = error* ]]; then
-        install_packages git
-    fi
+    # Make sure that git is installed.
+    install_packages git
 
     # Clone git repository to /home/git
     git clone $gitUrl $homedir/git/artixinstall
