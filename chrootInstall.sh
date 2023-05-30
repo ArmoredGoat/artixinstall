@@ -594,7 +594,7 @@ install_displaylink () {
     sed -i 's/systemctl stop displaylink-driver/rc-service displaylink stop/g' \
         /opt/displaylink/udev.sh
 
-    sed -i 's/if [[ $DIR == *systemd* ]];/if [[ $DIR == *elogin* ]];/g' \    
+    sed -i 's/if [[ $DIR == *systemd* ]]/if [[ $DIR == *elogin* ]]/g' \
         /opt/displaylink/suspend.sh
     ln -sf /opt/displaylink/suspend.sh \
         /lib64/elogind/system-sleep/displaylink.sh
