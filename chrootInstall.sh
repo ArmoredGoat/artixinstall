@@ -260,6 +260,7 @@ install_utiliy_packages () {
     utilityPackages="p7zip bluez bluez-openrc bluez-utils ranger cronie \
         cronie-openrc man-db man-pages texinfo less openssh openssh-openrc \
         rsync rsync-openrc syslog-ng syslog-ng-openrc bottom"
+    install_packages $utilityPackages
 
     # Add cronie and local services (job scheduler) to default run level
     add_service cronie
