@@ -766,12 +766,7 @@ install_python () {
 install_pywal () {
     ### PYWAL
 
-    # Make sure this directory exists and the user has permissions
-    # This directory has to be accessed when installing python modules
-    set_ownership "$username" "$homedir"/.local/lib
-
-    pacman -Syu procps imagemagick --needed --noconfirm
-    runuser -l "$username" -c "pip3 install --user pywal"
+    pacman -Syu procps imagemagick python-pywal --needed --noconfirm
 }
 
 install_qtile () {
