@@ -889,9 +889,6 @@ install_xorg () {
     install_packages $xorgPackages
 
     # Get config files repository and store them in corresponding directory
-    cp $repoDirectory/dotfiles/xorg/.xinitrc \
-        $homedir/.xinitrc
-    chmod +x $homedir/.xinitrc
     cp $repoDirectory/dotfiles/xorg/xorg.conf \
         /etc/X11/xorg.conf
 }
