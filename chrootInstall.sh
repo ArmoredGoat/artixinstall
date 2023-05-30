@@ -22,6 +22,9 @@ main () {
     configure_localization
     configure_clock
 
+    # Install grub and create boot entries.
+    install_grub
+
     # Create user with given information and disable root access if wanted
     create_user
     disable_root
@@ -344,8 +347,7 @@ install_aur_helper () {
 }
 
 install_aur_package () {
-    runuser -l "$username" -c "yay -Syuq $@ \
-        --needed --noconfirm"
+    runuser -l "$username" -c "yay -Syuq $@ --needed --noconfirm"
 }
 
 install_base_packages () {
@@ -407,8 +409,6 @@ install_git () {
 }
 
 install_graphics_drivers () {
-    # Set gpu variable to given value
-    gpu="$1"
     # Check which graphics card manufacturer was detected and select packages
     # accordingly.
     if [ "$gpu" == 'AMD' ]; then
@@ -628,7 +628,7 @@ install_nitrogen () {
 }
 
 install_others_packages () {
-    install_graphics_drivers $gpu
+    install_graphics_drivers
     install_nitrogen
     install_picom
     install_pywal
