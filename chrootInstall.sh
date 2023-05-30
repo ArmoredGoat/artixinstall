@@ -676,7 +676,7 @@ install_python () {
 
     # Make sure this directory exists and the user has permissions
     # This directory has to be accessed when installing python modules
-    create_directory /home/"$homedir"/.local/lib
+    create_directory "$homedir"/.local/lib
 
     # Install python module 'setuptools' for user with pip
     runuser -l "$username" -c "pip3 install --user setuptools"
