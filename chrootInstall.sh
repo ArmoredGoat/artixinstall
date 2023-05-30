@@ -199,6 +199,7 @@ install_others_packages () {
     install_lightdm
     install_rofi
     install_xorg
+    install_displaylink
     install_wally
 }
 
@@ -562,6 +563,49 @@ install_yay () {
     # Enable development packages updates and combined upgrades permanently
     runuser -l "$username" -c "yay -Y --devel --combinedupgrade \
         --batchinstall --save --noconfirm"
+}
+
+install_displaylink () {
+    # https://forum.artixlinux.org/index.php/topic,4371.0.html
+    displaylinkPackages="dkms linux-headers-lts"
+    install_packages $displaylinkPackages
+    install_evdi
+
+    create_directory $homedir/.local/share/displaylink
+    cd $homedir/.local/share/displaylink
+    7z e $repoDirectory/drivers/displaylink_5_7.zip \
+        -o$homedir/.local/share/displaylink
+    
+    chmod ug+x displaylink-driver-5.7.0-61.129.run
+
+    export SYSTEMINITDAEMON=systemd
+
+    ./displaylink-driver-5.7.0-61.129.run
+
+    echo 'modules="evdi"' >> /etc/conf.d/modules
+
+    cp $repoDirectory/drivers/displaylink \
+        /etc/init.d/displaylink
+    chmod ugo+x /etc/init.d/displaylink
+
+    sed -i 's/systemctl start displaylink-driver/rc-service displaylink start/g' \
+        /opt/displaylink/udev.sh
+    sed -i 's/systemctl stop displaylink-driver/rc-service displaylink stop/g' \
+        /opt/displaylink/udev.sh
+
+    sed -i 's/if [[ $DIR == *systemd* ]];/if [[ $DIR == *elogin* ]];/g' \    
+        /opt/displaylink/suspend.sh
+    ln -sf /opt/displaylink/suspend.sh \
+        /lib64/elogind/system-sleep/displaylink.sh
+
+    export SYSTEMINITDAEMON=''
+}
+
+install_evdi () {
+    runuser -l "$username" -c "git clone https://aur.archlinux.org/evdi.git \
+    $homedir/git/cloned/evdi && \
+    cd $homedir/git/cloned/evdi && \
+    makepkg -si --noconfirm"
 }
 
 install_git () {
