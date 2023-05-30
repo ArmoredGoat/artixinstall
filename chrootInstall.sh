@@ -27,6 +27,7 @@ main () {
     create_user
     disable_root
 
+    # Make sure that connman service is up and running
     add_service connmand
 
     # Install basic packages. These are packages that are commonly necessary on
@@ -39,38 +40,17 @@ main () {
         exit
     fi
 
+    # Create local copy of repository to have everything available.
     clone_repository
 
-    ## ESSENTIALS
-
+    # Install packages
     install_essential_packages
-
-    ## INTERNET
-
     install_internet_packages
-
-    ## MULTIMEDIA
-
     install_mulitmedia_packages
-
-    ## UTILITY
-
     install_utiliy_packages
-
-    ## GAMING
-
     install_gaming_packages
-
-    ## SCIENCE
-
     install_science_packages
-
-    ## SECURITY
-
     install_security_packages
-
-    ## OTHERS
-
     install_others_packages
 
     # Set ownership for home folder and all created files during installation
@@ -84,10 +64,220 @@ main () {
 
 # FUNCTION SECTION
 
-# Below, you will find all functions used above. They are listed alphabetically.
+# Below, you will find all functions used above. They are split into the 
+# following sections: meta (summaries of multiple installation functions), 
+# general, configuration, installation. The functions are listed alphabetically.
 # In general, the function's names are descriptive like 'install_stuff',
 # 'configure_stuff', and so on. It should be possible to guess what each
 # function does.
+
+# META FUNCTIONS
+
+install_base_packages () {
+    # Manuals
+        # man-db    -
+        # man-pages -
+        # texinfo   -
+
+    # General administration
+        # sudo
+
+    # Filesystem adiminstration
+        # e2fsprogs -
+        # dosfstools    -
+
+    # Editor
+        # nano  -
+
+    baseInstallationPackages="man-db man-pages texinfo nano sudo e2fsprogs dosfstools" 
+
+    install_packages $baseInstallationPackages
+}
+
+install_documents_packages () {
+    install_neovim
+}
+
+install_essential_packages () {
+    ### FIRMWARE
+        # sof-firmware -
+    ### JAVA
+        # jdk17-openjdk - 
+    essentialPackages="sof-firmware jdk17-openjdk"
+
+    install_packages $essentialPackages
+    install_microcode
+    install_python
+    install_git
+    configure_pacman
+    install_aur_helper
+    configure_xdg
+}
+
+install_gaming_packages () {
+    ### GAME DISTRIBUTION PLATFORM
+        # steam
+    gamingPackages="steam"
+
+    install_packages $gamingPackages
+
+    #install_minecraft
+}
+
+install_internet_packages () {
+    ### CLOUD SYNCHRONIZATION
+        # nextcloud-client - 
+    ### EMAIL CLIENT
+        # neomutt - 
+    ### INSTANT MESSAGING
+    #### MULTI-PROTOCOL CLIENT
+        # weechat -
+    #### OTHER INSTANT MESSAGING CLIENTS
+        # discord -
+    ### NETWORK MANAGER
+        # See install.sh. connman and wpa_supplicant are being used.
+    ### VPN CLIENT
+        # wireguard-tools - 
+        # wireguard-openrc -
+    ### WEB BROWSER
+        # firefox-esr - 
+
+    internetPackages="nextcloud-client neomutt weechat discord wireguard-tools \
+        wireguard-openrc firefox-esr"
+
+    install_packages $internetPackages
+
+    add_service wireguard
+}
+
+install_mulitmedia_packages () {
+    ### AUDIO PLAYER
+        # cmus - 
+    ### AUDIO TAG EDITOR
+        # beets - 
+    ### AUDIO VISUALIZER
+        # cli-visualizer-git - 
+    ### IMAGE VIEWER
+        # imv -
+    ### SCREENSHOTS
+        # flameshot - 
+    ### VIDEO PLAYER
+        # mpv -
+    ### VIDEO EDITOR
+        # losslesscut
+    ### WEBCAM
+        # cameractrls - 
+    
+    ### OPTICAL DISK RIPPING
+
+    # Installing makemkv-cli requires to accept the EULA, which pops up
+    # before finishing the process. The pager 'less' is used to display
+    # the text. To automatically leave less the command line option
+    # LESS='+q' is given along. Then it behaves as 'q' was entered manually.
+    # "yes 'yes'" outputs a constant stream of 'yes' strings 
+    # followed by a new line. This way as soon as the script leaves the
+    # pager, it accepts the EULA.
+    #runuser -l "$username" -c "yes 'yes' | LESS='+q' yay -Syu makemkv-cli \
+    #    --needed --noconfirm"
+
+    mulitmediaPackages="cmus beets imv flameshot mpv cameractrls"
+    mulitmediaPackagesAur="losslesscut-bin cli-visualizer-git"
+
+    install_packages $mulitmediaPackages
+    install_aur_packages $mulitmediaPackagesAur
+
+    install_pipewire
+}
+
+install_others_packages () {
+    install_graphics_drivers
+    install_nitrogen
+    install_picom
+    install_pywal
+    install_qtile
+    install_lightdm
+    install_rofi
+    install_xorg
+    install_wally
+}
+
+install_science_packages () {
+    echo "Nothing here yet."
+}
+
+install_security_packages () {
+    install_ufw
+}
+
+install_utiliy_packages () {
+    ### ARCHIVE MANAGER
+        # p7zip
+    ### AUR HELPER
+
+    # See section ESSENTIALS above.
+
+    ### BACKUP
+
+    # See SYNCHRONIZATION below. 
+
+    ### BLUETOOTH MANAGEMENT
+        # bluez
+        # bluez-openrc
+        # bluez-utils
+
+    ### CLOCK SYNCHRONIZATION
+        # connman's native ntp service is used.
+    
+    ### FILE MANAGER
+        # ranger - 
+
+    ### JOB SCHEDULER
+        # cronie
+        # local
+    ### MANUALS
+        # man-db
+        # man-pages
+        # texinfo
+    ### PAGER
+        # less
+    ### SECURE SHELL
+        # openssh
+    ### SYNCHRONIZATION
+        # rsync
+        # rsync-openrc
+    ### SYSLOGS
+        # syslog-ng
+        # syslog-ng-openrc
+    ### SYSTEM INFORMARTION VIEWER
+        # fastfetch
+    ### TASK MANAGER
+        # bottom
+    ### VERSION CONTROL SYSTEM
+        # See section ESSENTIALS above.
+
+    utilityPackages="p7zip bluez bluez-openrc bluez-utils ranger cronie \
+        cronie-openrc man-db man-pages texinfo less openssh openssh-openrc \
+        rsync rsync-openrc syslog-ng syslog-ng-openrc fastfetch bottom"
+
+    # Add cronie and local services (job scheduler) to default run level
+    add_service cronie
+    add_service local
+
+    # Add openssh service to enable ssh connections to machine
+    add_service sshd
+
+    # Add syslog-ng service to default runlevel to enable system logging
+    add_service syslog-ng
+
+    configure_shell
+    configure_grub
+    install_kitty
+    install_virt_manager
+
+    install_trash_cli
+}
+
+# GENERAL FUNCTIONS
 
 add_service () {
     # Set service to given package/service
@@ -126,104 +316,6 @@ clone_repository () {
     if [[ ! "$currentBranch" == "$gitBranch" ]]; then
         git checkout $gitBranch
     fi
-}
-
-configure_clock () {
-    # TODO Explain
-    hwclock --systohc --utc
-}
-
-configure_grub () {
-    # Find and replace 'menu' with 'hidden' to disable grub delay to speed up 
-    # boot process. If grub menu is needed, press ESC while booting
-    sed -i 's/GRUB_TIMEOUT_STYLE=menu/GRUB_TIMEOUT_STYLE=hidden/g' \
-        /etc/default/grub
-    # Update grub config to make changes persistent
-    update_grub_config
-}
-
-configure_localization () {
-    # By uncommenting localizations/languages in /etc/locale.gen, the system
-    # create the necessary files for using it the next time 'locale-gen' is run.
-    sed -i '/en_US.UTF-8 UTF-8/s/^#//g' /etc/locale.gen
-
-    # Set desired locale system-wide by setting and exporting the LANG
-    # environment variable.
-    echo 'export LANG="en_US.UTF-8"' > /etc/locale.conf
-    
-    # Set collation rules (rules for sorting and regular expresions) 
-    # system-wide by setting and exporting the LC_COLLATE environment variable.
-    # The value 'C' tell the system to list dotfiles first, followed by 
-    # uppercase and lowercase filenames.
-    echo 'export LC_COLLATE="C"' >> /etc/locale.conf
-    
-    # Set time zone by creating a symbolic link to the according file in
-    # time zone directory.
-    ln -sf /usr/share/zoneinfo/$timezone /etc/localtime
-    
-    # Generate localization
-    locale-gen
-}
-
-configure_pacman () {
-    ### PACMAN
-
-    # Copy configuration file into according directory
-    cp $repoDirectory/dotfiles/pacman/pacman.conf \
-        /etc/pacman.conf
-
-    create_directory /etc/pacman.d
-
-    # Get recent mirror lists
-    archSvnRepo="archlinux/svntogit-packages/packages"
-    curl $baseUrlRaw/$archSvnRepo/pacman-mirrorlist/trunk/mirrorlist \
-        -o /etc/pacman.d/mirrorlist-arch
-
-    # Uncomment every mirror temporarily to download reflector
-    sed -i 's/^#Server/Server/' /etc/pacman.d/mirrorlist-arch
-
-    # Install and enable support of Arch repositories
-    install_packages artix-archlinux-support
-    # Retrieve keys
-    pacman-key --populate archlinux
-
-    # Install additional packages
-    install_reflector
-
-    install_packages pacman-contrib
-
-    #TODO add paccache to cron    
-}
-
-configure_shell () {
-    ### COMMAND-LINE SHELL
-
-    # Copy config files and store them in corresponding directory
-    cp $repoDirectory/dotfiles/bash/.bashrc \
-        $homedir/.bashrc
-    cp $repoDirectory/dotfiles/bash/.bash_aliases \
-        $homedir/.bash_aliases
-
-    # Source .bashrc to make configuration active.
-    source $homedir/.bashrc
-
-    # Make bash* files executable. Necessary for some applications.
-    chmod +x $homedir/.bash*
-
-    install_packages bash-completion
-}
-
-configure_xdg () {
-    ### XDG
-    install_packages xdg-user-dirs
-
-    create_directory /etc/xdg
-
-    # Get config files repository and store them in corresponding directory
-    cp $repoDirectory/dotfiles/xdg/user-dirs.defaults \
-        /etc/xdg/user-dirs.defaults
-
-    create_directory $homedir/{downloads,documents/{music,public,desktop,templates,pictures,videos}}
 }
 
 create_directory () {
@@ -325,6 +417,133 @@ import_variables () {
     repoDirectory="$homedir/git/artixinstall"
 }
 
+install_aur_packages () {
+    runuser -l "$username" -c "yay -Syuq $@ --needed --noconfirm"
+}
+
+install_packages () {
+    # Function to install multiple packages that do not require further attention
+    # at once
+    pacman -Syuq $@ --needed --noconfirm
+}
+
+remove_temporary_files () {
+    rm -rf /chrootInstall.sh /tempfiles
+}
+
+set_ownership () {
+    # Set ownership recursivly for given directory.
+    chown -R "$1":"$1" $2
+}
+
+update_grub_config () {
+    # Create grub configuration file in boot directory, if not existent.
+    # If it is already there, update it.
+    grub-mkconfig -o /boot/grub/grub.cfg    
+}
+
+# CONFIGURATION FUNCTIONS
+
+configure_clock () {
+    # TODO Explain
+    hwclock --systohc --utc
+}
+
+configure_grub () {
+    # Find and replace 'menu' with 'hidden' to disable grub delay to speed up 
+    # boot process. If grub menu is needed, press ESC while booting
+    sed -i 's/GRUB_TIMEOUT_STYLE=menu/GRUB_TIMEOUT_STYLE=hidden/g' \
+        /etc/default/grub
+    # Update grub config to make changes persistent
+    update_grub_config
+}
+
+configure_localization () {
+    # By uncommenting localizations/languages in /etc/locale.gen, the system
+    # create the necessary files for using it the next time 'locale-gen' is run.
+    sed -i '/en_US.UTF-8 UTF-8/s/^#//g' /etc/locale.gen
+
+    # Set desired locale system-wide by setting and exporting the LANG
+    # environment variable.
+    echo 'export LANG="en_US.UTF-8"' > /etc/locale.conf
+    
+    # Set collation rules (rules for sorting and regular expresions) 
+    # system-wide by setting and exporting the LC_COLLATE environment variable.
+    # The value 'C' tell the system to list dotfiles first, followed by 
+    # uppercase and lowercase filenames.
+    echo 'export LC_COLLATE="C"' >> /etc/locale.conf
+    
+    # Set time zone by creating a symbolic link to the according file in
+    # time zone directory.
+    ln -sf /usr/share/zoneinfo/$timezone /etc/localtime
+    
+    # Generate localization
+    locale-gen
+}
+
+configure_pacman () {
+    ### PACMAN
+
+    # Copy configuration file into according directory
+    cp $repoDirectory/dotfiles/pacman/pacman.conf \
+        /etc/pacman.conf
+
+    create_directory /etc/pacman.d
+
+    # Get recent mirror lists
+    archSvnRepo="archlinux/svntogit-packages/packages"
+    curl $baseUrlRaw/$archSvnRepo/pacman-mirrorlist/trunk/mirrorlist \
+        -o /etc/pacman.d/mirrorlist-arch
+
+    # Uncomment every mirror temporarily to download reflector
+    sed -i 's/^#Server/Server/' /etc/pacman.d/mirrorlist-arch
+
+    # Install and enable support of Arch repositories
+    install_packages artix-archlinux-support
+    # Retrieve keys
+    pacman-key --populate archlinux
+
+    # Install additional packages
+    install_reflector
+
+    install_packages pacman-contrib
+
+    #TODO add paccache to cron    
+}
+
+configure_shell () {
+    ### COMMAND-LINE SHELL
+
+    # Copy config files and store them in corresponding directory
+    cp $repoDirectory/dotfiles/bash/.bashrc \
+        $homedir/.bashrc
+    cp $repoDirectory/dotfiles/bash/.bash_aliases \
+        $homedir/.bash_aliases
+
+    # Source .bashrc to make configuration active.
+    source $homedir/.bashrc
+
+    # Make bash* files executable. Necessary for some applications.
+    chmod +x $homedir/.bash*
+
+    install_packages bash-completion
+}
+
+configure_xdg () {
+    ### XDG
+    install_packages xdg-user-dirs
+
+    create_directory /etc/xdg
+
+    # Get config files repository and store them in corresponding directory
+    cp $repoDirectory/dotfiles/xdg/user-dirs.defaults \
+        /etc/xdg/user-dirs.defaults
+
+    create_directory $homedir/{downloads,documents/{music,public,desktop,templates,pictures,videos}}
+}
+
+# INSTALLATION FUNCTIONS
+
 install_aur_helper () {
     ### AUR HELPER
 
@@ -341,61 +560,6 @@ install_aur_helper () {
     # Enable development packages updates and combined upgrades permanently
     runuser -l "$username" -c "yay -Y --devel --combinedupgrade \
         --batchinstall --save --noconfirm"
-}
-
-install_aur_packages () {
-    runuser -l "$username" -c "yay -Syuq $@ --needed --noconfirm"
-}
-
-install_base_packages () {
-    # Manuals
-        # man-db    -
-        # man-pages -
-        # texinfo   -
-
-    # General administration
-        # sudo
-
-    # Filesystem adiminstration
-        # e2fsprogs -
-        # dosfstools    -
-
-    # Editor
-        # nano  -
-
-    baseInstallationPackages="man-db man-pages texinfo nano sudo e2fsprogs dosfstools" 
-
-    install_packages $baseInstallationPackages
-}
-
-install_documents_packages () {
-    install_neovim
-}
-
-install_essential_packages () {
-    ### FIRMWARE
-        # sof-firmware -
-    ### JAVA
-        # jdk17-openjdk - 
-    essentialPackages="sof-firmware jdk17-openjdk"
-
-    install_packages $essentialPackages
-    install_microcode
-    install_python
-    install_git
-    configure_pacman
-    install_aur_helper
-    configure_xdg
-}
-
-install_gaming_packages () {
-    ### GAME DISTRIBUTION PLATFORM
-        # steam
-    gamingPackages="steam"
-
-    install_packages $gamingPackages
-
-    #install_minecraft
 }
 
 install_git () {
@@ -441,32 +605,6 @@ install_grub () {
     fi
 
     update_grub_config
-}
-
-install_internet_packages () {
-    ### CLOUD SYNCHRONIZATION
-        # nextcloud-client - 
-    ### EMAIL CLIENT
-        # neomutt - 
-    ### INSTANT MESSAGING
-    #### MULTI-PROTOCOL CLIENT
-        # weechat -
-    #### OTHER INSTANT MESSAGING CLIENTS
-        # discord -
-    ### NETWORK MANAGER
-        # See install.sh. connman and wpa_supplicant are being used.
-    ### VPN CLIENT
-        # wireguard-tools - 
-        # wireguard-openrc -
-    ### WEB BROWSER
-        # firefox-esr - 
-
-    internetPackages="nextcloud-client neomutt weechat discord wireguard-tools \
-        wireguard-openrc firefox-esr"
-
-    install_packages $internetPackages
-
-    add_service wireguard
 }
 
 install_kitty () {
@@ -568,45 +706,6 @@ install_minecraft () {
     cmake --install build
 }
 
-install_mulitmedia_packages () {
-    ### AUDIO PLAYER
-        # cmus - 
-    ### AUDIO TAG EDITOR
-        # beets - 
-    ### AUDIO VISUALIZER
-        # cli-visualizer-git - 
-    ### IMAGE VIEWER
-        # imv -
-    ### SCREENSHOTS
-        # flameshot - 
-    ### VIDEO PLAYER
-        # mpv -
-    ### VIDEO EDITOR
-        # losslesscut
-    ### WEBCAM
-        # cameractrls - 
-    
-    ### OPTICAL DISK RIPPING
-
-    # Installing makemkv-cli requires to accept the EULA, which pops up
-    # before finishing the process. The pager 'less' is used to display
-    # the text. To automatically leave less the command line option
-    # LESS='+q' is given along. Then it behaves as 'q' was entered manually.
-    # "yes 'yes'" outputs a constant stream of 'yes' strings 
-    # followed by a new line. This way as soon as the script leaves the
-    # pager, it accepts the EULA.
-    #runuser -l "$username" -c "yes 'yes' | LESS='+q' yay -Syu makemkv-cli \
-    #    --needed --noconfirm"
-
-    mulitmediaPackages="cmus beets imv flameshot mpv cameractrls"
-    mulitmediaPackagesAur="losslesscut-bin cli-visualizer-git"
-
-    install_packages $mulitmediaPackages
-    install_aur_packages $mulitmediaPackagesAur
-
-    install_pipewire
-}
-
 install_neovim () {
     install_packages neovim
 }
@@ -622,24 +721,6 @@ install_nitrogen () {
     # Download wallpaper
     cp $repoDirectory/dotfiles/backgrounds/mushroom_town.png \
         $homedir/.local/share/backgrounds/mushroom_town.png
-}
-
-install_others_packages () {
-    install_graphics_drivers
-    install_nitrogen
-    install_picom
-    install_pywal
-    install_qtile
-    install_lightdm
-    install_rofi
-    install_xorg
-    install_wally
-}
-
-# Function to install multiple packages that do not require further attention
-# at once
-install_packages () {
-    pacman -Syuq $@ --needed --noconfirm
 }
 
 install_picom () {
@@ -730,14 +811,6 @@ install_rofi () {
     pacman -Syu rofi --needed --noconfirm
 }
 
-install_science_packages () {
-    echo "Nothing here yet."
-}
-
-install_security_packages () {
-    install_ufw
-}
-
 install_trash_cli () {
     install_packages trash-cli
 
@@ -783,74 +856,6 @@ install_ufw () {
     #ufw --force enable
 }
 
-install_utiliy_packages () {
-    ### ARCHIVE MANAGER
-        # p7zip
-    ### AUR HELPER
-
-    # See section ESSENTIALS above.
-
-    ### BACKUP
-
-    # See SYNCHRONIZATION below. 
-
-    ### BLUETOOTH MANAGEMENT
-        # bluez
-        # bluez-openrc
-        # bluez-utils
-
-    ### CLOCK SYNCHRONIZATION
-        # connman's native ntp service is used.
-    
-    ### FILE MANAGER
-        # ranger - 
-
-    ### JOB SCHEDULER
-        # cronie
-        # local
-    ### MANUALS
-        # man-db
-        # man-pages
-        # texinfo
-    ### PAGER
-        # less
-    ### SECURE SHELL
-        # openssh
-    ### SYNCHRONIZATION
-        # rsync
-        # rsync-openrc
-    ### SYSLOGS
-        # syslog-ng
-        # syslog-ng-openrc
-    ### SYSTEM INFORMARTION VIEWER
-        # fastfetch
-    ### TASK MANAGER
-        # bottom
-    ### VERSION CONTROL SYSTEM
-        # See section ESSENTIALS above.
-
-    utilityPackages="p7zip bluez bluez-openrc bluez-utils ranger cronie \
-        cronie-openrc man-db man-pages texinfo less openssh openssh-openrc \
-        rsync rsync-openrc syslog-ng syslog-ng-openrc fastfetch bottom"
-
-    # Add cronie and local services (job scheduler) to default run level
-    add_service cronie
-    add_service local
-
-    # Add openssh service to enable ssh connections to machine
-    add_service sshd
-
-    # Add syslog-ng service to default runlevel to enable system logging
-    add_service syslog-ng
-
-    configure_shell
-    configure_grub
-    install_kitty
-    install_virt_manager
-
-    install_trash_cli
-}
-
 install_virt_manager () {
     ### VIRTUALIZATION
 
@@ -891,21 +896,6 @@ install_xorg () {
     # Get config files repository and store them in corresponding directory
     cp $repoDirectory/dotfiles/xorg/xorg.conf \
         /etc/X11/xorg.conf
-}
-
-remove_temporary_files () {
-    rm -rf /chrootInstall.sh /tempfiles
-}
-
-set_ownership () {
-    # Set ownership recursivly for given directory.
-    chown -R "$1":"$1" $2
-}
-
-update_grub_config () {
-    # Create grub configuration file in boot directory, if not existent.
-    # If it is already there, update it.
-    grub-mkconfig -o /boot/grub/grub.cfg    
 }
 
 ##########  END FUNCTIONS
