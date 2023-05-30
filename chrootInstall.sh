@@ -181,10 +181,10 @@ install_mulitmedia_packages () {
     #    --needed --noconfirm"
 
     mulitmediaPackages="cmus beets imv flameshot mpv cameractrls"
-    mulitmediaPackagesAur="losslesscut-bin cli-visualizer-git"
 
     install_packages $mulitmediaPackages
-    install_aur_packages $mulitmediaPackagesAur
+    install_aur_packages losslesscut-bin
+    install_aur_packages cli-visualizer-git
 
     install_pipewire
 }
