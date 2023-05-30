@@ -418,7 +418,7 @@ import_variables () {
 }
 
 install_aur_packages () {
-    runuser -l "$username" -c "yay -Syuq $@ --needed --noconfirm"
+    runuser -l "$username" -c "yay -Syuq $1 --needed --noconfirm"
 }
 
 install_packages () {
