@@ -5,6 +5,7 @@
     gitRepo="ArmoredGoat/artixinstall"
     gitBranch="iss008"
     downloadUrl="$baseUrlRaw/$gitRepo/$gitBranch"
+    homedir="/home/$USER"
 
 main () {
     install_displaylink
@@ -29,7 +30,7 @@ create_directory () {
 		# General permissions settings. If necessary, e.g. ssh keys, the
         # permissions will be set accordingly
         chmod 755 $@
-		chown -R "$username":"$username" $@
+		chown -R "$USER":"$USER" $@
 	fi
 }
 
@@ -39,20 +40,20 @@ install_displaylink () {
     install_packages $displaylinkPackages
     install_evdi
 
-    create_directory /home/julius/.local/share/displaylink
-    cd /home/julius/.local/share/displaylink
-    7z e /home/julius/git/artixinstall/drivers/displaylink_5_7.zip \
-        -o/home/julius/.local/share/displaylink
-    
-    chmod ug+x displaylink-driver-5.7.0-61.129.run
 
+    runuser -l "$USER" -c "create_directory $homedir/.local/share/displaylink && \
+        cd $homedir/.local/share/displaylink && \
+        7z e $homedir/git/artixinstall/drivers/displaylink_5_7.zip \
+        -o$homedir/.local/share/displaylink && \
+        chmod ug+x displaylink-driver-5.7.0-61.129.run"
+    
     export SYSTEMINITDAEMON=systemd
 
     ./displaylink-driver-5.7.0-61.129.run
 
     echo 'modules="evdi"' >> /etc/conf.d/modules
 
-    cp /home/julius/git/artixinstall/drivers/displaylink \
+    cp $homedir/git/artixinstall/drivers/displaylink \
         /etc/init.d/displaylink
     chmod ugo+x /etc/init.d/displaylink
 
@@ -61,7 +62,7 @@ install_displaylink () {
     sed -i 's/systemctl stop displaylink-driver/rc-service displaylink stop/g' \
         /opt/displaylink/udev.sh
 
-    sed -i 's/if [[ $DIR == *systemd* ]]/if [[ $DIR == *elogin* ]]/g' \
+    sed -i 's/\*systemd\*/\*elogin\*/g' \
         /opt/displaylink/suspend.sh
     ln -sf /opt/displaylink/suspend.sh \
         /lib64/elogind/system-sleep/displaylink.sh
