@@ -249,7 +249,7 @@ install_utiliy_packages () {
         # syslog-ng
         # syslog-ng-openrc
     ### SYSTEM INFORMARTION VIEWER
-        # fastfetch
+        # macchina
     ### TASK MANAGER
         # bottom
     ### VERSION CONTROL SYSTEM
@@ -257,7 +257,7 @@ install_utiliy_packages () {
 
     utilityPackages="p7zip bluez bluez-openrc bluez-utils ranger cronie \
         cronie-openrc man-db man-pages texinfo less openssh openssh-openrc \
-        rsync rsync-openrc syslog-ng syslog-ng-openrc fastfetch-git bottom"
+        rsync rsync-openrc syslog-ng syslog-ng-openrc bottom"
 
     # Add cronie and local services (job scheduler) to default run level
     add_service cronie
@@ -272,6 +272,7 @@ install_utiliy_packages () {
     configure_shell
     configure_grub
     install_kitty
+    install_macchina
     install_virt_manager
 
     install_trash_cli
@@ -665,6 +666,10 @@ install_lightdm () {
     chmod +x install.sh
     ./install.sh
     reTheme $(cat $HOME/.cache/wal/wal)
+}
+
+install_macchina () {
+    install_aur_packages macchina
 }
 
 install_microcode () {
