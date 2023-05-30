@@ -343,7 +343,7 @@ install_aur_helper () {
         --batchinstall --save --noconfirm"
 }
 
-install_aur_package () {
+install_aur_packages () {
     runuser -l "$username" -c "yay -Syuq $@ --needed --noconfirm"
 }
 
@@ -602,7 +602,7 @@ install_mulitmedia_packages () {
     mulitmediaPackagesAur="losslesscut-bin cli-visualizer-git"
 
     install_packages $mulitmediaPackages
-    install_aur_package $mulitmediaPackagesAur
+    install_aur_packages $mulitmediaPackagesAur
 
     install_pipewire
 }
