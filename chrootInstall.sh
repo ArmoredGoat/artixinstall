@@ -110,7 +110,7 @@ install_essential_packages () {
     install_python
     install_git
     configure_pacman
-    install_aur_helper
+    install_yay
     configure_xdg
 }
 
@@ -544,7 +544,7 @@ configure_xdg () {
 
 # INSTALLATION FUNCTIONS
 
-install_aur_helper () {
+install_yay () {
     ### AUR HELPER
 
     runuser -l "$username" -c "git clone https://aur.archlinux.org/yay.git \
