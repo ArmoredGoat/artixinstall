@@ -489,7 +489,7 @@ install_kitty () {
         $homedir/.config/kitty/kitty.conf
 
     # Copy hack fonts to directory
-    cp $repoDirectory/dotfiles/fonts/ttf/hack \
+    cp -r $repoDirectory/dotfiles/fonts/ttf/hack \
         $homedir/.local/share/fonts/ttf/hack
 }
 
@@ -601,7 +601,7 @@ install_mulitmedia_packages () {
     #runuser -l "$username" -c "yes 'yes' | LESS='+q' yay -Syu makemkv-cli \
     #    --needed --noconfirm"
 
-    mulitmediaPackages="cmus beets imv flameshot mpv cameracrtls"
+    mulitmediaPackages="cmus beets imv flameshot mpv cameractrls"
     mulitmediaPackagesAur="losslesscut-bin cli-visualizer-git"
 
     install_packages $mulitmediaPackages
