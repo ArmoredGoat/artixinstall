@@ -54,7 +54,7 @@ main () {
     install_security_packages
     install_others_packages
 
-    cp $repoDirectory/scripts/after_reboot.sh / $homedir/after_reboot.sh
+    cp $repoDirectory/scripts/after_reboot.sh $homedir/after_reboot.sh
     chmod +x $homedir/after_reboot.sh
 
     # Set ownership for home folder and all created files during installation
