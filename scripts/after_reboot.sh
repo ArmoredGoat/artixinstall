@@ -1,11 +1,13 @@
 #! /bin/bash
 
+    username="$(env | grep SUDO_USER | awk -F "=" '{print $2}')"
+
     gitUrl="https://github.com/ArmoredGoat/artixinstall.git"
     baseUrlRaw="https://raw.githubusercontent.com"
     gitRepo="ArmoredGoat/artixinstall"
     gitBranch="iss008"
     downloadUrl="$baseUrlRaw/$gitRepo/$gitBranch"
-    homedir="/home/$USER"
+    homedir="/home/$username"
 
 main () {
     install_displaylink
@@ -30,7 +32,7 @@ create_directory () {
 		# General permissions settings. If necessary, e.g. ssh keys, the
         # permissions will be set accordingly
         chmod 755 $@
-		chown -R "$USER":"$USER" $@
+		chown -R "$username":"$username" $@
 	fi
 }
 
@@ -40,16 +42,14 @@ install_displaylink () {
     install_packages $displaylinkPackages
     install_evdi
 
-
-    runuser -l "$USER" -c "create_directory $homedir/.local/share/displaylink && \
-        cd $homedir/.local/share/displaylink && \
-        7z e $homedir/git/artixinstall/drivers/displaylink_5_7.zip \
+    create_directory $homedir/.local/share/displaylink
+    runuser -l "$username" -c "7z e $homedir/git/artixinstall/drivers/displaylink_5_7.zip \
         -o$homedir/.local/share/displaylink && \
-        chmod ug+x displaylink-driver-5.7.0-61.129.run"
+        chmod ug+x $homedir/.local/share/displaylink/displaylink-driver-5.7.0-61.129.run"
     
     export SYSTEMINITDAEMON=systemd
 
-    ./displaylink-driver-5.7.0-61.129.run
+    $homedir/.local/share/displaylink/displaylink-driver-5.7.0-61.129.run
 
     echo 'modules="evdi"' >> /etc/conf.d/modules
 
