@@ -672,20 +672,21 @@ install_python () {
         # python -
         # python-pip - 
     pythonPackages="python python-pip"
+    install_packages $pythonPackages
 
     # Make sure this directory exists and the user has permissions
     # This directory has to be accessed when installing python modules
     create_directory /home/"$homedir"/.local/lib
 
     # Install python module 'setuptools' for user with pip
-    runuser -l "$username" -c "python3 -m pip3 install --user setuptools"
+    runuser -l "$username" -c "pip3 install --user setuptools"
 }
 
 install_pywal () {
         ### PYWAL
 
         pacman -Syu procps imagemagick --needed --noconfirm
-        runuser -l "$username" -c "python3 -m pip3 install --user pywal"
+        runuser -l "$username" -c "pip3 install --user pywal"
 }
 
 install_qtile () {
