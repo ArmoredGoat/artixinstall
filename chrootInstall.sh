@@ -202,7 +202,7 @@ configure_shell () {
     cp $repoDirectory/dotfiles/bash/.bashrc \
         $homedir/.bashrc
     cp $repoDirectory/dotfiles/bash/.bash_aliases \
-        -$homedir/.bash_aliases
+        $homedir/.bash_aliases
 
     # Source .bashrc to make configuration active.
     source $homedir/.bashrc
