@@ -695,7 +695,7 @@ loginManager="elogind-"$initSystem
 
 # Linux kernel
     # linux-lts, zen, ...
-kernel="linux-lts"
+kernel="linux"
 
 # Firmware
     # linux-firmware    -

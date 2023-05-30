@@ -568,7 +568,7 @@ install_yay () {
 
 install_displaylink () {
     # https://forum.artixlinux.org/index.php/topic,4371.0.html
-    displaylinkPackages="dkms linux-lts-headers"
+    displaylinkPackages="dkms linux-headers"
     install_packages $displaylinkPackages
     install_evdi
 
