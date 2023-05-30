@@ -880,7 +880,7 @@ install_wally () {
 
     # I am using an ErgoDox EZ and this software is used to flash
     # layouts on the device.
-    pacman -Syu zsa-wally --needed --noconfirm
+    pacman -Syu zsa-wally-cli --needed --noconfirm
 }
 
 install_xorg () {
