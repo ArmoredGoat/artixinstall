@@ -143,7 +143,7 @@ install_internet_packages () {
         # firefox-esr - 
 
     internetPackages="nextcloud-client neomutt weechat discord wireguard-tools \
-        wireguard-openrc firefox-esr"
+        wireguard-openrc firefox"
 
     install_packages $internetPackages
 
