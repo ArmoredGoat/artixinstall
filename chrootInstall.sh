@@ -768,7 +768,7 @@ install_pywal () {
 
     # Make sure this directory exists and the user has permissions
     # This directory has to be accessed when installing python modules
-    create_directory "$homedir"/.local/lib
+    set_ownership "$username" "$homedir"/.local/lib
 
     pacman -Syu procps imagemagick --needed --noconfirm
     runuser -l "$username" -c "pip3 install --user pywal"
@@ -781,7 +781,7 @@ install_qtile () {
 
     # Make sure this directory exists and the user has permissions
     # This directory has to be accessed when installing python modules
-    create_directory "$homedir"/.local/lib
+    set_ownership "$username" "$homedir"/.local/lib
 
     # Fix for qtile. It seems there are issues with building cairocffi
     # through pip and normal packages.
