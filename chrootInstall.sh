@@ -47,6 +47,7 @@ main () {
     install_essential_packages
     install_internet_packages
     install_mulitmedia_packages
+    install_documents_packages
     install_utiliy_packages
     install_gaming_packages
     install_science_packages
