@@ -249,7 +249,7 @@ create_user () {
 
     # Set password
     echo "$userPassword
-    $userPassword
+$userPassword
     " | passwd "$username"
 
     # Add user to the following groups
