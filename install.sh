@@ -6,90 +6,211 @@ gitRepo="ArmoredGoat/artixinstall"
 gitBranch="iss008"
 downloadUrl="$baseUrlRaw/$gitRepo/$gitBranch"
 
-##########   START COLORS   
+main () {
+    # Declare variables for colors and special characters to style ouput.
+    declare_colors
+    declare_special_characters
+    # Create directory for storing variables and temporary files
+    create_directory /tempfiles
+    # Load US keymap
+    load_keymap us
+    # Print welcome message
+    print_head_message
 
-# Reset
-colorOff='\033[0m'       # Text Reset
+    set_manual_configuration
 
-# Colors
-blue='\033[0;34m'         # blue
-purple='\033[0;35m'       # purple
-cyan='\033[0;36m'         # cyan
-red='\033[0;31m'          # red
-green='\033[0;32m'        # green
-
-##########   END COLORS
-
-##########  START SPECIAL CHARACTERS
-
-# Green = Accepted inputs/done steps
-squareGreen="\033[0;32m\xE2\x96\x88\033[0m"
-# Red = Denied inputs/canceled steps
-squareRed="\033[0;31m\xE2\x96\x88\033[0m"
-# YellowRead = Waiting for input
-squareYellowRead=$'\033[0;33m\xE2\x96\x88\033[0m'
-# Yellow = Steps not done yet
-squareYellow="\033[0;33m\xE2\x96\x88\033[0m"
-
-##########  END SPECIAL CHARACTERS
-
-##########  START FUNCTIONS
-
-# \r jumps to beginning of line
-# \033 marks beginning of escape sequence
-# [1A moves one line up
-# [0K erase from cursor to right end
-
-delete_term_lines () {
-    local ERASE_CURR="\r\033[0K"
-    local ERASE_PREV="\r\033[1A\033[0K"
-    local MOVE_CURSOR_UP="\033[1A"
-    local ERASE_STRING=""
-    if [[ $2 ]]; then
-        ERASE_STRING+="${ERASE_CURR}"
-    fi
-    for (( i=0; i < $1; i++ )); do
-        ERASE_STRING+="${ERASE_PREV}"
-    done
-    if [[ $3 ]]; then
-        ERASE_STRING+="${MOVE_CURSOR_UP}"
-    fi
-    echo -e "${ERASE_STRING}"
+    get_boot_type
 }
 
-##########  END FUNCTIONS
+declare_colors () {
+    # Set variable to set color back to normal
+    colorOff='\033[0m'       # Text Reset
+    # Set variables to color terminal output
+    blue='\033[0;34m'         # blue
+    purple='\033[0;35m'       # purple
+    cyan='\033[0;36m'         # cyan
+    red='\033[0;31m'          # red
+    green='\033[0;32m'        # green
+}
 
-# Create directory for storing temp files/variables
-if [[ ! -d /tempfiles ]]; then
-    mkdir /tempfiles
-fi
+declare_special_characters () {
+    # Set variables to special characters to indicate status of step
+    # Green = Accepted inputs/done steps
+    squareGreen="\033[0;32m\xE2\x96\x88\033[0m"
+    # Red = Denied inputs/canceled steps
+    squareRed="\033[0;31m\xE2\x96\x88\033[0m"
+    # YellowRead = Waiting for input
+    squareYellowRead=$'\033[0;33m\xE2\x96\x88\033[0m'
+    # Yellow = Steps not done yet
+    squareYellow="\033[0;33m\xE2\x96\x88\033[0m"
+}
 
-# Load keymap us
-loadkeys us
+create_directory () {
+	# Check if directories exists. If not, create them.
+	if [[ ! -d $@ ]]; then
+	mkdir -pv $@
+    fi
+}
 
-echo -e "${cyan}###############################################################\
-#################"
-echo -e "#                   ArmoredGoat's Artix Installation Script           \
-         #"
-echo -e "#                          Last updated at 2023/03/20                 \
-         #"
-echo -e "# Educationally inspired by https://github.com/rwinkhart/artix-install\
--script  #"
-echo -e "######################################################################\
-##########${colorOff}"
+get_boot_type () {
+    # Determine if UEFI or BIOS boot. If /sys/firmware/efi exists --> UEFI boot
+    if [ -d "/sys/firmware/efi" ]; then
+        boot='uefi'
+    else
+        boot='bios'
+    fi
+}
 
-echo -e "\nBefore installation, a few questions have to be answered."
-read -n 1 -sp $'\nPress any key to continue.'
+get_terminal_width () {
+    terminalWidth=$(tput cols)
+}
 
-delete_term_lines 3
+load_keymap () {
+    loadkeys $1
+}
+
+print_center_text () {
+    # TODO Implement functionality to check if given text is to long
+    # to be displayed in one line. If so, split text at special character
+    # or space and move it to next line.
+
+    # Assign given values to variables
+    borderCharacter="$1"
+    text="$2"
+    # Get terminal width
+    get_terminal_width
+    # Subtract the number of characters of the text string from the terminal
+    # width to get the number of colums available for border characters and
+    # padding.
+    terminalWidthMinusText=$(((terminalWidth - ${#text})))
+    # Subtract two columns for the border characters on each side and divide
+    # by two to get the padding on one side. Assign it to two separate variables
+    # to manipulate them independently if necessary.
+    paddingLeft=$((((terminalWidthMinusText - 2) / 2)))
+    paddingRight=$paddingLeft
+    # Check if the remaining columns after inserting the text is uneven. If yes,
+    # increase paddingLeft by 1 to avoid to be one character short on the right
+    # end.
+    if [ $((terminalWidthMinusText % 2)) == 1 ]; then
+        ((paddingLeft++))
+    fi
+    # Print border character as left border
+    printf "$borderCharacter"
+    # Print left padding, so for each column one space character
+    for (( i=0; i < $paddingLeft; i++ )); do
+        printf " "
+    done
+    # Print text
+    printf "$text"
+    # Print right padding
+    for (( i=0; i < $paddingRight; i++ )); do
+        printf " "
+    done
+    # Print border character as right corner
+    printf "$borderCharacter"
+    # Print new line character to make sure the cursor is in a new line
+    printf "\n"
+}
+
+print_heading () {
+    # Assign given values to variables
+    borderCharacter="$1"
+    padding="$2"
+    heading="$3"
+    # Get terminal width
+    get_terminal_width
+    # Subtract the number of characters of the header string from the terminal
+    # width to get the number of colums available for border characters and
+    # padding.
+    terminalWidthMinusHeading=$(((terminalWidth - ${#heading})))
+    # Subtract the columns of the two paddings on each side and divide
+    # by two to get the border width on one side. Assign it to two separate 
+    # variables to manipulate them independently if necessary.
+    borderLeft=$((((terminalWidthMinusHeading - 2 * padding) / 2)))
+    borderRight=$borderLeft
+    # Check if the remaining columns after inserting the heading is uneven. 
+    # If yes, increase paddingLeft by 1 to avoid to be one character short on 
+    # the right end.
+    if [ $((terminalWidthMinusHeading % 2)) == 1 ]; then
+        ((borderLeft++))
+    fi
+    # Print left border, for each column one border character
+    for (( i=0; i < $borderLeft; i++ )); do
+        printf "$borderCharacter"
+    done
+    # Print left padding
+    for (( i=0; i < $padding; i++ )); do
+        printf " "
+    done
+    # Print heading
+    printf "$heading"
+    # Print right padding
+    for (( i=0; i < $padding; i++ )); do
+        printf " "
+    done
+    # Print right border
+    for (( i=0; i < $borderRight; i++ )); do
+        printf "$borderCharacter"
+    done
+    # Print new line character to make sure the cursor is in a new line
+    printf "\n"
+}
+
+print_head_message () {
+    # Set ouput color
+    set_color $cyan
+    # Print line as upper border of text box
+    print_line "#"
+    # Print content of text box
+    print_center_text "#" "ArmoredGoat's Artix Installation Script"
+    print_center_text "#" "Last updated: 2023/06/04"
+    # Print line as lower border of text box
+    print_line "#"
+    # Reset output color
+    set_color $colorOff
+    # Save current cursor position
+	tput sc
+
+    text="\nBefore installation, a few questions have to be answered."
+    prompt="Press any key to continue."
+    echo -e "$text"
+    read -n 1 -sp $'\n'"$prompt"
+    # Return to cursor position and clear everything on screen below
+	tput rc
+	tput ed
+}
+
+print_line () {
+    # Assign given value to variable
+    fillingCharacter="$1"
+    # Get terminal width
+    get_terminal_width
+    # For each column print the filling character
+    for (( i=0; i < $terminalWidth; i++ )); do
+        printf "$fillingCharacter"
+    done
+    # Print new line character to make sure the cursor is in a new line
+    printf "\n"
+}
+
+set_color () {
+    printf "$1"
+}
+
+set_manual_configuration () {
+    set_color $purple
+    print_heading "#" 3 "CONFIGURATION"
+
+    set_installation_type    
+}
+
+set_installation_type () {
+    set_color $blue
+    print_heading "#" 3 "INSTALLATION TYPE"
+
+}
 
 ##########   START MANUAL CONFIGURATION
-
-echo -e "${purple}##############################   CONFIGURATION   ############\
-###################${colorOff}"
-
-echo -e "\n          ${blue}#################### INSTALLATION TYPE ############\
-########${colorOff}"
 
 echo -e "\n${green}1) Base installation${colorOff} 
     Only necessary packages and configuration.
@@ -543,13 +664,6 @@ if [[ "$disk" == /dev/nvme0n* ]] || [[ "$disk" == /dev/mmcblk* ]]; then
     disk="$disk"'p'
 fi
 
-# Determine if UEFI or BIOS boot. If /sys/firmware/efi exists --> UEFI boot
-if [ -d "/sys/firmware/efi" ]; then
-    boot='uefi'
-else
-    boot='bios'
-fi
-
 ##########   END CONDITIONAL QUERIES
 
 ##########   START VARIABLE MANIPULATION
@@ -757,3 +871,6 @@ to exit the script without rebooting." reboot
             ;;
     esac      
 done
+
+# Call main function
+main
