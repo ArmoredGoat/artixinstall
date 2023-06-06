@@ -678,7 +678,7 @@ install_macchina () {
 }
 
 install_microcode () {
-    if [[ $cpu == 'AuthenticAMD' ]]; then
+    if [[ $cpu == 'AMD' ]] || [[ $cpu == 'AuthenticAMD' ]]; then
         microcodePackage='amd-ucode'
     elif [[ $cpu == 'Intel' ]] || [[ $cpu == 'GenuineIntel' ]]; then
         microcodePackage='intel-ucode'
