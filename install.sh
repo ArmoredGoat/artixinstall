@@ -234,10 +234,11 @@ partition_disk () {
         # To create partitions programatically (rather than manually)
         # the following is going to simulate the manual input to fdisk.
         # sed strips off all comments so that documentation can be included
-        # without interfering with the input.
+        # without interfering with the input. The RegEx is matching all
+        # alphanumeric values, +, and -.
         # Blank lines (commented as "Defualt") will send an empty
         # line terminated with a newline to take the fdisk default.
-        sed -e 's/\s*\([\+0-9a-zA-Z]*\).*/\1/' << EOF | fdisk -w always -W always "$baseDisk"
+        sed -e 's/\s*\([\+0-9a-zA-Z-]*\).*/\1/' << EOF | fdisk -w always -W always "$baseDisk"
             g       # Create new GPT disklabel
             n       # New partition
             1       # Partition number 1
@@ -254,7 +255,7 @@ partition_disk () {
                     # Default - start at beginning of remaining disk
                     # Default - use remaining disk space
             t       # Set type of partiton
-            3       # Select partition 2
+            3       # Select partition 3
             19      # Set type to 'Linux Swap'
             w       # Write partition table
             q       # Quit fdisk
@@ -278,7 +279,7 @@ EOF
         # Wipe any existing partition tables and filesystem on disk
         wipefs --all --force "$baseDisk"
         # Create partition table
-        sed -e 's/\s*\([\+0-9a-zA-Z]*\).*/\1/' << EOF | fdisk -w always -W always "$baseDisk"
+        sed -e 's/\s*\([\+0-9a-zA-Z-]*\).*/\1/' << EOF | fdisk -w always -W always "$baseDisk"
             g       # Create new GPT disklabel
             n       # New partition
             1       # Partition number 1
