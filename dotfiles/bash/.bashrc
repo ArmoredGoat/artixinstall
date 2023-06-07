@@ -5,6 +5,16 @@
 # If not running interactively, don't do anything
 [[ $- != *i* ]] && return
 
+##########  PATH
+
+# Add local 'pip' to PATH
+export PATH="${PATH}:${HOME}/.local/bin"
+
+##########  VARIABLES
+
+export EDITOR=nvim
+export VISUAL=nvim
+
 #####   HISTORY CUSTOMIZATION   #####
 
 HISTFILE=~/.bash_history.$HOSTNAME  # Guard history getting truncated to default 500 lines if bash --norc is run
@@ -101,10 +111,13 @@ fi
 # This prevents neofetch from launching everytime you open a terminal
 runningTerms=$(ps a | awk '{print $2}' | grep -vi "tty*" | uniq | wc -l);
 if [ $runningTerms -eq 1 ]; then
-    fastfetch
+    macchina
 fi
 
-##########  VARIABLES
+# Import colorscheme from 'wal' asynchronously
+# & 	-> Run the process in the background.
+# ( ) 	-> Hide shell job control messages.
+(cat ~/.cache/wal/sequences &)
 
-export EDITOR=nvim
-export VISUAL=nvim
+# Also change colorscheme of TTYs.
+source ~/.cache/wal/colors-tty.sh

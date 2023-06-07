@@ -1,8 +1,15 @@
 # Autostart programs
 
-picom &
-nitrogen --restore &
+# As long as picom does not work in my testing vm, it will be deactivated.
+#picom &
+# Check if there is already a cached color scheme and if yes, reload it.
+# Otherwise run pywal and create a color scheme.
+if [[ -d ~/.cache/wal ]]; then
+    wal -R &
+else
+    wal -i ~/.local/share/backgrounds/mushroom_town.png
+fi
 sh ~/.config/pipewire/.pipewire-start.sh &
 
 # Start Qtile
-exec dbus-launch --exit-with-session awesome
+exec dbus-launch --exit-with-session qtile start
