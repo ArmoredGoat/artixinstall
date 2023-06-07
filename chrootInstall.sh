@@ -21,7 +21,7 @@ main () {
     configure_clock
 
     # Install grub and create boot entries.
-    install_grub
+    #install_grub
 
     # Create user with given information and disable root access if wanted
     create_user

@@ -371,8 +371,8 @@ print_ciao_message () {
         case $reboot in
             "")
                 delete_terminal_lines 0 1
-                umount -R /mnt  # Unmounts disk
-                reboot
+#                umount -R /mnt  # Unmounts disk
+#                reboot
                 
                 break
                 ;;
