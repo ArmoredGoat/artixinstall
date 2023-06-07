@@ -3,7 +3,7 @@
     gitUrl="https://github.com/ArmoredGoat/artixinstall.git"
     baseUrlRaw="https://raw.githubusercontent.com"
     gitRepo="ArmoredGoat/artixinstall"
-    gitBranch="iss008"
+    gitBranch="iss009"
     downloadUrl="$baseUrlRaw/$gitRepo/$gitBranch"
 
 # This 'main' function is used to summarize and order all used functions in a
