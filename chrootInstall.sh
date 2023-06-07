@@ -721,12 +721,14 @@ install_neovim () {
     install_packages neovimPrerequisites
 
     # Build Neovim (stable) from source
-    runuser -l "$username" -c "git clone https://github.com/neovim/neovim \
-        $homedir/git/cloned/neovim && \
-        cd $homedir/git/cloned/neovim && \
-        make CMAKE_BUILD_TYPE=RelWithDebInfo && \
-        git checkout stable && \
-        sudo make install"
+#    runuser -l "$username" -c "git clone https://github.com/neovim/neovim \
+#        $homedir/git/cloned/neovim && \
+#        cd $homedir/git/cloned/neovim && \
+#        make CMAKE_BUILD_TYPE=RelWithDebInfo && \
+#        git checkout stable && \
+#        sudo make install"
+
+    install_packages neovim
 
     # Create directory for config files and plugins
     create_directory $homedir/.config/nvim/lua/custom/plugins
