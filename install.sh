@@ -248,28 +248,28 @@ partition_disk () {
             n       # New partition
             2       # Partition number 2
                     # Default - Start at beginning of remaining disk
-            +$swap  # Partiton size equal to given swap value
-            t       # Set type of partiton
-            2       # Select partition 2
-            19      # Set type to 'Linux Swap'
+            -$swap  # Partiton size equal to remaining space minus given swap value
             n       # New partition
             3       # Partition number 3
                     # Default - start at beginning of remaining disk
                     # Default - use remaining disk space
+            t       # Set type of partiton
+            3       # Select partition 2
+            19      # Set type to 'Linux Swap'
             w       # Write partition table
             q       # Quit fdisk
 EOF
         # Format and label EFI partition
         mkfs.fat -F 32 "$disk"'1'
         fatlabel "$disk"'1' ESP
-        # Format and label SWAP partition
-        mkswap -L SWAP "$disk"'2'
         # Format and label ROOT partition
-        mkfs.ext4 -L ROOT "$disk"'3'
-        # Mount SWAP partition
-        swapon "$disk"'2'
+        mkfs.ext4 -L ROOT "$disk"'2'
+        # Format and label SWAP partition
+        mkswap -L SWAP "$disk"'3'
         # Mount ROOT partition
-        mount "$disk"'3' /mnt
+        mount "$disk"'2' /mnt
+        # Mount SWAP partition
+        swapon "$disk"'3'
         # Create necessary directories on mounted disk
         mkdir -p /mnt/{boot,boot/efi,etc/conf.d,home}
         # Mount EFI partition
@@ -279,37 +279,37 @@ EOF
         wipefs --all --force "$baseDisk"
         # Create partition table
         sed -e 's/\s*\([\+0-9a-zA-Z]*\).*/\1/' << EOF | fdisk -w always -W always "$baseDisk"
-        g       # Create new GPT disklabel
-        n       # New partition
-        1       # Partition number 1
-                # Default - Start at beginning of disk
-        +1M     # 1 MB BIOS boot partition
-        t       # Set type of partiton
-        4       # Set type to 'BIOS boot'
-        n       # New partition
-        2       # Partition number 2
-                # Default - Start at beginning of remaining disk
-        +$swap  # Partiton size equal to given swap value
-        t       # Set type of partiton
-        2       # Select partition 2
-        19      # Set type to 'Linux Swap'
-        n       # New partition
-        3       # Partition number 3
-                # Default - start at beginning of remaining disk
-                # Default - use remaining disk space
-        w       # Write partition table
-        q       # Quit fdisk
+            g       # Create new GPT disklabel
+            n       # New partition
+            1       # Partition number 1
+                    # Default - Start at beginning of disk
+            +1M     # 1 MB BIOS boot partition
+            t       # Set type of partiton
+            4       # Set type to 'BIOS boot'
+            n       # New partition
+            2       # Partition number 2
+                    # Default - Start at beginning of remaining disk
+            -$swap  # Partiton size equal to remaining space minus given swap value
+            n       # New partition
+            3       # Partition number 3
+                    # Default - start at beginning of remaining disk
+                    # Default - use remaining disk space
+            t       # Set type of partiton
+            3       # Select partition 3
+            19      # Set type to 'Linux Swap'
+            w       # Write partition table
+            q       # Quit fdisk
 EOF
-        # Format and label SWAP partition
-        mkswap -L SWAP "$disk"'2'
         # Format and label ROOT partition
-        mkfs.ext4 -L ROOT "$disk"'3'
-        # Mount SWAP partition
-        swapon "$disk"'2'
+        mkfs.ext4 -L ROOT "$disk"'2'
+        # Format and label SWAP partition
+        mkswap -L SWAP "$disk"'3' 
         # Mount ROOT partition
-        mount "$disk"'3' /mnt
+        mount "$disk"'2' /mnt
+        # Mount SWAP partition
+        swapon "$disk"'3'
         # Create necessary directories
-        mkdir -p /mnt/etc/conf.d
+        mkdir -p /mnt/{boot,etc/conf.d,home}
     fi
 }
 
@@ -371,8 +371,8 @@ print_ciao_message () {
         case $reboot in
             "")
                 delete_terminal_lines 0 1
-#                umount -R /mnt  # Unmounts disk
-#                reboot
+                umount -R /mnt  # Unmounts disk
+                reboot
                 
                 break
                 ;;

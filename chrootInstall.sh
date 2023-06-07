@@ -21,7 +21,7 @@ main () {
     configure_clock
 
     # Install grub and create boot entries.
-    #install_grub
+    install_grub
 
     # Create user with given information and disable root access if wanted
     create_user
@@ -592,22 +592,26 @@ install_graphics_drivers () {
 }
 
 install_grub () {
-    # grub - 
-    # efibootmgr - 
-    # os-prober - Detection of other installed operating systems
-    packagesGrub="grub efibootmgr os-prober"
-
-    install_packages $packagesGrub
-
     # Check boot type and install correct version
     if [ "$boot" == 'uefi' ]; then
+        # grub - 
+        # efibootmgr - 
+        # os-prober - Detection of other installed operating systems
+        packagesGrub="grub efibootmgr os-prober"
+
+        install_packages $packagesGrub
+
         grub-install --target=x86_64-efi --efi-directory=/boot/efi \
             --bootloader-id=grub --recheck
         # grub-install --target=x86_64-efi --efi-directory=/boot/EFI \
         #    --bootloader-id=GRUB-rwinkhart --recheck
         # TODO Learn about bootloader-id
     elif [ "$boot" == 'bios' ]; then
-        grub-install --recheck $baseDisk
+        packagesGrub="grub os-prober"
+
+        install_packages $packagesGrub
+
+        grub-install --target=i386-pc --recheck $baseDisk
     fi
 
     update_grub_config
