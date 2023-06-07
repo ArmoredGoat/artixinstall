@@ -717,18 +717,24 @@ install_minecraft () {
 }
 
 install_neovim () {
-    install_packages neovim
+    # Build prerequisites
+    neovimPrerequisites="base-devel cmake unzip ninja curl"
+    install_packages neovimPrerequisites
 
-    # Install plugin manager
-    git clone --depth 1 https://github.com/wbthomason/packer.nvim \
-        $homedir/.local/share/nvim/site/pack/packer/start/packer.nvim
+    # Build Neovim (stable) from source
+    runuser -l "$username" -c "git clone https://github.com/neovim/neovim \
+        $homedir/git/cloned/neovim && \
+        cd $homedir/git/cloned/neovim && \
+        make CMAKE_BUILD_TYPE=RelWithDebInfo && \
+        git checkout stable && \
+        sudo make install"
 
     # Create directory for config files and plugins
-    create_directory $homedir/.config/nvim/lua
+    create_directory $homedir/.config/nvim/lua/custom/plugins
 
+    # Copy configuration into corresponding directory
     cp $repoDirectory/dotfiles/nvim/* \
         $homedir/.config/nvim/
-
 }
 
 install_nitrogen () {
