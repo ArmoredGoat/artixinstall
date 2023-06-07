@@ -607,7 +607,7 @@ install_grub () {
         #    --bootloader-id=GRUB-rwinkhart --recheck
         # TODO Learn about bootloader-id
     elif [ "$boot" == 'bios' ]; then
-        grub-install --target=i386-pc --recheck $baseDisk
+        grub-install --recheck $baseDisk
     fi
 
     update_grub_config
