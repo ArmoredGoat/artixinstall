@@ -838,6 +838,11 @@ install_rofi () {
     ### WINDOW SWITCHER
 
     pacman -Syu rofi --needed --noconfirm
+
+    install_packages papirus-icon-theme
+
+    cp $repoDirectory/dotfiles/rofi/config.rasi \
+        $homedir/.config/rofi/config.rasi
 }
 
 install_trash_cli () {
