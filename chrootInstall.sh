@@ -1,11 +1,5 @@
 #! /bin/bash
 
-    gitUrl="https://github.com/ArmoredGoat/artixinstall.git"
-    baseUrlRaw="https://raw.githubusercontent.com"
-    gitRepo="ArmoredGoat/artixinstall"
-    gitBranch="iss004"
-    downloadUrl="$baseUrlRaw/$gitRepo/$gitBranch"
-
 # This 'main' function is used to summarize and order all used functions in a
 # clear way. Also, it allows to swap out functions and rearrange them witout
 # much of an effort. In general, it seems to be good practice to break up
@@ -421,6 +415,7 @@ import_variables () {
 
     homedir=/home/"$username"
     repoDirectory="$homedir/git/artixinstall"
+    downloadUrl="$baseUrlRaw/$gitRepo/$gitBranch"
 }
 
 install_aur_packages () {

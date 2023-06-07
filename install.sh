@@ -3,7 +3,7 @@
 gitUrl="https://github.com/ArmoredGoat/artixinstall.git"
 baseUrlRaw="https://raw.githubusercontent.com"
 gitRepo="ArmoredGoat/artixinstall"
-gitBranch="iss004"
+gitBranch="iss005"
 downloadUrl="$baseUrlRaw/$gitRepo/$gitBranch"
 
 main () {
@@ -115,7 +115,7 @@ export_variables () {
 
     variables=("cpu" "threadsMinusOne" "gpu" "boot" "installationType" \
         "baseDisk" "username" "userPassword" "setRootPassword" "rootPassword" \
-        "timezone")
+        "timezone" "gitUrl" "baseUrlRaw" "gitRepo" "gitBranch")
 
     for variable in ${variables[@]}; do
         echo ${!variable} > $pathVariables/$variable
