@@ -1,0 +1,56 @@
+*filter
+:ufw6-user-input - [0:0]
+:ufw6-user-output - [0:0]
+:ufw6-user-forward - [0:0]
+:ufw6-before-logging-input - [0:0]
+:ufw6-before-logging-output - [0:0]
+:ufw6-before-logging-forward - [0:0]
+:ufw6-user-logging-input - [0:0]
+:ufw6-user-logging-output - [0:0]
+:ufw6-user-logging-forward - [0:0]
+:ufw6-after-logging-input - [0:0]
+:ufw6-after-logging-output - [0:0]
+:ufw6-after-logging-forward - [0:0]
+:ufw6-logging-deny - [0:0]
+:ufw6-logging-allow - [0:0]
+:ufw6-user-limit - [0:0]
+:ufw6-user-limit-accept - [0:0]
+### RULES ###
+
+### tuple ### limit any 22 ::/0 any ::/0 in comment=4c696d697420636f6e6e656374696f6e73206f6e2073736820706f7274
+-A ufw6-user-input -p tcp --dport 22 -m conntrack --ctstate NEW -m recent --set
+-A ufw6-user-input -p tcp --dport 22 -m conntrack --ctstate NEW -m recent --update --seconds 30 --hitcount 6 -j ufw6-user-limit
+-A ufw6-user-input -p tcp --dport 22 -j ufw6-user-limit-accept
+-A ufw6-user-input -p udp --dport 22 -m conntrack --ctstate NEW -m recent --set
+-A ufw6-user-input -p udp --dport 22 -m conntrack --ctstate NEW -m recent --update --seconds 30 --hitcount 6 -j ufw6-user-limit
+-A ufw6-user-input -p udp --dport 22 -j ufw6-user-limit-accept
+
+### tuple ### allow tcp 22,25,80,123,143,443,587,993 ::/0 any ::/0 in comment=5374616e6461726420696e636f6d696e6720706f727473
+-A ufw6-user-input -p tcp -m multiport --dports 22,25,80,123,143,443,587,993 -j ACCEPT
+
+### tuple ### allow tcp 22,25,80,123,143,443,587,993 ::/0 any ::/0 out comment=5374616e64617264206f7574676f696e6720706f727473
+-A ufw6-user-output -p tcp -m multiport --dports 22,25,80,123,143,443,587,993 -j ACCEPT
+
+### tuple ### allow udp 53,123 ::/0 any ::/0 in comment=416c6c6f77204e545020616e6420444e5320696e
+-A ufw6-user-input -p udp -m multiport --dports 53,123 -j ACCEPT
+
+### tuple ### allow udp 53,123 ::/0 any ::/0 out comment=416c6c6f77204e545020616e6420444e53206f7574
+-A ufw6-user-output -p udp -m multiport --dports 53,123 -j ACCEPT
+
+### END RULES ###
+
+### LOGGING ###
+-A ufw6-after-logging-input -j LOG --log-prefix "[UFW BLOCK] " -m limit --limit 3/min --limit-burst 10
+-A ufw6-after-logging-output -j LOG --log-prefix "[UFW BLOCK] " -m limit --limit 3/min --limit-burst 10
+-A ufw6-after-logging-forward -j LOG --log-prefix "[UFW BLOCK] " -m limit --limit 3/min --limit-burst 10
+-I ufw6-logging-deny -m conntrack --ctstate INVALID -j RETURN -m limit --limit 3/min --limit-burst 10
+-A ufw6-logging-deny -j LOG --log-prefix "[UFW BLOCK] " -m limit --limit 3/min --limit-burst 10
+-A ufw6-logging-allow -j LOG --log-prefix "[UFW ALLOW] " -m limit --limit 3/min --limit-burst 10
+### END LOGGING ###
+
+### RATE LIMITING ###
+-A ufw6-user-limit -m limit --limit 3/minute -j LOG --log-prefix "[UFW LIMIT BLOCK] "
+-A ufw6-user-limit -j REJECT
+-A ufw6-user-limit-accept -j ACCEPT
+### END RATE LIMITING ###
+COMMIT

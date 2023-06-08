@@ -1,0 +1,10 @@
+@theme "/usr/share/rofi/themes/gruvbox-dark-soft.rasi"
+configuration {
+	display-drun: "Applications:";
+	display-window: "Windows:";
+	drun-display-format: "{icon} {name}";
+	font: "Nerd Font Hack Mono 12";
+	modi: "window,run,drun";
+	show-icons: true;
+	icon-theme: "Papirus";
+}

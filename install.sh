@@ -1,757 +1,1058 @@
 #! /bin/bash
 
-##########   START COLORS   
+gitUrl="https://github.com/ArmoredGoat/artixinstall.git"
+baseUrlRaw="https://raw.githubusercontent.com"
+gitRepo="ArmoredGoat/artixinstall"
+gitBranch="iss005"
+downloadUrl="$baseUrlRaw/$gitRepo/$gitBranch"
 
-# Reset
-colorOff='\033[0m'       # Text Reset
+main () {
+    # Declare variables for colors and special characters to style ouput.
+    declare_colors
+    declare_special_characters
+    # Create directory for storing variables and temporary files
+    create_directory /tempfiles
+    # Load US keymap
+    load_keymap us
+    # Print welcome message
+    print_welcome_message
+    # Get hardware and boot information
+    get_system_information
+    # Run manual configuration
+    set_manual_configuration
+    # Partition chosen disk
+    partition_disk
+    # Generate filesystem table
+    generate_filesystem_table
+    # Set hostname
+    set_hostname
+    # Activate NTP daemon to synchronize computer's real-time clock
+    start_service ntpd
 
-# Colors
-blue='\033[0;34m'         # blue
-purple='\033[0;35m'       # purple
-cyan='\033[0;36m'         # cyan
-red='\033[0;31m'          # red
-green='\033[0;32m'        # green
+    install_general_packages
 
-##########   END COLORS
+    export_variables
 
-##########  START SPECIAL CHARACTERS
+    download_chroot_install_script
 
-# Green = Accepted inputs/done steps
-squareGreen="\033[0;32m\xE2\x96\x88\033[0m"
-# Red = Denied inputs/canceled steps
-squareRed="\033[0;31m\xE2\x96\x88\033[0m"
-# YellowRead = Waiting for input
-squareYellowRead=$'\033[0;33m\xE2\x96\x88\033[0m'
-# Yellow = Steps not done yet
-squareYellow="\033[0;33m\xE2\x96\x88\033[0m"
+    execute_chroot_install_script
 
-##########  END SPECIAL CHARACTERS
+    print_ciao_message
+}
 
-##########  START FUNCTIONS
+create_directory () {
+	# Check if directories exists. If not, create them.
+	if [[ ! -d $@ ]]; then
+	mkdir -pv $@
+    fi
+}
 
-# \r jumps to beginning of line
-# \033 marks beginning of escape sequence
-# [1A moves one line up
-# [0K erase from cursor to right end
+declare_colors () {
+    # Set variable to set color back to normal
+    colorOff='\033[0m'       # Text Reset
+    # Set variables to color terminal output
+    blue='\033[0;34m'         # blue
+    purple='\033[0;35m'       # purple
+    cyan='\033[0;36m'         # cyan
+    red='\033[0;31m'          # red
+    green='\033[0;32m'        # green
+    gray='\033[0;90m'         # gray
+}
 
-delete_term_lines () {
+declare_special_characters () {
+    # Set variables to special characters to indicate status of step
+    # Green = Accepted inputs/done steps
+    squareGreen="\033[0;32m\xE2\x96\x88\033[0m"
+    # Red = Denied inputs/canceled steps
+    squareRed="\033[0;31m\xE2\x96\x88\033[0m"
+    # YellowRead = Waiting for input
+    squareYelR=$'\033[0;33m\xE2\x96\x88\033[0m'
+    # Yellow = Steps not done yet
+    squareYellow="\033[0;33m\xE2\x96\x88\033[0m"
+}
+
+delete_terminal_lines () {
+    # Function to control cursor and delete terminal output. This is a
+    # subsitution for tput sc/rc, because it does not seem to function inside
+    # my script.
+
+    # \r jumps to beginning of line
+    # \033 marks beginning of escape sequence
+    # [1A moves one line up
+    # [0K erase from cursor to right end
     local ERASE_CURR="\r\033[0K"
     local ERASE_PREV="\r\033[1A\033[0K"
     local MOVE_CURSOR_UP="\033[1A"
     local ERASE_STRING=""
+    # If set, erase current line
     if [[ $2 ]]; then
         ERASE_STRING+="${ERASE_CURR}"
     fi
+    # If set, erase given number of previous lines
     for (( i=0; i < $1; i++ )); do
         ERASE_STRING+="${ERASE_PREV}"
     done
+    # If set, move cursor one line up
     if [[ $3 ]]; then
         ERASE_STRING+="${MOVE_CURSOR_UP}"
     fi
-    echo -e "${ERASE_STRING}"
+    # Output string to make changes
+    printf "${ERASE_STRING}"
 }
 
-##########  END FUNCTIONS
+download_chroot_install_script () {
+    curl $downloadUrl/chrootInstall.sh -o /mnt/chrootInstall.sh
+}
 
-# Create directory for storing temp files/variables
-if [[ ! -d /tempfiles ]]; then
-    mkdir /tempfiles
-fi
+execute_chroot_install_script () {
+    chmod +x /mnt/chrootInstall.sh
+    artix-chroot /mnt /chrootInstall.sh
+}
 
-# Load keymap us
-loadkeys us
+export_variables () {
+    pathVariables="/mnt/tempfiles"
+    create_directory $pathVariables
 
-echo -e "${cyan}###############################################################\
-#################"
-echo -e "#                   ArmoredGoat's Artix Installation Script           \
-         #"
-echo -e "#                          Last updated at 2023/03/20                 \
-         #"
-echo -e "# Educationally inspired by https://github.com/rwinkhart/artix-install\
--script  #"
-echo -e "######################################################################\
-##########${colorOff}"
+    variables=("cpu" "threadsMinusOne" "gpu" "boot" "installationType" \
+        "baseDisk" "username" "userPassword" "setRootPassword" "rootPassword" \
+        "timezone" "gitUrl" "baseUrlRaw" "gitRepo" "gitBranch")
 
-echo -e "\nBefore installation, a few questions have to be answered."
-read -n 1 -sp $'\nPress any key to continue.'
+    for variable in ${variables[@]}; do
+        echo ${!variable} > $pathVariables/$variable
+        printf "\nVariable exported:\t$variable\n"
+    done
+}
 
-delete_term_lines 3
+generate_filesystem_table () {
+    fstabgen -U /mnt >> /mnt/etc/fstab
+}
 
-##########   START MANUAL CONFIGURATION
-
-echo -e "${purple}##############################   CONFIGURATION   ############\
-###################${colorOff}"
-
-echo -e "\n          ${blue}#################### INSTALLATION TYPE ############\
-########${colorOff}"
-
-echo -e "\n${green}1) Base installation${colorOff} 
-    Only necessary packages and configuration.
-    In the end you have a working but basic Artix installation.
-
-${green}2) Customized installation${colorOff} 
-    Take over all my configuration and user settings.
-    It is not guaranteed that my configuration is one hundred percent compatible
-    with your system, although this script is designed to be adaptive."
-
-while true; do
-    read -p $'\n'$squareYellowRead"    Which installation would you like to \
-perfom (1-2)? " installationType
-    case $installationType in
-        1)
-            delete_term_lines 11
-
-            installationType='base'
-            
-            break
-            ;;
-        2)
-            delete_term_lines 11
-            
-            installationType='custom'
-            
-            break
-            ;;
-        *)
-            delete_term_lines 2
-
-            echo -e "${squareRed}    Invalid input..."
-            sleep 2
-
-            delete_term_lines 2 0 1
-            ;;
-    esac      
-done
-
-echo -e "${squareGreen}    Installation type '${installationType}' set!"
-
-echo -e "\n          ${blue}####################    PARTITIONING   ############\
-########${colorOff}"
-
-echo -e "\n                    ${blue}##########   DISK SELECTION  ##########\
-${colorOff}"
-
-# List available disks
-echo -e "\n$(lsblk --tree | grep 'NAME\|disk\|part')" | tee /tempfiles/output
-numberOfLines=$(wc -l < /tempfiles/output)
-# Store available disks in temp file, enumerates them, and display choices
-(lsblk --list -d | grep disk | awk '{print NR") /dev/" $1}') > \
-/tempfiles/availableDisks
-
-echo ""
-while IFS= read -r line; do
-    echo $line
-done < /tempfiles/availableDisks
-
-# Get number of lines of temp file = number of choices
-numberOfDisks=$(wc -l < /tempfiles/availableDisks)
-# Disk can be selected by entering its number 
-while true; do
-    if [[ "$numberOfDisks" > "1" ]]; then
-        read -p $'\n'$squareYellowRead"    Which disk shall be partitioned (1-\
-$numberOfDisks)? " selectedDisk
+get_boot_type () {
+    # Determine if UEFI or BIOS boot. If /sys/firmware/efi exists --> UEFI boot
+    if [ -d "/sys/firmware/efi" ]; then
+        boot='uefi'
     else
-        read -p $'\n'$squareYellowRead"    Which disk shall be partitioned (1)?\
- " selectedDisk
+        boot='bios'
     fi
-    if (( 1 <= $selectedDisk && $selectedDisk <= $numberOfDisks )); then
-            disk=$(sed "${selectedDisk}q;d" /tempfiles/availableDisks | \
-            awk '{print $2}')
-            
-            delete_term_lines $(( $numberOfLines + 5 ))
+}
 
-            echo -e "${squareGreen}    Disk ${disk} selected."
-
-            break
-        else
-            delete_term_lines 2
-
-            echo -e "${squareRed}    Invalid input..."
-            sleep 2
-
-            delete_term_lines 2 0 1
-    fi    
-done
-
-# Ask for confirmation to wipe selected disk.
-while true; do
-    read -p $'\n'$squareYellowRead"   ${disk} will be completely wiped. Do you \
-want to continue (y/N)? " wipe
-    case $wipe in
-        [yY][eE][sS]|[yY])
-            delete_term_lines 2 0 1
-            break
-            ;;
-        [nN][oO]|[nN]|"")
-            delete_term_lines 2
-
-            echo -e "${squareRed}    The installation will be aborted. Press \
-any key to exit."
-            read -sp $'\n'
-
-            exit 0
-            ;;
-        *)
-            delete_term_lines 2
-
-            echo -e "${squareRed}    Invalid input..."
-            sleep 2
-
-            delete_term_lines 2 0 1
-            ;;
-    esac      
-done
-
-echo -e "\n                    ${blue}##########     SWAP SPACE    ##########\
-${colorOff}"
-
-# Ask how much swap space should be allocated and convert the value
-# from Gibibyte to Megabyte.
-echo -e "\n${squareYellow}    Setting size of swap space..."
-
-read -rp $'\nSwap size in GiB: ' swap
-delete_term_lines 4
-echo -e "${squareGreen}    ${swap} GiB swap space set!"
-
-echo -e "\n          ${blue}####################  SYSTEM SETTINGS  ############\
-########${colorOff}"
-
-echo -e "\n                    ${blue}##########   HOST SETTINGS   ##########\
-${colorOff}"
-
-# Ask for hostname and credentials. Ensuring that passwords match.
-echo -e "\n${squareYellow}    Setting hostname..."
-
-read -rp $'\nHostname: ' hostname
-delete_term_lines 4
-echo -e "${squareGreen}    Hostname '${hostname}' set!"
-
-echo -e "\n                    ${blue}##########   USER SETTINGS   ##########\
-${colorOff}"
-
-echo -e "\n${squareYellow}    Setting username..."
-
-read -rp $'\nUsername: ' username
-delete_term_lines 4
-echo -e "${squareGreen}    Username '${username}' set!"
-
-echo -e "\n${squareYellow}    Setting user password..."
-userPassword="foo"; userPasswordConf="bar"
-while [ $userPassword != $userPasswordConf ]; do
-    read -rsp $'\nUser password: ' userPassword
-    delete_term_lines 0 1 1
-    read -rsp $'Confirm user password: ' userPasswordConf
-    if [[ $userPassword != $userPasswordConf && ${#userPassword} < 8 ]]; then
-        delete_term_lines 0 1 1
-        echo -e "${squareRed}    Passwords do not match AND are too short (at \
-least 8 characters)."
-        sleep 3
-        delete_term_lines 2 1 1
-    elif [[ $userPassword == $userPasswordConf && ${#userPassword} < 8 ]]; then
-        delete_term_lines 0 1 1
-        echo -e "${squareRed}    Passwords are too short (at least 8 \
-characters)."
-        userPassword="foo"; userPasswordConf="bar"
-        sleep 3
-        delete_term_lines 2 1 1
-    elif [[ $userPassword != $userPasswordConf ]]; then
-        delete_term_lines 0 1 1
-        echo -e "${squareRed}    Passwords do not match."
-        sleep 3
-        delete_term_lines 2 1 1
-    else
-        # Erase all ouput done due to entering root password and confirm that
-        # password is set
-        delete_term_lines 3 1
-        echo -e "${squareGreen}    User password set."
-        break
+get_hardware_information () {
+    # Get CPU to install according packages in chrootInstall.sh if necessary
+    cpu=$(lscpu | grep 'Vendor ID:' | awk 'FNR == 1 {print $3;}')
+# Temporarily disables as I don't have a usecase for this yet.
+#    threadsMinusOne=$(( $(lscpu | grep 'CPU(s):' | \
+#        awk 'FNR == 1 {print $2;}') - 1 ))
+    # Get GPU to install according drivers in chrootInstall.sh if necessary
+    gpu=$(lspci | grep 'VGA compatible controller:' | awk 'FNR == 1 {print $5;}')
+    # Sometimes, AMD is called AuthenticAMD. To match package names, set gpu to 
+    # 'AMD' if it is not NVIDIA, Intel or VMware
+    if ! ([ "$gpu" == 'NVIDIA' ] || [ "$gpu" == 'Intel' ] || \
+        [ "$gpu" == 'VMware' ]); then
+            gpu='AMD'
     fi
-done
+    # Get amount of RAM
+    ram=$(echo "$(< /proc/meminfo)" | grep 'MemTotal:' | awk '{print $2;}')
+    # Convert RAM from byte into gigabyte
+    ram=$(( $ram / 1000000 ))
+}
 
-while true; do
-    read -p $'\n'$squareYellowRead"    Do you want to set a root password (y/N)\
-? " setRootPassword
-    case $setRootPassword in
-        [yY][eE][sS]|[yY])
-            delete_term_lines 1 0 1
-            echo -e "${squareYellow}    Setting root password..."
-            setRootPassword=true
-            rootPassword="foo"; rootPasswordConf="bar"
-            while [[ $rootPassword != $rootPasswordConf ]]; do
-                read -rsp $'\nRoot password: ' rootPassword
-                delete_term_lines 0 1 1
-                read -rsp $'Confirm root password: ' rootPasswordConf
-                if [[ $rootPassword != $rootPasswordConf && \
-                ${#rootPassword} < 8 ]]; then
-                    delete_term_lines 0 1 1
-                    echo -e "${squareRed}    Passwords do not match AND are \
-too short (at least 8 characters)."
-                    sleep 3
-                    delete_term_lines 2 1 1
-                elif [[ $rootPassword == $rootPasswordConf && \
-                ${#rootPassword} < 8 ]]; then
-                    delete_term_lines 0 1 1
-                    echo -e "${squareRed}    Passwords are too short (at least \
-8 characters)."
-                    rootPassword="foo"; rootPasswordConf="bar"
-                    sleep 3
-                    delete_term_lines 2 1 1
-                elif [[ $rootPassword != $rootPasswordConf ]]; then
-                    delete_term_lines 0 1 1
-                    echo -e "${squareRed}    Passwords do not match."
-                    sleep 3
-                    delete_term_lines 2 1 1
-                else
-                    # Erase all ouput done due to entering root password and 
-                    # confirm that password is set
-                    delete_term_lines 3 1
-                    echo -e "${squareGreen}    Root password set."
-                    break
-                fi
-            done
-            break
-            ;;
-        [nN][oO]|[nN]|"")
-            setRootPassword=false
-            delete_term_lines 2
-            echo -e "${squareGreen}    No root password set."
-            break
-            ;;
-        *)
-            delete_term_lines 2
-            echo -e "${squareRed}    Invalid input..."
-            sleep 2
-            ;;
-    esac      
-done
+get_system_information () {
+    get_boot_type
+    get_hardware_information
+}
 
-echo -e "\n                    ${blue}##########   TIME SETTINGS   ##########\
-${colorOff}"
+get_terminal_width () {
+    terminalWidth=$(tput cols)
+}
 
-echo -e "\n${squareYellow}    Setting time zone..."
-echo ""
-echo "1) Africa
-2) America
-3) Asia
-4) Atlantic
-5) Australia
-6) Europe
-7) Pacific
-8) Etc" | tee /tempfiles/regions
-numberOfRegions="$(wc -l < /tempfiles/regions)"
+install_general_packages () {
+    # Install packages
+    # TODO Add explanation to choice of packages
+    # Base packages
+        # base          - 
+        # base-devel    - Package group with tools for building 
+        #                 (compiling and linking) software
+        #base_devel="db diffutils gc guile libisl libmpc perl autoconf \
+        # automake bash binutils bison esysusers /tempfilesfiles fakeroot \
+        # file findutils flex gawk gcc gettext grep groff gzip libtool m4 \
+        # make pacman pacman-contrib patch pkgconf python sed opendoas texinfo \
+        # which bc udev"
+    basePackages="base base-devel"
 
-while true; do
-    read -p $'\n'$squareYellowRead"    Please enter your region's number (1-\
-$numberOfRegions): " regionNumber
-    if (( 1 <= $regionNumber && $regionNumber <= $numberOfRegions )); then
-        region=$((sed "${regionNumber}q;d" /tempfiles/regions) | \
-        awk '{print $2}')
+    initSystem="openrc"
+    # Login manager
+        # elogind   - 
+    loginManager="elogind-"$initSystem
 
-        delete_term_lines 11 1
+    # Linux kernel
+        # linux-lts, zen, ...
+    kernel="linux"
 
-        break
-    else
-        if [[ $regionNumber == "" ]]; then
-            delete_term_lines 3
-        else
-            delete_term_lines 2
-        fi
+    # Firmware
+        # linux-firmware    -
+        # sof-firmware      -
+    firmware="linux-firmware"
 
-        echo -e "${squareRed}    Invalid input..."
-        sleep 2
+    # Network
+    network="connman connman-$initSystem wpa_supplicant wpa_supplicant-$initSystem"
 
-        delete_term_lines 2 0 1
+    generalPackages="$basePackages $initSystem $loginManager $kernel $firmware $network"
+
+    install_packages $generalPackages
+}
+
+install_packages () {
+    basestrap /mnt $@
+}
+
+load_keymap () {
+    loadkeys $1
+}
+
+partition_disk () {
+    # Check if SWAP is mounted. If yes, unmount it.
+    swapDevice=$(cat /proc/swaps | grep "partition" | awk '{print $1}')
+    if [[ $swapDevice ]]; then
+        swapoff $swapDevice
     fi
-done
-
-echo -e "${squareYellow}    ${region} selected..."
-
-echo ""
-
-ls -l /usr/share/zoneinfo/$region | grep -v "\->" | \
-tail -n +2 > /tempfiles/regionCities
-numberOfCities="$(wc -l < /tempfiles/regionCities)"
-
-ls -l /usr/share/zoneinfo/$region | grep -v "\->" | tail -n +2 | \
-awk '{print NR") " $9}' | column -c $(tput cols) | tee /tempfiles/output
-numberOfOutputLines=$(wc -l < /tempfiles/output)
-
-while true; do
-    if [[ $numberOfCities > "1" ]]; then
-        read -p $'\n'$squareYellowRead"    Please enter your cities' number (1-\
-$numberOfCities): " cityNumber
-    else
-        read -p $'\n'$squareYellowRead"    Please enter your cities' number \
-        (1): " cityNumber
+    # In case of NVME or SD/MMC device, append 'p' to adress Linux' 
+    # way of naming partitions.
+    baseDisk=$disk
+    if [[ "$disk" == /dev/nvme0n* ]] || [[ "$disk" == /dev/mmcblk* ]]; then
+        disk="$disk"'p'
     fi
-    if (( 1 <= $cityNumber && $cityNumber <= $numberOfCities )); then
-        city=$(sed "${cityNumber}q;d" /tempfiles/regionCities | \
-        awk '{print $9}')
+    # Unmount any partition of chosen disk that is mounted.
+    for mountPoint in $(mount | grep "^$baseDisk" | awk '{print $3}'); do
+        umount -fl $mountPoint
+    done
+    # In case of UEFI boot --> GPT/UEFI partitioning with 1 GiB disk space 
+    # for boot partition
+    # In case of BIOS boot --> MBR/BIOS partitioning
+    if [ "$boot" == 'uefi' ]; then
+        # Wipe any existing partition tables and filesystem on disk
+        wipefs --all --force "$baseDisk"
+        # To create partitions programatically (rather than manually)
+        # the following is going to simulate the manual input to fdisk.
+        # sed strips off all comments so that documentation can be included
+        # without interfering with the input. The RegEx is matching all
+        # alphanumeric values, +, and -.
+        # Blank lines (commented as "Defualt") will send an empty
+        # line terminated with a newline to take the fdisk default.
+        sed -e 's/\s*\([\+0-9a-zA-Z-]*\).*/\1/' << EOF | fdisk -w always -W always "$baseDisk"
+            g       # Create new GPT disklabel
+            n       # New partition
+            1       # Partition number 1
+                    # Default - Start at beginning of disk
+            +1024M  # 1 GiB boot parttion
+            t       # Set type of partiton
+            1       # Set type to 'EFI System'
+            n       # New partition
+            2       # Partition number 2
+                    # Default - Start at beginning of remaining disk
+            -$swap  # Partiton size equal to remaining space minus given swap value
+            n       # New partition
+            3       # Partition number 3
+                    # Default - start at beginning of remaining disk
+                    # Default - use remaining disk space
+            t       # Set type of partiton
+            3       # Select partition 3
+            19      # Set type to 'Linux Swap'
+            w       # Write partition table
+            q       # Quit fdisk
+EOF
+        # Format and label EFI partition
+        mkfs.fat -F 32 "$disk"'1'
+        fatlabel "$disk"'1' ESP
+        # Format and label ROOT partition
+        mkfs.ext4 -L ROOT "$disk"'2'
+        # Format and label SWAP partition
+        mkswap -L SWAP "$disk"'3'
+        # Mount ROOT partition
+        mount "$disk"'2' /mnt
+        # Mount SWAP partition
+        swapon "$disk"'3'
+        # Create necessary directories on mounted disk
+        mkdir -p /mnt/{boot,boot/efi,etc/conf.d,home}
+        # Mount EFI partition
+        mount  "$disk"'1' /mnt/boot/efi
+    else # If BIOS boot
+        # Wipe any existing partition tables and filesystem on disk
+        wipefs --all --force "$baseDisk"
+        # Create partition table
+        sed -e 's/\s*\([\+0-9a-zA-Z-]*\).*/\1/' << EOF | fdisk -w always -W always "$baseDisk"
+            g       # Create new GPT disklabel
+            n       # New partition
+            1       # Partition number 1
+                    # Default - Start at beginning of disk
+            +1M     # 1 MB BIOS boot partition
+            t       # Set type of partiton
+            4       # Set type to 'BIOS boot'
+            n       # New partition
+            2       # Partition number 2
+                    # Default - Start at beginning of remaining disk
+            -$swap  # Partiton size equal to remaining space minus given swap value
+            n       # New partition
+            3       # Partition number 3
+                    # Default - start at beginning of remaining disk
+                    # Default - use remaining disk space
+            t       # Set type of partiton
+            3       # Select partition 3
+            19      # Set type to 'Linux Swap'
+            w       # Write partition table
+            q       # Quit fdisk
+EOF
+        # Format and label ROOT partition
+        mkfs.ext4 -L ROOT "$disk"'2'
+        # Format and label SWAP partition
+        mkswap -L SWAP "$disk"'3' 
+        # Mount ROOT partition
+        mount "$disk"'2' /mnt
+        # Mount SWAP partition
+        swapon "$disk"'3'
+        # Create necessary directories
+        mkdir -p /mnt/{boot,etc/conf.d,home}
+    fi
+}
 
-        delete_term_lines $(( $numberOfOutputLines + 5 ))
+print_center_text () {
+    # TODO Implement functionality to check if given text is to long
+    # to be displayed in one line. If so, split text at special character
+    # or space and move it to next line.
 
-        break
-    else
-        if [[ $cityNumber == "" ]]; then
-            delete_term_lines 3
-        else
-            delete_term_lines 2
-        fi
+    # Assign given values to variables
+    borderCharacter="$1"
+    text="$2"
+    # Get terminal width
+    get_terminal_width
+    # Subtract the number of characters of the text string from the terminal
+    # width to get the number of colums available for border characters and
+    # padding.
+    terminalWidthMinusText=$(((terminalWidth - ${#text})))
+    # Subtract two columns for the border characters on each side and divide
+    # by two to get the padding on one side. Assign it to two separate variables
+    # to manipulate them independently if necessary.
+    paddingLeft=$((((terminalWidthMinusText - 2) / 2)))
+    paddingRight=$paddingLeft
+    # Check if the remaining columns after inserting the text is uneven. If yes,
+    # increase paddingLeft by 1 to avoid to be one character short on the right
+    # end.
+    if [ $((terminalWidthMinusText % 2)) == 1 ]; then
+        ((paddingLeft++))
+    fi
+    # Print border character as left border
+    printf "$borderCharacter"
+    # Print left padding, so for each column one space character
+    for (( i=0; i < $paddingLeft; i++ )); do
+        printf " "
+    done
+    # Print text
+    printf "$text"
+    # Print right padding
+    for (( i=0; i < $paddingRight; i++ )); do
+        printf " "
+    done
+    # Print border character as right corner
+    printf "$borderCharacter"
+    # Print new line character to make sure the cursor is in a new line
+    printf "\n"
+}
 
-        echo -e "${squareRed}    Invalid input..."
-        sleep 2
-
-        delete_term_lines 2 0 1
-    fi 
-done
-
-if [[ -d /usr/share/zoneinfo/$region/$city ]]; then
-
-    echo -e "${squareGreen}    ${region}/${city} selected..."
-
-    echo ""
-
-    ls -l /usr/share/zoneinfo/$region/$city | grep -v "\->" | \
-    tail -n +2 > /tempfiles/regionSubCities
-    numberOfSubCities="$(wc -l < /tempfiles/regionSubCities)"
-
-    ls -l /usr/share/zoneinfo/$region/$city | grep -v "\->" | tail -n +2 | \
-    awk '{print NR") " $9}' | column -c $(tput cols) | tee /tempfiles/output
+print_ciao_message () {
+    printf "\n"
+    set_color $cyan
+    print_line "#"
+    print_center_text "#" "Installation completed!"
+    print_center_text "#" "Please remove installation media before powering back on."
+    print_line "#"
+    set_color $colorOff
 
     while true; do
-        if [[ "$numberOfSubCities" > "1" ]]; then
-            read -p $'\n'$squareYellowRead"    Please enter your cities' number\ 
- (1-$numberOfSubCities): " subCityNumber
+        prompt="Press RETURN to reboot system or any other key to exit script."
+        read -n 1 -sp $'\n'"$prompt" reboot
+        case $reboot in
+            "")
+                delete_terminal_lines 0 1
+                umount -R /mnt  # Unmounts disk
+                reboot
+                
+                break
+                ;;
+            *)
+                delete_terminal_lines 0 1
+
+                break
+                ;;
+        esac      
+    done
+}
+
+print_heading () {
+    # Assign given values to variables
+    borderCharacter="$1"
+    padding="$2"
+    heading="$3"
+    # Get terminal width
+    get_terminal_width
+    # Subtract the number of characters of the header string from the terminal
+    # width to get the number of colums available for border characters and
+    # padding.
+    terminalWidthMinusHeading=$(((terminalWidth - ${#heading})))
+    # Subtract the columns of the two paddings on each side and divide
+    # by two to get the border width on one side. Assign it to two separate 
+    # variables to manipulate them independently if necessary.
+    borderLeft=$((((terminalWidthMinusHeading - 2 * padding) / 2)))
+    borderRight=$borderLeft
+    # Check if the remaining columns after inserting the heading is uneven. 
+    # If yes, increase paddingLeft by 1 to avoid to be one character short on 
+    # the right end.
+    if [ $((terminalWidthMinusHeading % 2)) == 1 ]; then
+        ((borderLeft++))
+    fi
+    # Print new line to have an empty line above heading
+    printf "\n"
+    # Print left border, for each column one border character
+    for (( i=0; i < $borderLeft; i++ )); do
+        printf "$borderCharacter"
+    done
+    # Print left padding
+    for (( i=0; i < $padding; i++ )); do
+        printf " "
+    done
+    # Print heading
+    printf "$heading"
+    # Print right padding
+    for (( i=0; i < $padding; i++ )); do
+        printf " "
+    done
+    # Print right border
+    for (( i=0; i < $borderRight; i++ )); do
+        printf "$borderCharacter"
+    done
+    # Print new line character to make sure the cursor is in a new line
+    printf "\n"
+}
+
+print_welcome_message () {
+    # Set ouput color
+    set_color $cyan
+    # Print line as upper border of text box
+    print_line "#"
+    # Print content of text box
+    print_center_text "#" "ArmoredGoat's Artix Installation Script"
+    print_center_text "#" "Last updated: 2023/06/04"
+    # Print line as lower border of text box
+    print_line "#"
+    # Reset output color
+    set_color $colorOff
+
+
+    text="\nBefore installation, a few questions have to be answered."
+    prompt="Press any key to continue."
+    printf "$text"
+    read -n 1 -sp $'\n'"$prompt"
+
+    delete_terminal_lines 2 0 1
+}
+
+print_line () {
+    # Assign given value to variable
+    fillingCharacter="$1"
+    # Get terminal width
+    get_terminal_width
+    # For each column print the filling character
+    for (( i=0; i < $terminalWidth; i++ )); do
+        printf "$fillingCharacter"
+    done
+    # Print new line character to make sure the cursor is in a new line
+    printf "\n"
+}
+
+set_color () {
+    printf "$1"
+}
+
+set_confirmation () {
+    set_color $purple
+    print_heading "#" 5 "CONFIGURATION"
+    set_color $colorOff
+
+
+    # Ask for confirmation to continue with installation
+    while true; do
+        printf "\n"
+        prompt="Proceed installation with given information (y/N)? "
+        read -p $squareYelR$'\t'"$prompt" proceed
+        case $proceed in
+            [yY][eE][sS]|[yY])
+                delete_terminal_lines 1
+                break
+                ;;
+            [nN][oO]|[nN]|"")
+                # Delete output
+                delete_terminal_lines 2
+                # Inform user that the script will be aborted
+                printf "\n${squareRed}\tThe installation will be aborted.\n"
+                read -sp $'\n\t'"Press any key to exit."
+                # Print empty line for spacing
+                printf "\n\n"
+                # Exit script
+                exit 0
+                ;;
+            *)
+                # Delete output
+                delete_terminal_lines 1
+                # Inform user that the input was invalid and wait two seconds
+                printf "${squareRed}\tInvalid input..."
+                sleep 2
+                # Delete output
+                delete_terminal_lines 1
+                ;;
+        esac      
+    done
+}
+
+set_disk () {
+    # Set output color
+    set_color $gray
+    # Print heading of section
+    print_heading "#" 15 "DISK SELECTION"
+    # Reset output color
+    set_color $colorOff
+
+    # List available disks with their partitions and store output in temp file
+    printf "\n$(lsblk --tree | grep 'NAME\|disk\|part')" | tee /tempfiles/output
+    # Count number of lines of temp file to track number of printed lines
+    numberOfLines=$(wc -l < /tempfiles/output)
+
+    # Store available disks in temp file, enumerates them, and display choices
+    (lsblk --list -d | grep disk | awk '{print NR") /dev/" $1}') > \
+        /tempfiles/availableDisks
+    # Print empty lines for spacing
+    printf "\n\n"
+
+    # Print lines of temp file
+    while IFS= read -r line; do
+        printf "$line\n"
+    done < /tempfiles/availableDisks
+
+    # Get number of lines of temp file = number of available disks
+    numberOfDisks=$(wc -l < /tempfiles/availableDisks)
+
+    # Ask which disk shall be paritioned
+    while true; do
+        # Print empty line for spacing
+        printf "\n"
+        # Adjust prompt to number of available disks
+        if [[ "$numberOfDisks" > "1" ]]; then
+            prompt="Which disk shall be partitioned (1-$numberOfDisks)? "
+            read -p $squareYelR$'\t'"$prompt" selectedDisk
         else
-            read -p $'\n'$squareYellowRead"    Please enter your cities' number\
- (1): " subCityNumber
+            prompt="Which disk shall be partitioned (1)? "
+            read -p $squareYelR$'\t'"$prompt" selectedDisk
         fi
-        if (( 1 <= $subCityNumber && $subCityNumber <= $numberOfCities )); then
-            subCity=$(sed "${subCityNumber}q;d" /tempfiles/regionSubCities | \
-            awk '{print $9}')
-            
-            delete_term_lines 8
-            
+        # Check if given value has a according disk. If yes, leave while loop
+        if (( 1 <= $selectedDisk && $selectedDisk <= $numberOfDisks )); then
+            # Set disk
+            disk=$(sed "${selectedDisk}q;d" /tempfiles/availableDisks | \
+                awk '{print $2}')
+            # Delete output
+            delete_terminal_lines $(( $numberOfLines + 5 ))
             break
         else
-            if [[ $subCityNumber == "" ]]; then
-                delete_term_lines 3
-            else
-                delete_term_lines 2
-            fi
-
-            echo -e "${squareRed}    Invalid input..."
+            # Delete output
+            delete_terminal_lines 1
+            # Inform user that the input was invalid and wait two seconds
+            printf "${squareRed}\tInvalid input..."
             sleep 2
+            # Delete output
+            delete_terminal_lines 1
+        fi    
+    done
+    # Confirm disk selection
+    printf "\n${squareGreen}\tDisk ${disk} selected.\n"
 
-            delete_term_lines 2 0 1
+    # Ask for confirmation to wipe selected disk.
+    while true; do
+        # Print empty line for spacing
+        printf "\n"
+        prompt="${disk} will be completely wiped. Continue (y/N)? "
+        read -p $squareYelR$'\t'"$prompt" wipe
+        case $wipe in
+            [yY][eE][sS]|[yY])
+                # Delete output
+                delete_terminal_lines 2
+                # Leave while loop
+                break
+                ;;
+            [nN][oO]|[nN]|"")
+                # Delete output
+                delete_terminal_lines 2
+                # Inform user that the script will be aborted
+                printf "\n${squareRed}\tThe installation will be aborted.\n"
+                read -sp $'\n\t'"Press any key to exit."
+                # Print empty line for spacing
+                printf "\n\n"
+                # Exit script
+                exit 0
+                ;;
+            *)
+                # Delete output
+                delete_terminal_lines 1
+                # Inform user that the input was invalid and wait two seconds
+                printf "${squareRed}\tInvalid input..."
+                sleep 2
+                # Delete output
+                delete_terminal_lines 1
+                ;;
+        esac      
+    done
+}
+
+set_manual_configuration () {
+    set_color $purple
+    print_heading "#" 5 "CONFIGURATION"
+
+    set_installation_type  
+
+    set_color $blue
+    print_heading "#" 10 "PARTITIONING"
+
+    set_disk
+    set_swap
+
+    set_color $blue
+    print_heading "#" 10 "SYSTEM SETTINGS"
+
+    set_host_settings
+    set_user_settings
+
+    set_timezone
+
+    set_confirmation
+}
+
+set_hostname () {
+    # Insert hostname into /etc/hostname
+    printf $hostname > /mnt/etc/hostname
+    # Insert 
+    printf "hostname='$hostname'" > /mnt/etc/conf.d/hostname
+}
+
+set_host_settings () {
+    # Set output color
+    set_color $gray
+    # Print heading of section
+    print_heading "#" 15 "HOST SETTINGS"
+    # Reset output color
+    set_color $colorOff
+
+    printf "\n${squareYellow}\tSetting username...\n"
+
+    read -rp $'\nHostname: ' hostname
+    delete_terminal_lines 4
+    # Change uppercase characters to lowercase
+    hostname=$(echo "$hostname" | tr '[:upper:]' '[:lower:]')
+    # Confirm hostname
+    printf "\n${squareGreen}\tHostname '${hostname}' set!\n"
+}
+
+set_installation_type () {
+    # Set output color
+    set_color $blue
+    # Print heading of section
+    print_heading "#" 10 "INSTALLATION TYPE"
+    # Declare and print informational text
+    textBaseInstallation="${green}1) Base installation${colorOff} \
+        \n\tOnly necessary packages and configuration. \
+        \n\tIn the end you have a working but basic Artix installation."
+    textCustomizedInstallation="\n${green}2) Custom installation${colorOff} \
+        \n\tTake over all my configuration and user settings. \
+        \n\tIt is not guaranteed that my configuration is one hundred percent \
+        \n\tcompatible with your system."
+    printf "\n$textBaseInstallation"
+    printf "\n$textCustomizedInstallation\n"
+    # Ask for prefered installation type.
+    while true; do
+        printf "\n"
+        read -p $squareYelR$'\t'"Choose installation type (1-2)? " \
+            installationType
+        # If given value has according installation type, leave while loop.
+        # Otherwise, reenter.
+        case $installationType in
+            1)
+                # Delete output
+                delete_terminal_lines 11
+                # Set installation type
+                installationType='base'
+                # Leave while loop
+                break
+                ;;
+            2)
+                # Delete output
+                delete_terminal_lines 11
+                # Set installation type
+                installationType='custom'
+                # Leave while loop
+                break
+                ;;
+            *)
+                # Delete output
+                delete_terminal_lines 1
+                # Inform user that the input was invalid and wait two seconds
+                printf "${squareRed}\tInvalid input..."
+                sleep 2
+                # Delete output
+                delete_terminal_lines 1
+                ;;
+        esac      
+    done
+    # Confirm chosen installation type.
+    printf "\n${squareGreen}\tInstallation type '${installationType}' set!\n"
+}
+
+set_root_password () {
+    while true; do
+        printf "\n"
+        read -p $squareYelR$'\t'"Do you want to set a root password (y/N)? " \
+            setRootPassword
+        case $setRootPassword in
+            [yY][eE][sS]|[yY])
+                # Delete output
+                delete_terminal_lines 1 0 1
+                
+                printf "\n${squareYellow}\tSetting root password...\n"
+
+                # Declare placeholder values to first enter while loop
+                rootPassword="foo"; rootPasswordConf="bar"
+
+                while [[ $rootPassword != $rootPasswordConf ]]; do
+                    read -rsp $'\nRoot password: ' rootPassword
+                    delete_terminal_lines 0 1
+                    read -rsp $'Confirm root password: ' rootPasswordConf
+                    # Check if passwords match and are long enough
+                    if [[ $rootPassword != $rootPasswordConf && \
+                            ${#rootPassword} < 8 ]]; then
+                        # Delete output
+                        delete_terminal_lines 1 1
+                        # Inform user that passwords are too short and do not match
+                        printf "\n${squareRed}\tPasswords do not match AND too short (>=8)."
+                        # Wait three seconds
+                        sleep 3
+                        # Delete output
+                        delete_terminal_lines 1 1
+                    # Check if passwords match and are long enough
+                    elif [[ $rootPassword == $rootPasswordConf && \
+                    ${#rootPassword} < 8 ]]; then
+                        # Delete output
+                        delete_terminal_lines 1 1
+                        # Inform user that passwords are too short
+                        printf "\n${squareRed}\tPasswords are too short (>=8)."
+                        # Wait three seconds
+                        sleep 3
+                        # Reset passwords to reenter while loop.
+                        rootPassword="foo"; rootPasswordConf="bar"
+                        # Delete output
+                        delete_terminal_lines 1 1
+                    # Check if passwords match
+                    elif [[ $rootPassword != $rootPasswordConf ]]; then
+                        # Delete output
+                        delete_terminal_lines 1 1
+                        # Inform user that passwords do not match
+                        printf "\n${squareRed}\tPasswords do not match."
+                        # Wait three seconds
+                        sleep 3
+                        # Delete output
+                        delete_terminal_lines 1 1
+                    else # Password do match and are long enough
+                        # Delete output
+                        delete_terminal_lines 2 1 1
+                        # Leave while loop
+                        break
+                    fi
+                done
+                # Set variable
+                setRootPassword=true
+                # Confirm root password is set
+                printf "\n${squareGreen}\tRoot password set.\n"
+                # Leave while loop
+                break
+                ;;
+            [nN][oO]|[nN]|"")
+                # Set variable
+                setRootPassword=false
+                # Delete output
+                delete_terminal_lines 2
+                # Confirm that no root password is set
+                printf "\n${squareGreen}\tNo root password set.\n"
+                # Leave while loop
+                break
+                ;;
+            *)
+                # Delete output
+                delete_terminal_lines 1
+                # Inform user that the input was invalid and wait two seconds
+                printf "${squareRed}\tInvalid input..."
+                sleep 2
+                # Delete output
+                delete_terminal_lines 1
+                ;;
+        esac      
+    done
+}
+
+set_swap () {
+    # Set output color
+    set_color $gray
+    # Print heading of section
+    print_heading "#" 15 "SWAP SPACE"
+    # Reset output color
+    set_color $colorOff
+        
+    # Ask how much swap space should be allocated and convert the value
+    # from Gibibyte to Megabyte.
+    printf "\n${squareYellow}\tSetting size of swap space...\n"
+
+    read -rp $'\nSwap size in GiB: ' swap
+    # Delete outpu
+    delete_terminal_lines 4
+    # Confirm chosen swap size.
+    printf "\n${squareGreen}\t${swap} GiB swap space set!\n"
+    
+    # Convert size of swap space from gibibyte to megabyte to be compatible
+    # with partiton table
+    swap="$(( $swap * 1024 ))"'M'
+}
+
+set_timezone () {
+    # Set output color
+    set_color $gray
+    # Print heading of section
+    print_heading "#" 15 "TIME SETTINGS"
+    # Reset output color
+    set_color $colorOff
+
+    printf "\n${squareYellow}\tSetting time zone...\n"
+
+    printf "\n"
+
+    printf "1) Africa \n2) America \n3) Asia \n4) Atlantic \n5) Australia \
+        \n6) Europe \n7) Pacific \n8) Etc \n" | tee /tempfiles/regions
+    numberOfRegions="$(wc -l < /tempfiles/regions)"
+
+    while true; do
+        printf "\n"
+        prompt="Please enter your region's number (1-$numberOfRegions): "
+        read -p $squareYelR$'\t'"$prompt" regionNumber
+
+        if (( 1 <= $regionNumber && $regionNumber <= $numberOfRegions )); then
+            region=$((sed "${regionNumber}q;d" /tempfiles/regions) | \
+                awk '{print $2}')
+
+            delete_terminal_lines 11
+
+            break
+        else
+            # Delete output
+            if [[ $regionNumber == "" ]]; then
+                delete_terminal_lines 2
+            else
+                delete_terminal_lines 1
+            fi
+            # Inform user that the input was invalid and wait two seconds
+            printf "${squareRed}\tInvalid input..."
+            sleep 2
+            # Delete output
+            delete_terminal_lines 1
+        fi
+    done
+
+    printf "\n${squareYellow}\t${region} selected...\n\n"
+
+    ls -l /usr/share/zoneinfo/$region | grep -v "\->" | \
+    tail -n +2 > /tempfiles/regionCities
+    numberOfCities="$(wc -l < /tempfiles/regionCities)"
+
+    ls -l /usr/share/zoneinfo/$region | grep -v "\->" | tail -n +2 | \
+    awk '{print NR") " $9}' | column -c $(tput cols) | tee /tempfiles/output
+    numberOfOutputLines=$(wc -l < /tempfiles/output)
+
+    while true; do
+        printf "\n"
+        if [[ $numberOfCities > "1" ]]; then
+            prompt="Please enter your cities' number (1-$numberOfCities): "
+        else
+            prompt="Please enter your cities' number (1): "
+        fi
+        read -p $squareYelR$'\t'"$prompt" cityNumber
+        if (( 1 <= $cityNumber && $cityNumber <= $numberOfCities )); then
+            city=$(sed "${cityNumber}q;d" /tempfiles/regionCities | \
+            awk '{print $9}')
+
+            delete_terminal_lines $(( $numberOfOutputLines + 5 ))
+
+            break
+        else
+            # Delete output
+            if [[ $cityNumber == "" ]]; then
+                delete_terminal_lines 2
+            else
+                delete_terminal_lines 1
+            fi
+            # Inform user that the input was invalid and wait two seconds
+            printf "${squareRed}\tInvalid input..."
+            sleep 2
+            # Delete output
+            delete_terminal_lines 1
         fi 
     done
 
-else
-    delete_term_lines 3
+    if [[ -d /usr/share/zoneinfo/$region/$city ]]; then
 
-fi
+        printf "\n${squareYellow}\t${region}/${city} selected...\n\n"
 
-if [ $subCity ]; then
-    timezone="$region/$city/$subCity"
-else
-    timezone="$region/$city"
-fi
+        ls -l /usr/share/zoneinfo/$region/$city | grep -v "\->" | \
+        tail -n +2 > /tempfiles/regionSubCities
+        numberOfSubCities="$(wc -l < /tempfiles/regionSubCities)"
 
-echo -e "${squareGreen}    Time zone ${timezone} set."
+        ls -l /usr/share/zoneinfo/$region/$city | grep -v "\->" | tail -n +2 | \
+        awk '{print NR") " $9}' | column -c $(tput cols) | tee /tempfiles/output
 
-echo -e "\n${purple}##############################    CONFIRMATION   ##########\
-#####################${colorOff}"
-
-# Ask for confirmation to continue with installation
-while true; do
-    read -p $'\n'$squareYellowRead"   Do you want to proceed the installation \
-with the given information (y/N)? " proceed
-    case $proceed in
-        [yY][eE][sS]|[yY])
-            delete_term_lines 2 0 1
-            break
-            ;;
-        [nN][oO]|[nN]|"")
-            delete_term_lines 2
-
-            echo -e "${squareRed}    The installation will be aborted. Press \
-any key to exit."
-            read -sp $'\n'
-
-            exit 0
-            ;;
-        *)
-            delete_term_lines 2
-
-            echo -e "${squareRed}    Invalid input..."
+        while true; do
+            printf "\n"
+            if [[ "$numberOfSubCities" > "1" ]]; then
+                prompt="Please enter your cities' number (1-$numberOfSubCities): "
+            else
+                prompt="Please enter your cities' number (1): "
+            fi
+                read -p $squareYelR$'\t'"$prompt" subCityNumber
+            if (( 1 <= $subCityNumber && $subCityNumber <= $numberOfCities )); then
+                subCity=$(sed "${subCityNumber}q;d" /tempfiles/regionSubCities | \
+                awk '{print $9}')
+                
+                delete_terminal_lines 8
+                
+                break
+            else
+            # Delete output
+            if [[ $subCityNumber == "" ]]; then
+                delete_terminal_lines 2
+            else
+                delete_terminal_lines 1
+            fi
+            # Inform user that the input was invalid and wait two seconds
+            printf "${squareRed}\tInvalid input..."
             sleep 2
+            # Delete output
+            delete_terminal_lines 1 
+            fi 
+        done
 
-            delete_term_lines 2 0 1
-            ;;
-    esac      
-done
+    else
+        delete_terminal_lines 2
 
-##########   END MANUAL CONFIGURATION
+    fi
 
-##########   START HARDWARE DETECTION
+    if [ $subCity ]; then
+        timezone="$region/$city/$subCity"
+    else
+        timezone="$region/$city"
+    fi
 
-# Get CPU and threads 
-# TODO Insert reason for detection
-cpu=$(lscpu | grep 'Vendor ID:' | awk 'FNR == 1 {print $3;}')
-threadsMinusOne=$(( $(lscpu | grep 'CPU(s):' | \
-awk 'FNR == 1 {print $2;}') - 1 ))
-# Get GPU
-gpu=$(lspci | grep 'VGA compatible controller:' | awk 'FNR == 1 {print $5;}')
-if ! ([ "$gpu" == 'NVIDIA' ] || [ "$gpu" == 'Intel' ] || \
-[ "$gpu" == 'VMware' ]); then
-    gpu='AMD'
-fi
-# Get amount of RAM
-ram=$(echo "$(< /proc/meminfo)" | grep 'MemTotal:' | awk '{print $2;}')
-ram=$(( $ram / 1000000 ))
+    # Confirm time zone
+    printf "\n${squareGreen}\tTime zone '${timezone}' set!\n"
+}
 
-##########   END HARDWARE DETECTION
+set_username () {
+    printf "\n${squareYellow}\tSetting username...\n"
 
-##########   START SOFTWARE DETECTION
+    read -rp $'\nUsername: ' username
+    # Delete output
+    delete_terminal_lines 4
 
-# THAT'S NOT WORKING, SUBSTITUTE FOR INTERACTIVE MENU
-# Detect init system by getting process with pid 1
-#initSystem=$(ps -p 1 -o comm=)
+    # Change uppercase characters to lowercase
+    username=$(echo "$username" | tr '[:upper:]' '[:lower:]')
+    # Confirm username
+    printf "\n${squareGreen}\tUsername '${username}' set!\n"
+}
 
-##########   END SOFTWARE DETECTION
-
-##########   START CONDITIONAL QUERIES
-
-# Do not know why this is done, yet. Will implement it when I figured it out.
-#if [ "$gpu" == 'Intel' ]; then
-#    echo -e '1. libva-intel-driver (intel igpus up to coffee lake)\n2. \
-#intel-media-driver (intel igpus/dgpus newer than coffee lake)\n'
-#    read -n 1 -rp "va-api driver: " intel_vaapi_driver
-#fi
-
-# In case of NVME or SD/MMC device, append 'p' to adress Linux' 
-#way of naming partitions.
-baseDisk=$disk
-if [[ "$disk" == /dev/nvme0n* ]] || [[ "$disk" == /dev/mmcblk* ]]; then
-    disk="$disk"'p'
-fi
-
-# Determine if UEFI or BIOS boot. If /sys/firmware/efi exists --> UEFI boot
-if [ -d "/sys/firmware/efi" ]; then
-    boot='uefi'
-else
-    boot='bios'
-fi
-
-##########   END CONDITIONAL QUERIES
-
-##########   START VARIABLE MANIPULATION
-
-# Change uppercase characters to lowercase for username and hostname
-username=$(echo "$username" | tr '[:upper:]' '[:lower:]')
-hostname=$(echo "$hostname" | tr '[:upper:]' '[:lower:]')
-# Convert size of swap space from gibibyte to megabyte
-swap="$(( $swap * 1024 ))"'M'
-
-##########   END VARIABLE MANIPULATION
-
-##########   START PARTITIONING
-
-swapDevice=$(cat /proc/swaps | grep "partition" | awk '{print $1}')
-if [[ $swapDevice ]]; then
-    swapoff $swapDevice
-fi
-
-for mountPoint in $(mount | grep "^$baseDisk" | awk '{print $3}'); do
-    umount -fl $mountPoint
-done
-
-# In case of UEFI boot --> GPT/UEFI partitioning with 1 GiB disk space 
-# for boot partition
-# In case of BIOS boot --> MBR/BIOS partitioning
-if [ "$boot" == 'uefi' ]; then
-    wipefs --all --force "$baseDisk"
-
-    # To create partitions programatically (rather than manually)
-    # the following is going to simulate the manual input to fdisk.
-    # sed strips off all comments so that documentation can be included
-    # without interfering with the input.
-    # Blank lines (commented as "Defualt") will send an empty
-    # line terminated with a newline to take the fdisk default.
-    sed -e 's/\s*\([\+0-9a-zA-Z]*\).*/\1/' << EOF | fdisk -w always -W always "$baseDisk"
-        g       # Create new GPT disklabel
-        n       # New partition
-        1       # Partition number 1
-                # Default - Start at beginning of disk
-        +1024M  # 1 GiB boot parttion
-        t       # Set type of partiton
-        1       # Set type to 'EFI System'
-        n       # New partition
-        2       # Partition number 2
-                # Default - Start at beginning of remaining disk
-        +$swap  # Partiton size equal to given swap value
-        t       # Set type of partiton
-        2       # Select partition 2
-        19      # Set type to 'Linux Swap'
-        n       # New partition
-        3       # Partition number 3
-                # Default - start at beginning of remaining disk
-                # Default - use remaining disk space
-        w       # Write partition table
-        q       # Quit fdisk
-EOF
-
-    # Format and label disks
-    mkfs.fat -F 32 "$disk"'1'
-    fatlabel "$disk"'1' ESP
+set_user_password () {
+    printf "\n${squareYellow}\tSetting user password...\n"
     
-    mkswap -L SWAP "$disk"'2'
-    
-    mkfs.ext4 -L ROOT "$disk"'3'
-        
-    # Mount storage and EFI partitions, and create necessary directories
-    swapon "$disk"'2'
-    mount "$disk"'3' /mnt
-    
-    mkdir -p /mnt/{boot,boot/efi,etc/conf.d,home}
-    mount  "$disk"'1' /mnt/boot/efi
-else
-    wipefs --all --force "$baseDisk"
-    sed -e 's/\s*\([\+0-9a-zA-Z]*\).*/\1/' << EOF | fdisk -w always -W always "$baseDisk"
-    g       # Create new GPT disklabel
-    n       # New partition
-    1       # Partition number 1
-            # Default - Start at beginning of disk
-    +1M     # 1 MB BIOS boot partition
-    t       # Set type of partiton
-    4       # Set type to 'BIOS boot'
-    n       # New partition
-    2       # Partition number 2
-            # Default - Start at beginning of remaining disk
-    +$swap  # Partiton size equal to given swap value
-    t       # Set type of partiton
-    2       # Select partition 2
-    19      # Set type to 'Linux Swap'
-    n       # New partition
-    3       # Partition number 3
-            # Default - start at beginning of remaining disk
-            # Default - use remaining disk space
-    w       # Write partition table
-    q       # Quit fdisk
-EOF
+    # Declare placeholder values to first enter while loop
+    userPassword="foo"; userPasswordConf="bar"
 
-    # Format and label disks
-    mkswap -L SWAP "$disk"'2'
-    
-    mkfs.ext4 -L ROOT "$disk"'3'
-
-    # Mount storage and EFI partitions, and create necessary directories
-    swapon "$disk"'2'
-    mount "$disk"'3' /mnt
-    
-    mkdir -p /mnt/etc/conf.d
-fi
-
-##########   END PARTITIONING
-
-##########   START BASE INSTALLATION
-
-# Generate filesystem table
-fstabgen -U /mnt >> /mnt/etc/fstab
-
-# Set hostname
-echo $hostname > /mnt/etc/hostname
-echo "hostname='$hostname'" > /mnt/etc/conf.d/hostname
-
-# Activate NTP daemon to synchronize computer's real-time clock
-rc-service ntpd start
-#  sv up ntpd   s6-rc -u change ntpd   dinitctl start ntpd
-
-# Install packages
-# TODO Add explanation to choice of packages
-# Base packages
-    # base          - 
-    # base-devel    - Package group with tools for building 
-    #                 (compiling and linking) software
-    #base_devel="db diffutils gc guile libisl libmpc perl autoconf \
-    # automake bash binutils bison esysusers /tempfilesfiles fakeroot \
-    # file findutils flex gawk gcc gettext grep groff gzip libtool m4 \
-    # make pacman pacman-contrib patch pkgconf python sed opendoas texinfo \
-    # which bc udev"
-basePackages="base base-devel"
-
-initSystem="openrc"
-
-# Login manager
-    # elogind   - 
-loginManager="elogind-"$initSystem
-
-# Linux kernel
-    # linux-lts, zen, ...
-kernel="linux-lts"
-
-# Firmware
-    # linux-firmware    -
-    # sof-firmware      -
-firmware="linux-firmware"
-
-# Network
-    # networkmanager                -
-    # networkmanager-$initSystem    -
-    # dhcpcd                        -
-network="networkmanager-$initSystem dhcpcd"
-
-basestrap /mnt $basePackages $initSystem $loginManager $kernel $firmware \
-$network
-
-##########   END BASE INSTALLATION
-
-##########   START EXPORTING VARIABLES
-
-mkdir /mnt/tempfiles
-#echo "$formfactor" > /mnt/tempfiles/formfactor
-echo "$cpu" > /mnt/tempfiles/cpu
-echo "$threadsMinusOne" > /mnt/tempfiles/threadsMinusOne
-echo "$gpu" > /mnt/tempfiles/gpu
-#echo "$intel_vaapi_driver" > /mnt/tempfiles/intel_vaapi_driver
-echo "$boot" > /mnt/tempfiles/boot
-echo "$installationType" > /mnt/tempfiles/installationType
-echo "$baseDisk" > /mnt/tempfiles/baseDisk
-echo "$username" > /mnt/tempfiles/username
-echo "$userPassword" > /mnt/tempfiles/userPassword
-echo "$setRootPassword" > /mnt/tempfiles/setRootPassword
-echo "$rootPassword" > /mnt/tempfiles/rootPassword
-echo "$timezone" > /mnt/tempfiles/timezone
-
-##########   END EXPORTING VARIABLES
-
-curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/development/\
-chrootInstall.sh -o /mnt/chrootInstall.sh
-chmod +x /mnt/chrootInstall.sh
-artix-chroot /mnt /chrootInstall.sh
-
-echo -e "\n##############################################################################################"
-echo -e "#                                   ${Green}Installation completed                                   ${Color_Off}#"
-echo -e "#                Make sure to ${Red}remove installation media${Color_Off} before powering back on              #"
-echo -e "##############################################################################################"
-
-while true; do
-    read -n 1 -sp $'\n'"Press RETURN to reboot the system now or any other key \
-to exit the script without rebooting." reboot
-    case $reboot in
-        "")
-            delete_term_lines 1 1
-
-            umount -R /mnt  # Unmounts disk
-            reboot
-            
+    while [ $userPassword != $userPasswordConf ]; do
+        read -rsp $'\nUser password: ' userPassword
+        # Delete output
+        delete_terminal_lines 0 1
+        read -rsp $'Confirm user password: ' userPasswordConf
+        # Check if passwords match and are long enough
+        if [[ $userPassword != $userPasswordConf && \
+                ${#userPassword} < 8 ]]; then
+            # Delete output
+            delete_terminal_lines 1 1
+            # Inform user that passwords are too short and do not match
+            printf "\n${squareRed}\tPasswords do not match AND too short (>=8)."
+            # Wait three seconds
+            sleep 3
+            # Delete output
+            delete_terminal_lines 1 1
+        # Check if passwords match and are long enough
+        elif [[ $userPassword == $userPasswordConf && ${#userPassword} < 8 ]]; then
+            # Delete output
+            delete_terminal_lines 1 1
+            # Inform user that passwords are too short
+            printf "\n${squareRed}\tPasswords are too short (>=8)."
+            # Wait three seconds
+            sleep 3
+            # Reset passwords to reenter while loop.
+            userPassword="foo"; userPasswordConf="bar"
+            # Delete output
+            delete_terminal_lines 1 1
+        # Check if passwords match
+        elif [[ $userPassword != $userPasswordConf ]]; then
+            # Delete output
+            delete_terminal_lines 1 1
+            # Inform user that passwords do not match
+            printf "\n${squareRed}\tPasswords do not match."
+            # Wait three seconds
+            sleep 3
+            # Delete output
+            delete_terminal_lines 1 1
+        else # Password do match and are long enough
+            # Delete output
+            delete_terminal_lines 2 1 1
+            # Leave while loop
             break
-            ;;
-        *)
-            delete_term_lines 1 1
+        fi
+    done
+    # Confirm user password.
+    printf "\n${squareGreen}\tUser password set.\n"
+}
 
-            break
-            ;;
-    esac      
-done
+set_user_settings () {
+    # Set output color
+    set_color $gray
+    # Print heading of section
+    print_heading "#" 15 "USER SETTINGS"
+    # Reset output color
+    set_color $colorOff
+
+    set_username
+    set_user_password
+
+    set_root_password
+}
+
+start_service () {
+    # Set service to given package/service
+    service="$1"
+
+    # Start service
+    rc-service $service start
+
+    # TODO Add support for other init system
+    #  sv up ntpd   s6-rc -u change ntpd   dinitctl start ntpd 
+}
+
+main

@@ -1,0 +1,9 @@
+#!/sbin/openrc-run
+
+# (C) 2022, Erik Ridderby
+# Distributed under the terms of the GNU General Public License v3
+
+command="/opt/displaylink/DisplayLinkManager"
+command_background=true
+pidfile="/run/${RC_SVCNAME}.pid"
+directory="/opt/displaylink"

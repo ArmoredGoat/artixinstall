@@ -1,0 +1,59 @@
+*filter
+:ufw-user-input - [0:0]
+:ufw-user-output - [0:0]
+:ufw-user-forward - [0:0]
+:ufw-before-logging-input - [0:0]
+:ufw-before-logging-output - [0:0]
+:ufw-before-logging-forward - [0:0]
+:ufw-user-logging-input - [0:0]
+:ufw-user-logging-output - [0:0]
+:ufw-user-logging-forward - [0:0]
+:ufw-after-logging-input - [0:0]
+:ufw-after-logging-output - [0:0]
+:ufw-after-logging-forward - [0:0]
+:ufw-logging-deny - [0:0]
+:ufw-logging-allow - [0:0]
+:ufw-user-limit - [0:0]
+:ufw-user-limit-accept - [0:0]
+### RULES ###
+
+### tuple ### limit any 22 0.0.0.0/0 any 0.0.0.0/0 in comment=4c696d697420636f6e6e656374696f6e73206f6e2073736820706f7274
+-A ufw-user-input -p tcp --dport 22 -m conntrack --ctstate NEW -m recent --set
+-A ufw-user-input -p tcp --dport 22 -m conntrack --ctstate NEW -m recent --update --seconds 30 --hitcount 6 -j ufw-user-limit
+-A ufw-user-input -p tcp --dport 22 -j ufw-user-limit-accept
+-A ufw-user-input -p udp --dport 22 -m conntrack --ctstate NEW -m recent --set
+-A ufw-user-input -p udp --dport 22 -m conntrack --ctstate NEW -m recent --update --seconds 30 --hitcount 6 -j ufw-user-limit
+-A ufw-user-input -p udp --dport 22 -j ufw-user-limit-accept
+
+### tuple ### allow tcp 22,25,80,123,143,443,587,993 0.0.0.0/0 any 0.0.0.0/0 in comment=5374616e6461726420696e636f6d696e6720706f727473
+-A ufw-user-input -p tcp -m multiport --dports 22,25,80,123,143,443,587,993 -j ACCEPT
+
+### tuple ### allow tcp 22,25,80,123,143,443,587,993 0.0.0.0/0 any 0.0.0.0/0 out comment=5374616e64617264206f7574676f696e6720706f727473
+-A ufw-user-output -p tcp -m multiport --dports 22,25,80,123,143,443,587,993 -j ACCEPT
+
+### tuple ### allow udp 53,123 0.0.0.0/0 any 0.0.0.0/0 in comment=416c6c6f77204e545020616e6420444e5320696e
+-A ufw-user-input -p udp -m multiport --dports 53,123 -j ACCEPT
+
+### tuple ### allow udp 53,123 0.0.0.0/0 any 0.0.0.0/0 out comment=416c6c6f77204e545020616e6420444e53206f7574
+-A ufw-user-output -p udp -m multiport --dports 53,123 -j ACCEPT
+
+### tuple ### allow any any 0.0.0.0/0 any 192.168.1.0/24 in comment=416c6c6f772066726f6d20686f6d65206e6574776f726b
+-A ufw-user-input -s 192.168.1.0/24 -j ACCEPT
+
+### END RULES ###
+
+### LOGGING ###
+-A ufw-after-logging-input -j LOG --log-prefix "[UFW BLOCK] " -m limit --limit 3/min --limit-burst 10
+-A ufw-after-logging-output -j LOG --log-prefix "[UFW BLOCK] " -m limit --limit 3/min --limit-burst 10
+-A ufw-after-logging-forward -j LOG --log-prefix "[UFW BLOCK] " -m limit --limit 3/min --limit-burst 10
+-I ufw-logging-deny -m conntrack --ctstate INVALID -j RETURN -m limit --limit 3/min --limit-burst 10
+-A ufw-logging-deny -j LOG --log-prefix "[UFW BLOCK] " -m limit --limit 3/min --limit-burst 10
+-A ufw-logging-allow -j LOG --log-prefix "[UFW ALLOW] " -m limit --limit 3/min --limit-burst 10
+### END LOGGING ###
+
+### RATE LIMITING ###
+-A ufw-user-limit -m limit --limit 3/minute -j LOG --log-prefix "[UFW LIMIT BLOCK] "
+-A ufw-user-limit -j REJECT
+-A ufw-user-limit-accept -j ACCEPT
+### END RATE LIMITING ###
+COMMIT

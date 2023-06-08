@@ -1,0 +1,12 @@
+# Default settings for user directories
+#
+# The values are relative pathnames from the home directory and
+# will be translated on a per-path-element basis into the users locale
+DOWNLOAD=downloads
+DOCUMENTS=documents
+MUSIC=documents/music
+PUBLICSHARE=documents/public
+DESKTOP=documents/desktop
+TEMPLATES=documents/templates
+PICTURES=documents/pictures
+VIDEOS=documents/videos
