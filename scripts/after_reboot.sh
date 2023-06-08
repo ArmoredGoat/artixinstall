@@ -10,6 +10,8 @@
     homedir="/home/$username"
 
 main () {
+    add_service ufw
+
     install_displaylink
     add_service displaylink
 }
