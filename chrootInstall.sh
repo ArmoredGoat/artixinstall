@@ -839,9 +839,9 @@ install_reflector () {
 install_rofi () {
     ### WINDOW SWITCHER
 
-    pacman -Syu rofi --needed --noconfirm
+    rofiPackages="rofi papirus-icon-theme"
 
-    install_packages papirus-icon-theme
+    install_packages $rofiPackages
 
     cp $repoDirectory/dotfiles/rofi/config.rasi \
         $homedir/.config/rofi/config.rasi
