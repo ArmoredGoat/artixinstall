@@ -563,6 +563,10 @@ if [[ $swapDevice ]]; then
     swapoff $swapDevice
 fi
 
+for mountPoint in $(mount | grep "^$baseDisk" | awk '{print $3}'); do
+    umount -fl $mountPoint
+done
+
 # In case of UEFI boot --> GPT/UEFI partitioning with 1 GiB disk space 
 # for boot partition
 # In case of BIOS boot --> MBR/BIOS partitioning
@@ -576,26 +580,26 @@ if [ "$boot" == 'uefi' ]; then
     # Blank lines (commented as "Defualt") will send an empty
     # line terminated with a newline to take the fdisk default.
     sed -e 's/\s*\([\+0-9a-zA-Z]*\).*/\1/' << EOF | fdisk -w always -W always "$baseDisk"
-        g # Create new GPT disklabel
-        n # New partition
-        1 # Partition number 1
-          # Default - Start at beginning of disk
-        +1024M # 1 GiB boot parttion
-        t # Set type of partiton
-        1 # Set type to 'EFI System'
-        n # New partition
-        2 # Partition number 2
-          # Default - Start at beginning of remaining disk
-        +$swap # Partiton size equal to given swap value
-        t # Set type of partiton
-        2 # Select partition 2
-        19 # Set type to 'Linux Swap'
-        n # New partition
-        3 # Partition number 3
-          # Default - start at beginning of remaining disk
-          # Default - use remaining disk space
-        w # Write partition table
-        q # Quit fdisk
+        g       # Create new GPT disklabel
+        n       # New partition
+        1       # Partition number 1
+                # Default - Start at beginning of disk
+        +1024M  # 1 GiB boot parttion
+        t       # Set type of partiton
+        1       # Set type to 'EFI System'
+        n       # New partition
+        2       # Partition number 2
+                # Default - Start at beginning of remaining disk
+        +$swap  # Partiton size equal to given swap value
+        t       # Set type of partiton
+        2       # Select partition 2
+        19      # Set type to 'Linux Swap'
+        n       # New partition
+        3       # Partition number 3
+                # Default - start at beginning of remaining disk
+                # Default - use remaining disk space
+        w       # Write partition table
+        q       # Quit fdisk
 EOF
 
     # Format and label disks
@@ -615,29 +619,36 @@ EOF
 else
     wipefs --all --force "$baseDisk"
     sed -e 's/\s*\([\+0-9a-zA-Z]*\).*/\1/' << EOF | fdisk -w always -W always "$baseDisk"
-    o # Clear in-memory partition table
-    n # New partition
-    p # Primary partition
-    1 # Partition number 1
-      # Default - Start at beginning of disk
-    +$swap # Partiton size equal to given swap value
-    n # New partition
-    p # Primary partition
-    2 # Partition number 1
-      # Default - start at beginning of remaining disk
-    -1M # Use remaining disk space minus 1 M
-    w # Write partition table
-    q # Quit fdisk
+    g       # Create new GPT disklabel
+    n       # New partition
+    1       # Partition number 1
+            # Default - Start at beginning of disk
+    +1M     # 1 MB BIOS boot partition
+    t       # Set type of partiton
+    4       # Set type to 'BIOS boot'
+    n       # New partition
+    2       # Partition number 2
+            # Default - Start at beginning of remaining disk
+    +$swap  # Partiton size equal to given swap value
+    t       # Set type of partiton
+    2       # Select partition 2
+    19      # Set type to 'Linux Swap'
+    n       # New partition
+    3       # Partition number 3
+            # Default - start at beginning of remaining disk
+            # Default - use remaining disk space
+    w       # Write partition table
+    q       # Quit fdisk
 EOF
 
     # Format and label disks
-    mkswap -L SWAP "$disk"'1'
+    mkswap -L SWAP "$disk"'2'
     
-    mkfs.ext4 -L ROOT "$disk"'2'
+    mkfs.ext4 -L ROOT "$disk"'3'
 
     # Mount storage and EFI partitions, and create necessary directories
-    swapon "$disk"'1'
-    mount "$disk"'2' /mnt
+    swapon "$disk"'2'
+    mount "$disk"'3' /mnt
     
     mkdir -p /mnt/etc/conf.d
 fi
@@ -706,7 +717,7 @@ echo "$gpu" > /mnt/tempfiles/gpu
 #echo "$intel_vaapi_driver" > /mnt/tempfiles/intel_vaapi_driver
 echo "$boot" > /mnt/tempfiles/boot
 echo "$installationType" > /mnt/tempfiles/installationType
-echo "$baseDisk" > /mnt/tempfiles/disk
+echo "$baseDisk" > /mnt/tempfiles/baseDisk
 echo "$username" > /mnt/tempfiles/username
 echo "$userPassword" > /mnt/tempfiles/userPassword
 echo "$setRootPassword" > /mnt/tempfiles/setRootPassword
@@ -719,3 +730,28 @@ curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/development/\
 chrootInstall.sh -o /mnt/chrootInstall.sh
 chmod +x /mnt/chrootInstall.sh
 artix-chroot /mnt /chrootInstall.sh
+
+echo -e "\n##############################################################################################"
+echo -e "#                                   ${Green}Installation completed                                   ${Color_Off}#"
+echo -e "#                Make sure to ${Red}remove installation media${Color_Off} before powering back on              #"
+echo -e "##############################################################################################"
+
+while true; do
+    read -n 1 -sp $'\n'"Press RETURN to reboot the system now or any other key \
+to exit the script without rebooting." reboot
+    case $reboot in
+        "")
+            delete_term_lines 1 1
+
+            umount -R /mnt  # Unmounts disk
+            reboot
+            
+            break
+            ;;
+        *)
+            delete_term_lines 1 1
+
+            break
+            ;;
+    esac      
+done

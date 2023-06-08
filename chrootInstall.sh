@@ -62,7 +62,7 @@ gpu="$(< /tempfiles/gpu)"
 #"$intel_vaapi_driver"="$(< /tempfiles/intel_vaapi_driver
 boot="$(< /tempfiles/boot)"
 installationType="$(< /tempfiles/installationType)"
-baseDisk="$(< /tempfiles/disk)"
+baseDisk="$(< /tempfiles/baseDisk)"
 username="$(< /tempfiles/username)"
 userPassword="$(< /tempfiles/userPassword)"
 setRootPassword="$(< /tempfiles/setRootPassword)"
@@ -110,7 +110,7 @@ if [ "$boot" == 'uefi' ]; then
     # TODO Learn about bootloader-id
 fi
 if [ "$boot" == 'bios' ]; then
-    grub-install --target=i386-pc "$disk"
+    grub-install --target=i386-pc --recheck $baseDisk
 fi
 
 # TODO Learn what the heck is going on right here...
@@ -199,7 +199,7 @@ elif [[ $installationType == 'custom' ]]; then
         curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/development/configfiles/pacman/pacman.conf -o /etc/pacman.conf
 
         if [[ ! -d /etc/pacman.d ]]; then
-            mkdir /etc/pacman.d
+            mkdir -p /etc/pacman.d
         fi
 
         # Get recent mirror lists
@@ -211,7 +211,7 @@ elif [[ $installationType == 'custom' ]]; then
         # Install and enable support of Arch repositories
         pacman -Syu artix-archlinux-support --needed --noconfirm
         # Retrieve keys
-        pacman-key --populate archlinx
+        pacman-key --populate archlinux
 
         ### REFLECTOR
 
@@ -246,13 +246,13 @@ elif [[ $installationType == 'custom' ]]; then
         pacman -Syu xdg-user-dirs --needed --noconfirm
 
         if [[ ! -d /etc/xdg ]]; then
-            mkdir /etc/xdg
+            mkdir -p /etc/xdg
         fi
 
         # Get config files repository and store them in corresponding directory
         curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/development/configfiles/xdg/user-dirs.defaults -o /etc/xdg/user-dirs.defaults
 
-        mkdir /home/"$username"/{downloads,documents/{music,public,desktop,templates,pictures,videos}}
+        mkdir -p /home/"$username"/{downloads,documents/{music,public,desktop,templates,pictures,videos}}
 
     ### CRON
 
@@ -327,15 +327,15 @@ elif [[ $installationType == 'custom' ]]; then
 
         ## General configuration
         # Get config files repository and store them in corresponding directory
-        curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/development/configfiles/kitty/kitty.conf -o /home/"$username"/.config/kitty/kitty.conf
+        curl https://raw.githubusercontent.com/ArmoredGoat/artixinstall/development/configfiles/kitty/kitty.conf \
+        -o /home/"$username"/.config/kitty/kitty.conf
         ## Configure theme
         if [[ ! -d /home/"$username"/.config/kitty/themes ]]; then
             mkdir -p /home/"$username"/.config/kitty/themes
         fi
 
         # Download them from https://github.com/kovidgoyal/kitty-themes
-        curl https://raw.githubusercontent.com/kovidgoyal/kitty-themes/master/\
-        themes/Earthsong.conf \
+        curl https://raw.githubusercontent.com/kovidgoyal/kitty-themes/master/themes/Earthsong.conf \
         -o /home/"$username"/.config/kitty/themes/Earthsong.conf
         ln -s /home/"$username"/.config/kitty/themes/Earthsong.conf \
             /home/"$username"/.config/kitty/theme.conf
@@ -459,8 +459,4 @@ chown -R "$username":"$username" /home/"$username"
 
 rm -rf /chrootInstall.sh /tempfiles
 
-echo -e "\n##############################################################################################"
-echo -e "#                                   ${Green}Installation completed                                   ${Color_Off}#"
-echo -e "#            Please poweroff and ${Red}remove installation media${Color_Off} before powering back on           #"
-echo -e "##############################################################################################\n"
 exit
