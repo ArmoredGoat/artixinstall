@@ -890,6 +890,10 @@ install_ufw () {
 
     # Reload ufw
     #ufw --force enable
+    create_directory /etc/ufw
+
+    cp $repoDirectory/dotfiles/ufw/* \
+        /etc/ufw/
 }
 
 install_virt_manager () {
