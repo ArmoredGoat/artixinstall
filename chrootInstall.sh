@@ -718,7 +718,7 @@ install_minecraft () {
 install_neovim () {
     # Build prerequisites
     neovimPrerequisites="base-devel cmake unzip ninja curl"
-    install_packages neovimPrerequisites
+    install_packages $neovimPrerequisites
 
     # Build Neovim (stable) from source
 #    runuser -l "$username" -c "git clone https://github.com/neovim/neovim \
@@ -842,6 +842,8 @@ install_rofi () {
     rofiPackages="rofi papirus-icon-theme"
 
     install_packages $rofiPackages
+
+    create_directory $homedir/.config/rofi
 
     cp $repoDirectory/dotfiles/rofi/config.rasi \
         $homedir/.config/rofi/config.rasi
