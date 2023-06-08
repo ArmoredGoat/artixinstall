@@ -734,7 +734,7 @@ install_neovim () {
     create_directory $homedir/.config/nvim/lua/custom/plugins
 
     # Copy configuration into corresponding directory
-    cp $repoDirectory/dotfiles/nvim/* \
+    cp -r $repoDirectory/dotfiles/nvim/* \
         $homedir/.config/nvim/
 }
 
