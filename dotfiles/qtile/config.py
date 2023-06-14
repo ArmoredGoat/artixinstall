@@ -1,45 +1,73 @@
-from libqtile import bar, layout, widget
-from libqtile.bar import CALCULATED
+from libqtile import bar, layout, widget, hook, qtile
+import libqtile.bar
 from libqtile.config import Click, Drag, Group, Key, Match, Screen
 from libqtile.lazy import lazy
-from libqtile.utils import guess_terminal
+
+# G E N E R A L
 
 mod = "mod4"
-terminal = "kitty" 
+terminal = "kitty"
+
+# C O L O R S
 
 colors = []
-cache="/home/julius/.cache/wal/colors"
-def load_colors(cache):
-    with open(cache, 'r') as file:
-        for i in range(8):
-            colors.append(file.readline().strip())
-    colors.append('#ffffff')
-    lazy.reload()
-load_colors(cache)
 
+theme = "/home/julius/.local/share/themes/saharan_day.conf"
+
+
+def load_colors(theme):
+    with open(theme, 'r') as file:
+        # Scan file and append color value if line starts with "color"
+        for line in file:
+            if line.startswith("color"):
+                colorIndex = line.find('#')
+                colors.append(line[colorIndex:].strip())
+    lazy.reload()
+
+
+load_colors(theme)
+
+# K E Y B I N D S
 
 keys = [
-    # A list of available commands that can be bound to keys can be found
-    # at https://docs.qtile.org/en/latest/manual/config/lazy.html
     # Switch between windows
-    Key([mod], "h",     lazy.layout.left(), desc="Move focus to left"),
-    Key([mod], "l",     lazy.layout.right(),desc="Move focus to right"),
-    Key([mod], "j",     lazy.layout.down(), desc="Move focus down"),
-    Key([mod], "k",     lazy.layout.up(),   desc="Move focus up"),
-    Key([mod], "space", lazy.layout.next(), desc="Move window focus to other window"),
+    Key([mod], "h", lazy.layout.left(), desc="Move focus to left"),
+    Key([mod], "l", lazy.layout.right(), desc="Move focus to right"),
+    Key([mod], "j", lazy.layout.down(), desc="Move focus down"),
+    Key([mod], "k", lazy.layout.up(), desc="Move focus up"),
+    Key([mod], "space", lazy.layout.next(),
+        desc="Move window focus to next/other window"),
+
+    # Move windows
     # Move windows between left/right columns or move up/down in current stack.
     # Moving out of range in Columns layout will create new column.
-    Key([mod, "shift"], "h", lazy.layout.shuffle_left(), desc="Move window to the left"),
-    Key([mod, "shift"], "l", lazy.layout.shuffle_right(), desc="Move window to the right"),
-    Key([mod, "shift"], "j", lazy.layout.shuffle_down(), desc="Move window down"),
-    Key([mod, "shift"], "k", lazy.layout.shuffle_up(), desc="Move window up"),
+    Key([mod, "shift"], "h", lazy.layout.shuffle_left(),
+        desc="Move window to the left"),
+    Key([mod, "shift"], "l", lazy.layout.shuffle_right(),
+        desc="Move window to the right"),
+    Key([mod, "shift"], "j", lazy.layout.shuffle_down(),
+        desc="Move window down"),
+    Key([mod, "shift"], "k", lazy.layout.shuffle_up(),
+        desc="Move window up"),
+
+    # Resize windows
     # Grow windows. If current window is on the edge of screen and direction
     # will be to screen edge - window would shrink.
-    Key([mod, "control"], "h", lazy.layout.grow_left(), desc="Grow window to the left"),
-    Key([mod, "control"], "l", lazy.layout.grow_right(), desc="Grow window to the right"),
-    Key([mod, "control"], "j", lazy.layout.grow_down(), desc="Grow window down"),
-    Key([mod, "control"], "k", lazy.layout.grow_up(), desc="Grow window up"),
-    Key([mod], "n", lazy.layout.normalize(), desc="Reset all window sizes"),
+    Key([mod, "control"], "h", lazy.layout.grow_left(),
+        desc="Grow window to the left"),
+    Key([mod, "control"], "l", lazy.layout.grow_right(),
+        desc="Grow window to the right"),
+    Key([mod, "control"], "j", lazy.layout.grow_down(),
+        desc="Grow window down"),
+    Key([mod, "control"], "k", lazy.layout.grow_up(),
+        desc="Grow window up"),
+    Key([mod], "f", lazy.window.toggle_fullscreen(),
+        desc="Toggle fullscreen for focused window"),
+
+    # Reset windows
+    Key([mod], "n", lazy.layout.normalize(),
+        desc="Reset all window sizes"),
+
     # Toggle between split and unsplit sides of stack.
     # Split = all windows displayed
     # Unsplit = 1 window displayed, like Max layout, but still with
@@ -50,47 +78,76 @@ keys = [
         lazy.layout.toggle_split(),
         desc="Toggle between split and unsplit sides of stack",
     ),
-    Key([mod], "Return", lazy.spawn(terminal), desc="Launch terminal"),
-    # Toggle between different layouts as defined below
+
+    # Toggle between layouts
     Key([mod], "Tab", lazy.next_layout(), desc="Toggle between layouts"),
+
+    # Spawn/kill applications/windows
+    Key([mod], "Return", lazy.spawn(terminal), desc="Launch terminal"),
+    Key([mod], "r", lazy.spawn("rofi -show drun"),
+        desc="Spawn a command using a prompt widget"),
+    Key([mod], "s", lazy.spawn("flameshot gui"),
+        desc="Take a screenshot"),
+    Key([mod], "p", lazy.spawn("sh -c ~/.config/rofi/scripts/power"),
+        desc="Open menu with power options"),
     Key([mod], "w", lazy.window.kill(), desc="Kill focused window"),
+
+    # General
     Key([mod, "control"], "r", lazy.reload_config(), desc="Reload the config"),
     Key([mod, "control"], "q", lazy.shutdown(), desc="Shutdown Qtile"),
-    Key([mod], "r", lazy.spawn("rofi -show drun"), desc="Spawn a command using a prompt widget"),
-    # If rofi is throwing a tantrum, I have the inbuilt spawner still in place.
-    Key([mod, "shift"], "r", lazy.spawncmd()),
+
+    # Audio controls
+    Key([mod, "shift"], "m", lazy.spawn("amixer -D default set Master toggle"),
+        desc="Mute audio"),
+    Key([mod, "shift"], "j", lazy.spawn(
+        "amixer -D default sset Master 5%- unmute"),
+        desc="Decrease audio volume by five percent"),
+    Key([mod, "shift"], "k", lazy.spawn(
+        "amixer -D default sset Master 5%+ unmute"),
+        desc="Decrease audio volume by five percent"),
+    Key([mod], "c", lazy.spawn("kitty -e cmus"),)
 ]
 
-groups = []
+# G R O U P S
 
-group_names = ["1", "2", "3", "4", "5", "6", "7",]
-group_labels = ["Start", "\ue7a2", "\ueac4", "󰘑", "\uf1b6", "\uf269", "\uf001",]
-group_layouts = ["monadtall", "monadtall", "monadtall", "monadtall", "monadtall", "monadtall", "tile",]
+groups = [
+    Group(name="1", label="\ueb06", layout="monadtall",
+          matches=[Match(wm_class=["Freetube"])]),
+    Group("2", label="\uf120", layout="monadtall",
+          matches=[Match(wm_class=["nextcloud"])]),
+    Group("3", label="\ueac4", layout="monadtall",
+          matches=[Match(wm_class=["ranger"])]),
+    Group("4", label="󱋊", layout="monadtall",
+          matches=[Match(wm_class=["discord"])],
+          spawn=["discord"]),
+    Group("5", label="\uf1b6", layout="monadtall",
+          matches=[Match(wm_class=["Steam"])],
+          spawn=["Steam"]),
+    Group("6", label="\uf269", layout="max",
+          matches=[Match(wm_class=["firefox"])],
+          spawn=["firefox"]),
+    Group("7", label="\uf001", layout="tile",
+          matches=[Match(wm_class=["spotify"])],
+          spawn=["kitty", "kitty -e vis", "kitty -e cmus"]),
+    Group("8", label="\ueb06", layout="monadtall",
+          matches=[Match(wm_class=["cmus"])]),
+]
 
-for i in range(len(group_names)):
-    groups.append(
-        Group(
-            name = group_names[i],
-            layout = group_layouts[i].lower(),
-            label = group_labels[i],
-            )
-        )
-
+for i in groups:
     keys.extend(
         [
             # mod1 + letter of group = switch to group
             Key(
-                [mod],
-                groups[i].name,
-                lazy.group[groups[i].name].toscreen(),
-                desc="Switch to group {}".format(groups[i].name),
+                [mod], i.name,
+                lazy.group[i.name].toscreen(),
+                desc="Switch to group {}".format(i.name),
             ),
             # mod1 + shift + letter of group = switch to & move focused window to group
             Key(
-                [mod, "shift"],
-                groups[i].name,
-                lazy.window.togroup(groups[i].name, switch_group=True),
-                desc="Switch to & move focused window to group {}".format(groups[i].name),
+                [mod, "shift"], i.name,
+                lazy.window.togroup(i.name, switch_group=True),
+                desc="Switch to & move focused window to group {}".format(
+                    i.name),
             ),
             # Or, use below if you prefer not to switch to that group.
             # # mod1 + shift + letter of group = move focused window to group
@@ -99,127 +156,347 @@ for i in range(len(group_names)):
         ]
     )
 
+# L A Y O U T S
+
 layouts = [
-    layout.Columns(border_focus_stack=["#d75f5f", "#8f3d3d"], border_width=4),
-    layout.Max(),
-    # Try more layouts by unleashing below layouts.
-    layout.Stack(num_stacks=2),
-    layout.Bsp(),
-    layout.Matrix(),
-    layout.MonadTall(),
-    layout.MonadWide(),
-    layout.RatioTile(),
-    layout.Tile(),
-    layout.TreeTab(),
-    layout.VerticalTile(),
-    layout.Zoomy(),
+    layout.Columns(
+        margin=5,
+        border_focus=colors[1],
+        border_normal=colors[13],
+        border_width=1,
+    ),
+
+    layout.Max(
+        margin=5,
+        border_focus=colors[1],
+        border_normal=colors[13],
+        border_width=0,
+    ),
+
+    layout.Matrix(
+        margin=5,
+        border_focus=colors[1],
+        border_normal=colors[13],
+        border_width=1,
+    ),
+
+    layout.MonadTall(
+        margin=5,
+        border_focus=colors[1],
+        border_normal=colors[13],
+        border_width=1,
+    ),
+
+    layout.MonadWide(
+        margin=5,
+        border_focus=colors[1],
+        border_normal=colors[13],
+        border_width=1,
+    ),
+
+    layout.Tile(
+        margin=5,
+        border_focus=colors[1],
+        border_normal=colors[13],
+        border_width=1,
+    ),
+
+    # layout.Stack(num_stacks=2),
+    # layout.Bsp(),
+    # layout.RatioTile(),
+    # layout.TreeTab(),
+    # layout.VerticalTile(),
+    # layout.Zoomy(),
 ]
 
+# B A R
+
 widget_defaults = dict(
-    font="Hack Nerd Font Mono",
+    font="Hack Nerd Font",
     fontsize=16,
     padding=4,
 )
 extension_defaults = widget_defaults.copy()
 
+
+def search():
+    qtile.cmd_spawn("rofi -show drun")
+
+
+def power():
+    qtile.cmd_spawn("sh -c ~/.config/rofi/scripts/power")
+
+
 screens = [
     Screen(
         top=bar.Bar(
-            [   
+            [
+                widget.Spacer(
+                    length=15,
+                    background=colors[13],
+                ),
+
+                widget.Image(
+                    background=colors[13],
+                    filename='~/.config/qtile/assets/icons/icon_launch_earth.png',
+                    margin=2,
+                    mouse_callbacks={"Button1": power},
+                ),
+
+                widget.Image(
+                    background=colors[13],
+                    filename='~/.config/qtile/assets/separators/sep_wave_rl.png',
+                ),
+
+                widget.GroupBox(
+                    active=colors[5],
+                    background=colors[12],
+                    block_highlight_text_color=colors[5],
+                    highlight_color=colors[11],
+                    inactive=colors[13],
+                    borderwidth=3,
+                    disable_drag=True,
+                    fontsize=16,
+                    foreground=colors[5],
+                    highlight_method='block',
+                    other_current_screen_border=colors[10],
+                    other_screen_border=colors[10],
+                    this_current_screen_border=colors[13],
+                    this_screen_border=colors[13],
+                    urgent_border=colors[13],
+                ),
+
+                widget.Spacer(
+                    length=8,
+                    background=colors[12],
+                ),
+
+                widget.Image(
+                    background=colors[12],
+                    filename='~/.config/qtile/assets/separators/sep_straight_lr.png',
+                ),
+
+                widget.Image(
+                    background=colors[12],
+                    filename='~/.config/qtile/assets/icons/icon_layout.png',
+                ),
+
+                widget.CurrentLayout(
+                    background=colors[12],
+                    foreground=colors[5],
+                    fmt='{}',
+                    font="Hack Nerd Font Mono Bold",
+                    fontsize=13,
+                ),
+
+                widget.Image(
+                    background=colors[12],
+                    filename='~/.config/qtile/assets/separators/sep_wave_lr.png',
+                ),
+
+                widget.Image(
+                    filename='~/.config/qtile/assets/icons/icon_search.png',
+                    margin=2,
+                    background=colors[13],
+                    mouse_callbacks={"Button1": search},
+                ),
+
                 widget.TextBox(
-                    text = "\uf31f",
-                    ),
-                widget.Sep(),
-                widget.GroupBox(),
+                    fmt='Search',
+                    background=colors[13],
+                    font="Hack Nerd Font Mono Bold",
+                    fontsize=13,
+                    foreground=colors[5],
+                    mouse_callbacks={"Button1": search},
+                ),
+
+                widget.Image(
+                    background=colors[13],
+                    filename='~/.config/qtile/assets/separators/sep_circle_r.png',
+                ),
+
                 widget.WindowName(
-                    empty_group_string = "",
-                    width = CALCULATED,
-                    ),
-                widget.Systray(),
+                    background=colors[12],
+                    font="Hack Nerd Font Mono Bold",
+                    fontsize=16,
+                    foreground=colors[5],
+                    format="{name}",
+                    empty_group_string="Desktop",
+                ),
+
+                widget.Image(
+                    background=colors[13],
+                    filename='~/.config/qtile/assets/separators/sep_circle_l.png',
+                ),
+
+                widget.Systray(
+                    background=colors[13],
+                    fontsize=2,
+                ),
+
                 widget.TextBox(
-                    text="\uf4bc",
-                    fontsize=20,
-                    padding=1,
-                    ), 
+                    background=colors[13],
+                    text=' ',
+                ),
+
+                widget.Image(
+                    background=colors[13],
+                    filename='~/.config/qtile/assets/separators/sep_wave_rl.png',
+                ),
+
+                widget.Image(
+                    background=colors[12],
+                    filename='~/.config/qtile/assets/icons/icon_cpu.png'
+                ),
+
+                widget.Spacer(
+                    background=colors[12],
+                    length=-7,
+                ),
+
                 widget.CPU(
+                    background=colors[12],
+                    foreground=colors[5],
                     format="{load_percent}%",
-                    ),
-                widget.TextBox(
-                    text="\ue266",
-                    fontsize=20,
-                    padding=1,
-                    ),
-                widget.Memory(format="{MemPercent}%"),
-                widget.TextBox(
-                    text="\uf0a0",
-                    fontsize=20,
-                    padding=1,
-                    ),
+                ),
+
+                widget.Image(
+                    background=colors[12],
+                    filename='~/.config/qtile/assets/separators/sep_straight_rl.png',
+                ),
+
+                widget.Image(
+                    background=colors[12],
+                    filename='~/.config/qtile/assets/icons/icon_ram.png',
+                    margin=3,
+                ),
+
+                widget.Spacer(
+                    background=colors[12],
+                    length=-7,
+                ),
+
+                widget.Memory(
+                    background=colors[12],
+                    foreground=colors[5],
+                    format="{MemPercent}%",
+                    update_interval=5,
+                ),
+
+                widget.Image(
+                    background=colors[12],
+                    filename='~/.config/qtile/assets/separators/sep_straight_rl.png',
+                ),
+
+                widget.Image(
+                    background=colors[12],
+                    filename='~/.config/qtile/assets/icons/icon_hdd.png',
+                    margin=3,
+                ),
+
+                widget.Spacer(
+                    background=colors[12],
+                    length=-3,
+                ),
+
                 widget.DF(
+                    foreground=colors[5],
                     format="{uf}{m}",
                     measure="G",
                     partition="/",
                     visible_on_warn=False,
-                    ),
-                widget.TextBox(
-                    background = colors[5],
-                    foreground = colors[1],
-                    text="󰒍",
-                    fontsize=20,
-                    padding=1,
-                    ),
-                widget.Net(
-                    background = colors[1],
-                    foreground = colors[5],
-                    format="{down}",
-                    interface="eth0",
-                    padding=1,
-                    prefix="M",
-                    ),
-                widget.TextBox(
-                    text="\uf175\uf176",
-                    fontsize=20,
-                    padding=1,
-                    ),
-                widget.Net(
-                    format="{up}",
-                    interface="eth0",
-                    padding=3,
-                    prefix="M",
-                    ),
-                widget.TextBox(
-                    text="󰚰", # \udb81\udeb0"
-                    fontsize=20,
-                    padding=1,
-                    ),
-                widget.CheckUpdates(
-                    display_format="{updates}",
-                    distro="Arch_checkupdates",
-                    no_update_string="0",
-                    update_interval=60,
-                    ),
-                widget.Cmus(
-                    max_chars=20,
-                    scroll=True,
-                    scroll_repeat=True,
-                    ),
-                widget.Sep(),
-                widget.TextBox(
-                    text = "󱑏", # \udb85\udc4f
-                    ),
-                widget.Clock(format="%A - %H:%M:%S"),
+                    background=colors[12],
+                ),
+
+                widget.Image(
+                    background=colors[12],
+                    filename='~/.config/qtile/assets/separators/sep_straight_rl.png',
+                ),
+
+                # widget.Image(
+                #   background=colors[12],
+                #   filename='~/.config/qtile/assets/icons/icon_update.png',
+                #   margin=3,
+                # ),
+
+                # widget.Spacer(
+                #    background=colors[12],
+                #    length=-7,
+                # ),
+
+                # widget.CheckUpdates(
+                #    background=colors[12],
+                #    display_format="{updates}",
+                #    distro="Arch_checkupdates",
+                #    foreground=colors[5],
+                #    no_update_string="0",
+                #    update_interval=60,
+                # ),
+
+                # widget.Image(
+                #    background=colors[12],
+                #    filename='~/.config/qtile/assets/separators/sep_straight_rl.png',
+                # ),
+
+                widget.Volume(
+                    background=colors[12],
+                    font="Hack Nerd Font Mono",
+                    fontsize=13,
+                    theme_path='~/.config/qtile/assets/volume/',
+                    emoji=True,
+                ),
+
+                widget.Spacer(
+                    length=-10,
+                    background=colors[12],
+                ),
+
+                widget.Volume(
+                    background=colors[12],
+                    font='Hack Nerd Font Mono',
+                    foreground=colors[5],
+                ),
+
+                widget.Image(
+                    background=colors[12],
+                    filename='~/.config/qtile/assets/separators/sep_wave_lr.png',
+                ),
+
+                widget.Image(
+                    background=colors[13],
+                    filename='~/.config/qtile/assets/icons/icon_clock.png',
+                    margin=5,
+                ),
+
+                widget.Clock(
+                    background=colors[13],
+                    foreground=colors[5],
+                    font="Hack Nerd Font Mono",
+                    format="%H:%M:%S"
+                ),
+
+                widget.Spacer(
+                    length=15,
+                    background=colors[13],
+                ),
             ],
-            size = 18,
-            border_width = 4,
-            # border_color=["ff00ff", "000000", "ff00ff", "000000"]  # Borders are magenta
+            size=30,
+            border_color=colors[13],
+            border_width=[0, 0, 0, 0],
+            margin=[10, 30, 6, 30],
         ),
     ),
 ]
 
+# H O O K S
+
+
 # Drag floating layouts.
 mouse = [
-    Drag([mod], "Button1", lazy.window.set_position_floating(), start=lazy.window.get_position()),
-    Drag([mod], "Button3", lazy.window.set_size_floating(), start=lazy.window.get_size()),
+    Drag([mod], "Button1", lazy.window.set_position_floating(),
+         start=lazy.window.get_position()),
+    Drag([mod], "Button3", lazy.window.set_size_floating(),
+         start=lazy.window.get_size()),
     Click([mod], "Button2", lazy.window.bring_to_front()),
 ]
 
@@ -260,3 +537,5 @@ wl_input_rules = None
 # We choose LG3D to maximize irony: it is a 3D non-reparenting WM written in
 # java that happens to be on java's whitelist.
 wmname = "LG3D"
+
+# E O F
