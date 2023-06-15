@@ -182,9 +182,10 @@ install_mulitmedia_packages () {
 
     install_packages $mulitmediaPackages
     install_aur_packages losslesscut-bin
-    install_aur_packages cli-visualizer-git
-
+    
     install_pipewire
+    
+    install_cava
 }
 
 install_others_packages () {
@@ -544,6 +545,23 @@ configure_xdg () {
 }
 
 # INSTALLATION FUNCTIONS
+
+install_cava () {
+    # Make sure requirements are installed
+    cavaPackages="base-devel fftw ncurses alsa-lib iniparser pipewire-pulse autoconf-archive"
+
+    install_packages $cavaPackages
+
+    # Install cava from AUR
+    install_aur_packages cava
+
+    # Create config directory for cava
+    create_directory $homedir/.config/cava
+
+    # Copy configuration file into directory
+    cp $repoDirectory/dotfiles/cava/config \
+        $homedir/.config/cava/config
+}
 
 install_yay () {
     ### AUR HELPER
