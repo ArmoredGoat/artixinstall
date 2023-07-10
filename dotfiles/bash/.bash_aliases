@@ -1,6 +1,8 @@
-#####   ALIAS CUSTOMIZAZION #####
+#
+# ~/.bash_aliases
+#
 
-### GIT
+# G I T
 alias gs='git status'           # View Git status
 alias ga='git add'              # Add a file to Git
 alias gaa='git add --all'       # Add all files to Git
@@ -9,7 +11,7 @@ alias gl='git log --oneline'    # View Git log
 alias gb='git checkout -b'      # Create new Git branch and move to new branch
 alias gd='git diff'             # View difference
 
-### QOL
+# Q O L
 alias cd..='cd ..'              # Get rid of command not found
 alias ..='cd ..;pwd'            # Move to parent folder
 alias ...='cd ../..;pwd'        # Move up two parent folders
@@ -39,7 +41,7 @@ alias fgrep='fgrep --color=auto'
 
 alias bc='bc -l'    # Start calculator with math support
 
-alias mount='mount |column -t'  # Make mount command output pretty and human readable format
+alias mount='mount | column -t'  # Make mount command output pretty and human readable format
 
 alias now='date +"%T"'              # Show current time
 alias nowtime=now                   # Different command to show time
