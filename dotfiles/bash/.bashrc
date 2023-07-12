@@ -5,17 +5,32 @@
 # If not running interactively, don't do anything
 [[ $- != *i* ]] && return
 
-##########  PATH
 
-# Add local 'pip' to PATH
+# P A T H
+
+# Add .local/bin to PATH for pip packages, personal scripts, and so on.
 export PATH="${PATH}:${HOME}/.local/bin"
+# Add Go to PATH
+export PATH="${PATH}:/usr/local/go/bin"
 
-##########  VARIABLES
+# E D I T O R
 
 export EDITOR=nvim
 export VISUAL=nvim
+set -o vi   		# Enable vim commands in command line
 
-#####   HISTORY CUSTOMIZATION   #####
+# B A S H
+
+# Enable programmable completion features
+if ! shopt -oq posix; then
+    if [ -f /usr/share/bash-completion/bash_completion ]; then
+        . /usr/share/bash-completion/bash_completion
+    elif [ -f /etc/bash_completion ]; then
+        . /etc/bash_completion
+    fi
+fi
+
+# B A S H   H I S T O R Y
 
 HISTFILE=~/.bash_history.$HOSTNAME  # Guard history getting truncated to default 500 lines if bash --norc is run
 HISTTIMEFORMAT="%F %T "             # Add date and time formatting to bash history
@@ -23,26 +38,15 @@ HISTCONTROL=ignoredups              # Ignore duplicate commands in bash history
 HISTSIZE=-1                         # Disable command limit of bash history
 HISTFILESIZE=-1                     # Disable size limit of bash history file
 
-shopt -s histappend             # Set bash history to append instead of overwriting
+shopt -s histappend     # Set bash history to append instead of overwriting
+shopt -s checkwinsize   # Check the window size after each command and, if 
+                        # necessary, update the values of LINES and COLUMNS.
 
-#####   BASH CUSTOMIZATION  #####
-
-blk='\[\033[01;30m\]'   # Black
-blu='\[\033[01;34m\]'   # Blue
-cyn='\[\033[01;36m\]'   # Cyan
-grn='\[\033[01;32m\]'   # Green
-mag='\[\033[01;35m\]'   # Magenta
-red='\[\033[01;31m\]'   # Red
-wht='\[\033[01;37m\]'   # White
-ylw='\[\033[01;33m\]'   # Yellow
-
-clr='\[\033[00m\]'      # Reset
-
-#####	PROMPT CUSTOMIZATION	#####
+# P R O M P T
 
 function nonzero_return() {
 	RETVAL=$?
-	[ $RETVAL -ne 0 ] && echo "─[$clr$RETVAL$cyn]"
+	[ $RETVAL -ne 0 ] && printf "\033[1m${RETVAL} \033[0;2m| \033[0m"
 }
 
 # get current branch in git repo
@@ -51,7 +55,7 @@ function parse_git_branch() {
 	if [ ! "${BRANCH}" == "" ]
 	then
 		STAT=`parse_git_dirty`
-		echo "─[$clr${BRANCH}${STAT}$cyn]"
+		printf "\033[1m${BRANCH}${STAT} \033[0;2m| \033[0m"
 	else
 		echo ""
 	fi
@@ -92,21 +96,17 @@ function parse_git_dirty {
 	fi
 }
 
-export PS1="$cyn┌──[$ylw\u$cyn@$ylw\h$cyn]─[$clr\w$cyn]$(parse_git_branch)$(nonzero_return)\n└─$ "
+export PS1=' \[\e[1m\]\w \[\e[0;2m\]| \[\e[0m\]$(parse_git_branch)$(nonzero_return)\[\e[1m\]\\$ \[\e[0m\]'
 
+# A L I A S E S
 
-#####   VIM CUSTOMIZATION   #####
-
-set -o vi   # Enable vim commands in command line
-
-#####   LOAD ALIASES        #####
-
+# Import aliases from ~/.bash_aliases
 if [ -f $HOME/.bash_aliases ]; then
     source $HOME/.bash_aliases
 fi
 
+# S Y S T E M   M O N I T O R
 
-##### GENERAL CUSTOMIZATION #####
 # Check, if other terminal windows are currently open. If not, run neofetch
 # This prevents neofetch from launching everytime you open a terminal
 runningTerms=$(ps a | awk '{print $2}' | grep -vi "tty*" | uniq | wc -l);
@@ -114,9 +114,9 @@ if [ $runningTerms -eq 1 ]; then
     macchina
 fi
 
+# C O L O R S
+
 # Import colorscheme from 'wal' asynchronously
-# & 	-> Run the process in the background.
-# ( ) 	-> Hide shell job control messages.
 (cat ~/.cache/wal/sequences &)
 
 # Also change colorscheme of TTYs.

@@ -1,0 +1,16 @@
+#
+# /root/.bashrc
+#
+
+# P R O M P T
+PS1=' \[\e[1m\]\w \[\e[0;2m\]| \[\e[0m\]\[\e[1m\]# \[\e[0m\]'
+
+# A L I A S E S
+alias ls='ls $LS_OPTIONS'
+alias ll='ls $LS_OPTIONS -l'
+alias l='ls $LS_OPTIONS -lA'
+
+# Some more alias to avoid making mistakes:
+alias rm='rm -i'
+alias cp='cp -i'
+alias mv='mv -i'
