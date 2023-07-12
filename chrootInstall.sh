@@ -691,9 +691,9 @@ install_lightdm () {
     cp $repoDirectory/dotfiles/lightdm/* \
         /etc/lightdm/
 
-    install -Dm 755 "$repoDirectory/files/X11/.xinitrc" -t "$homedir"
-    install -Dm 755 "$repoDirectory/scripts/xinitrcsession-helper" -t "/usr/bin/"
-    install -Dm 644 "$repoDirectory/files/X11/xinitrc.desktop" \
+    install -Dm 755 "$repoDirectory/dotfiles/xorg/.xinitrc" -t "$homedir"
+    install -Dm 755 "$repoDirectory/dotfiles/xorg/xinitrcsession-helper" -t "/usr/bin/"
+    install -Dm 644 "$repoDirectory/dotfiles/xorg/xinitrc.desktop" \
         -t "/usr/share/xsessions"
 
     # Set wallpaper for lightdm with slickgreeter-pywal
