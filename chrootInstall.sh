@@ -769,8 +769,8 @@ install_nitrogen () {
     create_directory $homedir/.config/nitrogen
 
     # Download wallpaper
-    cp $repoDirectory/dotfiles/backgrounds/mushroom_town.png \
-        $homedir/.local/share/backgrounds/mushroom_town.png
+    cp $repoDirectory/dotfiles/backgrounds/hollow_knight_lantern.png \
+        $homedir/.local/share/backgrounds/hollow_knight_lantern.png
 }
 
 install_picom () {
