@@ -992,10 +992,6 @@ install_xorg () {
     ### DISPLAY SERVER
     xorgPackages="xorg xorg-server xorg-xinit"
     install_packages $xorgPackages
-
-    # Get config files repository and store them in corresponding directory
-    cp $repoDirectory/dotfiles/xorg/xorg.conf \
-        /etc/X11/xorg.conf
 }
 
 ##########  END FUNCTIONS
