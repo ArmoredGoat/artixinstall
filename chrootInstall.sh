@@ -340,7 +340,7 @@ copy_user_files () {
         $homedir/.local/share/backgrounds/hollow_knight_lantern.png
     # Copy login manager background image (must be in a directory
     # which can be accessed by login manager)
-    cp $repoDirectory/files/backgrounds/hollow_knight_view.jpg \
+    cp $repoDirectory/dotfiles/backgrounds/hollow_knight_view.jpg \
         /usr/share/backgrounds/hollow_knight_view.jpg
 
     # Ensure permissions are set correctly for .local. Installation processes
