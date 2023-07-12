@@ -514,21 +514,25 @@ configure_pacman () {
 }
 
 configure_shell () {
-    ### COMMAND-LINE SHELL
+    # B A S H
 
-    # Copy config files and store them in corresponding directory
-    cp $repoDirectory/dotfiles/bash/.bashrc \
-        $homedir/.bashrc
-    cp $repoDirectory/dotfiles/bash/.bash_aliases \
-        $homedir/.bash_aliases
-
-    # Source .bashrc to make configuration active.
-    source $homedir/.bashrc
+    # Copy bash config files into user's home directory
+    cp $repoDirectory/dotfiles/bash/{.bashrc,.bash_aliases,.bash_profile} \
+        $homedir/
+    
+    # Copy bash config files into root's home directory
+    cp $repoDirectory/dotfiles/bash/.bashrc_root \
+        /root/.bashrc
+    cp $repoDirectory/dotfiles/bash/.bash_profile \
+        /root/
 
     # Make bash* files executable. Necessary for some applications.
     chmod +x $homedir/.bash*
 
     install_packages bash-completion
+
+    # Source .bashrc to make configuration active.
+    source $homedir/.bashrc
 }
 
 configure_xdg () {
