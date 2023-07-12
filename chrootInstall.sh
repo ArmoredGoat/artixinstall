@@ -249,7 +249,7 @@ install_utiliy_packages () {
         # syslog-ng
         # syslog-ng-openrc
     ### SYSTEM INFORMARTION VIEWER
-        # macchina
+        #
     ### TASK MANAGER
         # bottom
     ### VERSION CONTROL SYSTEM
@@ -273,7 +273,6 @@ install_utiliy_packages () {
     configure_shell
     configure_grub
     install_kitty
-    install_macchina
     install_virt_manager
 
     install_trash_cli
@@ -326,6 +325,12 @@ copy_user_files () {
     create_directory $homedir/.local/share/{backgrounds,fonts/ttf,themes}
     create_directory /usr/share/backgrounds
 
+    # Create directory for user programs
+    create_directory $home/.local/bin
+
+    # Ensure ~/.local/bin is on PATH
+    export PATH="$PATH:$home/.local/bin"
+
     # Copy files to corresponding directories
     # Copy fonts
     cp -r $repoDirectory/dotfiles/fonts/ttf/* \
@@ -337,23 +342,35 @@ copy_user_files () {
     # which can be accessed by login manager)
     cp $repoDirectory/files/backgrounds/hollow_knight_view.jpg \
         /usr/share/backgrounds/hollow_knight_view.jpg
+
+    # Ensure permissions are set correctly for .local. Installation processes
+    # for e.g. pipx require permissions for user as it is run with 'runuser'
+    # command.
+    set_ownership "$username" "$home/.local"
 }
 
 create_directory () {
 	# Check if directories exists. If not, create them.
-	if [[ ! -d $@ ]]; then
-	mkdir -pv $@
+	if [[ -d $@ ]]; then
+        printf "Directory '$@': already existent.\n"
+    else
+        mkdir -p $@
+        printf "Directory '$@': created.\n"
     fi
+
 	# This script is run with privileged rights. Therefore, anything created
 	# with it will be owned by root. To make sure that the permissions are set
 	# correclty, the function checks if the directory lies in the home folder.
 	# If so, it grants ownership to the user.
-	if [[ $@ = $homedir/* ]]; then
+	if [[ "$@" == $home/* ]]; then
 		# General permissions settings. If necessary, e.g. ssh keys, the
         # permissions will be set accordingly
-        chmod 755 $@
-		chown -R "$username":"$username" $@
+        chmod 755 "$@"
+		chown -R "$username":"$username" "$@"
 	fi
+
+    permissions=$(ls -la "$@" | sed -n '2 p' | awk '{print $1" "$3":"$4}')
+    printf "Directory '$@': permissions $permissions set.\n"
 }
 
 create_user () {
@@ -704,10 +721,6 @@ install_lightdm () {
     ./install.sh
 }
 
-install_macchina () {
-    install_aur_packages macchina
-}
-
 install_microcode () {
     if [[ $cpu == 'AMD' ]] || [[ $cpu == 'AuthenticAMD' ]]; then
         microcodePackage='amd-ucode'
@@ -832,6 +845,10 @@ install_python () {
     # your .bashrc or by calling 'pipx ensurepath'.
     pythonPackages="python python-pipx python-setuptools python-virtualenv"
     install_packages $pythonPackages
+
+    # Ensure pipx is on PATH before go further. On the finished system the 
+    # PATH is set in ~/.bashrc
+    runuser -l "$username" -c "pipx ensurepath"
 }
 
 install_pywal () {
