@@ -329,10 +329,10 @@ copy_user_files () {
     # Copy files to corresponding directories
     # Copy fonts
     cp -r $repoDirectory/dotfiles/fonts/ttf/* \
-        $home/.local/share/fonts/ttf
+        $homedir/.local/share/fonts/ttf
     # Copy desktop background image
     cp $repoDirectory/dotfiles/backgrounds/hollow_knight_lantern.png \
-        $home/.local/share/backgrounds/hollow_knight_lantern.png
+        $homedir/.local/share/backgrounds/hollow_knight_lantern.png
     # Copy login manager background image (must be in a directory
     # which can be accessed by login manager)
     cp $repoDirectory/files/backgrounds/hollow_knight_view.jpg \
