@@ -326,7 +326,7 @@ copy_user_files () {
     create_directory /usr/share/backgrounds
 
     # Create directory for user programs
-    create_directory $home/.local/bin
+    create_directory $homedir/.local/bin
 
     # Ensure ~/.local/bin is on PATH
     export PATH="$PATH:$home/.local/bin"
