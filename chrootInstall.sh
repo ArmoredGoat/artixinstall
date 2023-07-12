@@ -774,9 +774,16 @@ install_nitrogen () {
 }
 
 install_picom () {
-    ### COMPOSITE MANAGER
+    # C O M P O S I T E  M A N A G E R
+
     install_packages picom
 
+    # Create directories for nitrogen config and log files
+    create_directory $homedir/{.config/nitrogen,.local/share/picom}
+
+    # Copy configuration file for picom into corresponding directory.
+    cp $repoDirectory/dotfiles/picom/picom.conf \
+        $homedir/.config/picom/picom.conf
 }
 
 install_pipewire () {
