@@ -688,7 +688,7 @@ install_lightdm () {
     create_directory /etc/lightdm
 
     # Get config files repository and store them in corresponding directory
-    cp $repoDirectory/dotfiles/lightdm/() \
+    cp $repoDirectory/dotfiles/lightdm/* \
         /etc/lightdm/
 
     install -Dm 755 "$repoDirectory/files/X11/.xinitrc" -t "$homedir"
