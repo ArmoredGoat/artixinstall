@@ -1,0 +1,3 @@
+#!/usr/bin/env sh
+: "${XINITRC:=$HOME/.xinitrc}"
+exec "${XINITRC}"

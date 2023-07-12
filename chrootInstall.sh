@@ -36,6 +36,7 @@ main () {
 
     # Create local copy of repository to have everything available.
     clone_repository
+    copy_user_files
 
     # Install packages
     install_essential_packages
@@ -319,6 +320,25 @@ clone_repository () {
     fi
 }
 
+copy_user_files () {
+    # Create directories in /usr/share (systemwide) and .local/share (user-only)
+    # to store backgrounds, fonts, icons, themes, ...
+    create_directory $homedir/.local/share/{backgrounds,fonts/ttf,themes}
+    create_directory /usr/share/backgrounds
+
+    # Copy files to corresponding directories
+    # Copy fonts
+    cp -r $repoDirectory/dotfiles/fonts/ttf/* \
+        $home/.local/share/fonts/ttf
+    # Copy desktop background image
+    cp $repoDirectory/dotfiles/backgrounds/hollow_knight_lantern.png \
+        $home/.local/share/backgrounds/hollow_knight_lantern.png
+    # Copy login manager background image (must be in a directory
+    # which can be accessed by login manager)
+    cp $repoDirectory/files/backgrounds/hollow_knight_view.jpg \
+        /usr/share/backgrounds/hollow_knight_view.jpg
+}
+
 create_directory () {
 	# Check if directories exists. If not, create them.
 	if [[ ! -d $@ ]]; then
@@ -427,6 +447,10 @@ install_packages () {
     # Function to install multiple packages that do not require further attention
     # at once
     pacman -Syuq $@ --needed --noconfirm
+}
+
+install_pip_package () {
+    runuser -l "$username" -c "pipx install $1"
 }
 
 remove_temporary_files () {
@@ -642,17 +666,10 @@ install_kitty () {
     # Create directories for kitty's general configs
     create_directory $homedir/.config/kitty
 
-    # Create directories for personal backgrounds, fonts, themes, etc.
-    create_directory $homedir/.local/share/{backgrounds,fonts/ttf,themes}
-
     ## General configuration
     # Get config files repository and store them in corresponding directory
     cp $repoDirectory/dotfiles/kitty/kitty.conf \
         $homedir/.config/kitty/kitty.conf
-
-    # Copy hack fonts to directory
-    cp -r $repoDirectory/dotfiles/fonts/ttf/hack \
-        $homedir/.local/share/fonts/ttf/hack
 }
 
 install_lightdm () {
@@ -671,19 +688,13 @@ install_lightdm () {
     create_directory /etc/lightdm
 
     # Get config files repository and store them in corresponding directory
-    cp $repoDirectory/dotfiles/lightdm/lightdm.conf \
-        /etc/lightdm/lightdm.conf
-    cp $repoDirectory/dotfiles/lightdm/slick-greeter.conf \
-        /etc/lightdm/slick-greeter.conf
-    cp $repoDirectory/dotfiles/lightdm/users.conf \
-        /etc/lightdm/users.conf
+    cp $repoDirectory/dotfiles/lightdm/() \
+        /etc/lightdm/
 
-    cp $repoDirectory/dotfiles/xorg/.xprofile \
-        $homedir/.xprofile
-    chmod +x $homedir/.xprofile
-
-    # Set wallpaper
-    wal -i $homedir/.local/share/backgrounds/mushroom_town.png
+    install -Dm 755 "$repoDirectory/files/X11/.xinitrc" -t "$homedir"
+    install -Dm 755 "$repoDirectory/scripts/xinitrcsession-helper" -t "/usr/bin/"
+    install -Dm 644 "$repoDirectory/files/X11/xinitrc.desktop" \
+        -t "/usr/share/xsessions"
 
     # Set wallpaper for lightdm with slickgreeter-pywal
     git clone https://github.com/Paul-Houser/slickgreeter-pywal \
@@ -691,7 +702,6 @@ install_lightdm () {
     cd $homedir/git/cloned/slickgreeter-pywal
     chmod +x install.sh
     ./install.sh
-    reTheme $(cat $HOME/.cache/wal/wal)
 }
 
 install_macchina () {
@@ -768,9 +778,9 @@ install_nitrogen () {
     # Create directory for nitrogen config.
     create_directory $homedir/.config/nitrogen
 
-    # Download wallpaper
-    cp $repoDirectory/dotfiles/backgrounds/hollow_knight_lantern.png \
-        $homedir/.local/share/backgrounds/hollow_knight_lantern.png
+    # Copy nitrogen config into directory
+    cp $repoDirectory/dotfiles/nitrogen/* \
+        $homedir/.config/nitrogen/
 }
 
 install_picom () {
@@ -808,16 +818,20 @@ install_pipewire () {
 install_python () {
     ### PYTHON
         # python -
-        # python-pip - 
-    pythonPackages="python python-pip"
+        # python-pipx - 
+    # https://pypa.github.io/pipx/
+    # pipx is like pip a general-purpose package installer for Python and uses
+    # the same package index, PyPI. As it is specifacally made for application
+    # installation, it adds isolation while maintaining availability and 
+    # connectiity between apps and shell. By using virtual environments, pipx
+    # addresses the problem that packages provided by apt and pip are mixed up.
+    # Mixing two package managers is a bad idea. Therefor, your distro protects
+    # you from doing that.
+    # pipx runs with regular user permissions and installs packages in 
+    # ~/.local/bin, so make sure that it is on PATH by either add an export to
+    # your .bashrc or by calling 'pipx ensurepath'.
+    pythonPackages="python python-pipx python-setuptools python-virtualenv"
     install_packages $pythonPackages
-
-    # Make sure this directory exists and the user has permissions
-    # This directory has to be accessed when installing python modules
-    create_directory "$homedir"/.local/lib
-
-    # Install python module 'setuptools' for user with pip
-    runuser -l "$username" -c "pip3 install --user setuptools"
 }
 
 install_pywal () {
@@ -827,23 +841,21 @@ install_pywal () {
 }
 
 install_qtile () {
-    ### WINDOW MANAGER
+    # W I N D O W   M A N A G E R
+    qtile_packages="dbus gdk-pixbuf2 git glibc graphviz gtk3 imagemagick \
+        libnotify libpulse lm_sensors mypy pango python-bowler \
+        python-cairocffi python-cffi python-dbus-next python-gobject \
+        python-iwlib python-psutil python-pytest python-setproctitle \
+        python-setuptools python-setuptools-scm python-xcffib python-xdg \
+        python-xvfbwrapper xorg-server-xephyr xorg-xrandr"
+    install_packages $qtile_packages
 
-    pacman -Syu qtile --needed --noconfirm
-
-    # Make sure this directory exists and the user has permissions
-    # This directory has to be accessed when installing python modules
-    set_ownership "$username" "$homedir"/.local/lib
-
-    # Fix for qtile. It seems there are issues with building cairocffi
-    # through pip and normal packages.
-    runuser -l "$username" -c "pip3 install --user --no-cache --upgrade \
-        --no-build-isolation cairocffi"
+    install_pip_package "git+https://github.com/qtile/qtile@master"
 
     create_directory $homedir/.config/qtile
     # Get config files repository and store them in corresponding directory
-    cp $repoDirectory/dotfiles/qtile/config.py \
-        $homedir/.config/qtile/config.py
+    cp -r $repoDirectory/dotfiles/qtile/* \
+        $homedir/.config/qtile/
 }
 
 install_reflector () {
