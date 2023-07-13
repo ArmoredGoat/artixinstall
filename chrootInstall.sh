@@ -182,7 +182,7 @@ install_mulitmedia_packages () {
     mulitmediaPackages="cmus beets imv flameshot mpv cameractrls"
 
     install_packages $mulitmediaPackages
-    install_aur_packages losslesscut-bin
+    #install_aur_packages losslesscut-bin
     
     install_pipewire
     
@@ -190,16 +190,32 @@ install_mulitmedia_packages () {
 }
 
 install_others_packages () {
+    # Graphical environment
     install_graphics_drivers
-    install_nitrogen
-    install_picom
-    install_pywal
-    install_qtile
-    # Quick and dirty test fix.
-    #install_display_manager
-    install -Dm 755 "$repoDirectory/dotfiles/xorg/.xinitrc" -t "$homedir"
-    install_rofi
     install_xorg
+
+    # Wallpaper setter
+    install_nitrogen
+
+    # Window compositor
+    install_picom
+
+    # Login manager
+    #install_ly
+
+    # Window manager
+    install_qtile
+
+    # Quick and dirty test fix.
+    install -Dm 755 "$repoDirectory/dotfiles/xorg/.xinitrc" -t "$homedir"
+
+    # Window switcher, run dialog, etc.
+    install_rofi
+
+    # Notification daemon
+    #install_dunst
+
+    # Software to flash my keyboard
     install_wally
 }
 
@@ -566,8 +582,8 @@ configure_shell () {
     # Copy bash config files into root's home directory
     cp $repoDirectory/dotfiles/bash/.bashrc_root \
         /root/.bashrc
-    cp $repoDirectory/dotfiles/bash/.bash_profile \
-        /root/
+    cp $repoDirectory/dotfiles/bash/.bash_profile_root \
+        /root/.bash_profile
 
     # Make bash* files executable. Necessary for some applications.
     chmod +x $homedir/.bash*
@@ -691,7 +707,7 @@ install_kitty () {
         $homedir/.config/kitty/kitty.conf
 }
 
-install_display_manager () {
+install_ly () {
     ### DISPLAY MANAGER
         # lightdm
         # lightdm-openrc
@@ -840,14 +856,6 @@ install_python () {
     install_packages $pythonPackages
 
     install_pipx
-
-
-}
-
-install_pywal () {
-    ### PYWAL
-
-    pacman -Syu procps imagemagick python-pywal --needed --noconfirm
 }
 
 install_qtile () {
@@ -860,7 +868,9 @@ install_qtile () {
         python-xvfbwrapper xorg-server-xephyr xorg-xrandr"
     install_packages $qtile_packages
 
-    install_pip_package "git+https://github.com/qtile/qtile@master"
+    runuser -l "$username" -c "export PATH=$PATH:$HOME/.local/bin && \
+        pipx install git+https://github.com/qtile/qtile@master"
+    #install_pip_package "git+https://github.com/qtile/qtile@master"
 
     create_directory $homedir/.config/qtile
     # Get config files repository and store them in corresponding directory

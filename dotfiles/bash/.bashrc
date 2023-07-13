@@ -109,15 +109,7 @@ fi
 
 # Check, if other terminal windows are currently open. If not, run neofetch
 # This prevents neofetch from launching everytime you open a terminal
-runningTerms=$(ps a | awk '{print $2}' | grep -vi "tty*" | uniq | wc -l);
-if [ $runningTerms -eq 1 ]; then
-    macchina
-fi
-
-# C O L O R S
-
-# Import colorscheme from 'wal' asynchronously
-(cat ~/.cache/wal/sequences &)
-
-# Also change colorscheme of TTYs.
-source ~/.cache/wal/colors-tty.sh
+#runningTerms=$(ps a | awk '{print $2}' | grep -vi "tty*" | uniq | wc -l);
+#if [ $runningTerms -eq 1 ]; then
+#    macchina
+#fi
