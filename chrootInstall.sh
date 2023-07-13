@@ -585,8 +585,8 @@ configure_shell () {
     cp $repoDirectory/dotfiles/bash/.bash_profile \
         /root/.bash_profile
 
-    # Make bash* files executable. Necessary for some applications.
-    chmod +x $homedir/.bash*
+    # Make bash files executable. Necessary for some applications.
+    chmod +x $homedir/{.bashrc,.bash_profile}
 
     install_packages bash-completion
 
