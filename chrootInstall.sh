@@ -885,6 +885,14 @@ install_qtile () {
         pipx install git+https://github.com/qtile/qtile@master"
     #install_pip_package "git+https://github.com/qtile/qtile@master"
 
+    # Create a virtual environment for qtile and enter it by sourcing it
+    # 'bin/activate' inside. Then install psutil with pip so qtile has access
+    # to its functions. Afterwards, leave.
+    runuser -l "$username" -c "virtualenv ~/.local/pipx/venvs/qtile && \
+        source virtualenv ~/.local/pipx/venvs/qtile/bin/activate && \
+        pip install psutil && \
+        deactivate"
+
     create_directory $homedir/.config/qtile
     # Get config files repository and store them in corresponding directory
     cp -r $repoDirectory/dotfiles/qtile/* \
