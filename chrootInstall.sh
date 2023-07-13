@@ -201,7 +201,7 @@ install_others_packages () {
     install_picom
 
     # Login manager
-    #install_ly
+    install_ly
 
     # Window manager
     install_qtile
@@ -582,7 +582,7 @@ configure_shell () {
     # Copy bash config files into root's home directory
     cp $repoDirectory/dotfiles/bash/.bashrc_root \
         /root/.bashrc
-    cp $repoDirectory/dotfiles/bash/.bash_profile_root \
+    cp $repoDirectory/dotfiles/bash/.bash_profile \
         /root/.bash_profile
 
     # Make bash* files executable. Necessary for some applications.
@@ -708,17 +708,25 @@ install_kitty () {
 }
 
 install_ly () {
-    ### DISPLAY MANAGER
-        # lightdm
-        # lightdm-openrc
-        # lightdm-gtk-greeter
-        # light-locker
-    lightdmPackages="lightdm lightdm-openrc light-locker lightdm-slick-greeter"
-    install_packages $lightdmPackages
+    # Ly is a lightweight TUI (ncurses-like) display manager for Linux and BSD.
+    # https://github.com/fairyglade/ly
 
-    install -Dm 755 "$repoDirectory/dotfiles/xorg/xinitrcsession-helper" -t "/usr/bin/"
-    install -Dm 644 "$repoDirectory/dotfiles/xorg/xinitrc.desktop" \
-        -t "/usr/share/xsessions"
+    # Clone repository into git directory and compile it with 'make'.
+    runuser -l "$username" -c "git clone --recurse-submodules \
+        https://github.com/fairyglade/ly $homedir/git/ly && \
+        cd $homedir/git/ly && make"
+    
+    # Install Ly and the OpenRC service
+    cd $homedir/git/ly
+    make install installopenrc
+    
+    # Enable service to start on boot.
+    add_service ly
+
+    # By default Ly uses tty2 which already has a login/getty (basic login 
+    # prompt) running. To prevent this prompt to spawn on top of Ly it has
+    # to be disabled.
+    rc-update del agetty.tty2
 }
 
 install_microcode () {
