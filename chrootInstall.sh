@@ -846,7 +846,7 @@ install_pipx () {
     # Ensure pipx is on PATH before go further. On the finished system the 
     # PATH is set in ~/.bashrc
     runuser -l "$username" -c "pip install pipx --break-system-packages && \
-        pipx ensurepath"
+        export PATH=$PATH:$HOME/.local/bin"
 
 }
 
