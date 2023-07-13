@@ -786,7 +786,7 @@ install_picom () {
     install_packages picom
 
     # Create directories for nitrogen config and log files
-    create_directory $homedir/{.config/nitrogen,.local/share/picom}
+    create_directory $homedir/{.config/picom,.local/share/picom}
 
     # Copy configuration file for picom into corresponding directory.
     cp $repoDirectory/dotfiles/picom/picom.conf \
