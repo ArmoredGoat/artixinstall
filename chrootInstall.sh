@@ -195,7 +195,9 @@ install_others_packages () {
     install_picom
     install_pywal
     install_qtile
-    install_lightdm
+    # Quick and dirty test fix.
+    #install_display_manager
+    install -Dm 755 "$repoDirectory/dotfiles/xorg/.xinitrc" -t "$homedir"
     install_rofi
     install_xorg
     install_wally
@@ -689,7 +691,7 @@ install_kitty () {
         $homedir/.config/kitty/kitty.conf
 }
 
-install_lightdm () {
+install_display_manager () {
     ### DISPLAY MANAGER
         # lightdm
         # lightdm-openrc
@@ -698,27 +700,9 @@ install_lightdm () {
     lightdmPackages="lightdm lightdm-openrc light-locker lightdm-slick-greeter"
     install_packages $lightdmPackages
 
-    # Enable lightdm to start at boot
-    rc-update add lightdm
-
-    # Create directory for lightdm config files
-    create_directory /etc/lightdm
-
-    # Get config files repository and store them in corresponding directory
-    cp $repoDirectory/dotfiles/lightdm/* \
-        /etc/lightdm/
-
-    install -Dm 755 "$repoDirectory/dotfiles/xorg/.xinitrc" -t "$homedir"
     install -Dm 755 "$repoDirectory/dotfiles/xorg/xinitrcsession-helper" -t "/usr/bin/"
     install -Dm 644 "$repoDirectory/dotfiles/xorg/xinitrc.desktop" \
         -t "/usr/share/xsessions"
-
-    # Set wallpaper for lightdm with slickgreeter-pywal
-    git clone https://github.com/Paul-Houser/slickgreeter-pywal \
-        $homedir/git/cloned/slickgreeter-pywal
-    cd $homedir/git/cloned/slickgreeter-pywal
-    chmod +x install.sh
-    ./install.sh
 }
 
 install_microcode () {
@@ -828,8 +812,7 @@ install_pipewire () {
     chmod +x $homedir/.config/pipewire/.pipewire-start.sh
 }
 
-install_pipx () {
-
+install_pipx () {zs
         # python-pipx - 
     # https://pypa.github.io/pipx/
     # pipx is like pip a general-purpose package installer for Python and uses
