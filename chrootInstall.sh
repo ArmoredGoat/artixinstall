@@ -325,11 +325,11 @@ copy_user_files () {
     create_directory $homedir/.local/share/{backgrounds,fonts/ttf,themes}
     create_directory /usr/share/backgrounds
 
-    # Create directory for user programs
-    create_directory $homedir/.local/bin
+    # Create directories for user programs and libraries
+    create_directory $homedir/.local/{bin,lib}
 
     # Ensure ~/.local/bin is on PATH
-    export PATH="$PATH:$home/.local/bin"
+    export PATH="$PATH:$homedir/.local/bin"
 
     # Copy files to corresponding directories
     # Copy fonts
@@ -346,7 +346,7 @@ copy_user_files () {
     # Ensure permissions are set correctly for .local. Installation processes
     # for e.g. pipx require permissions for user as it is run with 'runuser'
     # command.
-    set_ownership "$username" "$home/.local"
+    set_ownership "$username" "$homedir/.local"
 }
 
 create_directory () {
@@ -362,7 +362,7 @@ create_directory () {
 	# with it will be owned by root. To make sure that the permissions are set
 	# correclty, the function checks if the directory lies in the home folder.
 	# If so, it grants ownership to the user.
-	if [[ "$@" == $home/* ]]; then
+	if [[ "$@" == $homedir/* ]]; then
 		# General permissions settings. If necessary, e.g. ssh keys, the
         # permissions will be set accordingly
         chmod 755 "$@"
