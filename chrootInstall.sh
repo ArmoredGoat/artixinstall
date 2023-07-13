@@ -354,12 +354,8 @@ copy_user_files () {
     cp -r $repoDirectory/dotfiles/fonts/ttf/* \
         $homedir/.local/share/fonts/ttf
     # Copy desktop background image
-    cp $repoDirectory/dotfiles/backgrounds/hollow_knight_lantern.png \
-        $homedir/.local/share/backgrounds/hollow_knight_lantern.png
-    # Copy login manager background image (must be in a directory
-    # which can be accessed by login manager)
-    cp $repoDirectory/dotfiles/backgrounds/hollow_knight_view.jpg \
-        /usr/share/backgrounds/hollow_knight_view.jpg
+    cp $repoDirectory/dotfiles/backgrounds/hollow_knight_nail.png \
+        $homedir/.local/share/backgrounds/hollow_knight_nail.png
 
     # Ensure permissions are set correctly for .local. Installation processes
     # for e.g. pipx require permissions for user as it is run with 'runuser'

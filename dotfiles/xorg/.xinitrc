@@ -33,13 +33,9 @@ if [ -d /etc/X11/xinit/xinitrc.d ] ; then
 fi
 
 #picom &
-# Check if there is already a cached color scheme and if yes, reload it.
-# Otherwise run pywal and create a color scheme.
-if [[ -d ~/.cache/wal ]]; then
-    wal -R &
-else
-    wal -i ~/.local/share/backgrounds/hollow_knight_lantern.png
-fi
+# Restore set wallpaper
+nitrogen --restore
+
 #sh ~/.config/pipewire/.pipewire-start.sh &
 
 # Start Qtile
