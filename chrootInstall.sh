@@ -812,7 +812,7 @@ install_pipewire () {
     chmod +x $homedir/.config/pipewire/.pipewire-start.sh
 }
 
-install_pipx () {zs
+install_pipx () {
         # python-pipx - 
     # https://pypa.github.io/pipx/
     # pipx is like pip a general-purpose package installer for Python and uses
