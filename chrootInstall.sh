@@ -712,9 +712,10 @@ install_ly () {
     # https://github.com/fairyglade/ly
 
     # Clone repository into git directory and compile it with 'make'.
-    runuser -l "$username" -c "git clone --recurse-submodules \
-        https://github.com/fairyglade/ly $homedir/git/ly && \
-        cd $homedir/git/ly && make"
+    git clone --recurse-submodules https://github.com/fairyglade/ly \
+        $homedir/git/ly
+    cd $homedir/git/ly
+    make
     
     # Install Ly and the OpenRC service
     cd $homedir/git/ly
@@ -726,7 +727,7 @@ install_ly () {
     # By default Ly uses tty2 which already has a login/getty (basic login 
     # prompt) running. To prevent this prompt to spawn on top of Ly it has
     # to be disabled.
-    rc-update del agetty.tty2
+    rc-update del agetty.tty2 default
 }
 
 install_microcode () {
