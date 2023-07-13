@@ -698,9 +698,13 @@ install_kitty () {
 
     install_packages kitty
 
-    # Create directories for kitty's general configs
-    create_directory $homedir/.config/kitty
+    # Create directories for kitty's general configs and themes
+    create_directory $homedir/.config/{kitty,kitty/themes}
 
+    # Copy nord theme for kitty by connorholyday into themes directory
+    # https://github.com/connorholyday/nord-kitty/tree/master
+    cp $repoDirectory/dotfiles/themes/nord_kitty.conf \
+        $homedir/.config/kitty/themes/nord.conf
     ## General configuration
     # Get config files repository and store them in corresponding directory
     cp $repoDirectory/dotfiles/kitty/kitty.conf \

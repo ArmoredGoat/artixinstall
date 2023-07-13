@@ -1,47 +1,47 @@
 from libqtile import layout
-from colors import colors
+from colors import nord
 from libqtile.config import Match
 
 layouts = [
     layout.Columns(
         margin=5,
-        border_focus=colors[4],
-        border_normal=colors[1],
+        border_focus=nord[4],
+        border_normal=nord[1],
         border_width=1,
     ),
 
     layout.Max(
         margin=5,
-        border_focus=colors[1],
-        border_normal=colors[1],
+        border_focus=nord[1],
+        border_normal=nord[1],
         border_width=0,
     ),
 
     layout.Matrix(
         margin=5,
-        border_focus=colors[5],
-        border_normal=colors[1],
+        border_focus=nord[5],
+        border_normal=nord[1],
         border_width=1,
     ),
 
     layout.MonadTall(
         margin=5,
-        border_focus=colors[3],
-        border_normal=colors[1],
+        border_focus=nord[3],
+        border_normal=nord[1],
         border_width=1,
     ),
 
     layout.MonadWide(
         margin=5,
-        border_focus=colors[3],
-        border_normal=colors[1],
+        border_focus=nord[3],
+        border_normal=nord[1],
         border_width=1,
     ),
 
     layout.Tile(
         margin=5,
-        border_focus=colors[5],
-        border_normal=colors[1],
+        border_focus=nord[5],
+        border_normal=nord[1],
         border_width=1,
     ),
 

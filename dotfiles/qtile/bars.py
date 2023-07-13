@@ -1,25 +1,11 @@
 import os
 from libqtile import bar, extension, qtile, widget
 from libqtile.lazy import lazy
+from colors import nord
 
 home = os.path.expanduser('~')
 config = os.path.expanduser('~/.config/qtile/')
 assets = os.path.expanduser('~/.config/qtile/assets/')
-
-colors = []
-cache = '/home/julius/.cache/wal/colors'
-
-
-def init_colors(cache):
-    with open(cache, 'r') as file:
-        for i in range(8):
-            colors.append(file.readline().strip())
-    colors.append('#ffffff')
-    lazy.reload()
-
-
-init_colors(cache)
-
 
 def search():
     qtile.cmd_spawn("rofi -show drun")
@@ -30,10 +16,10 @@ def power():
 
 
 widget_defaults = dict(
-    background=colors[2],
+    background=nord[2],
     font="Hack Nerd Font",
     fontsize=16,
-    foreground=colors[6],
+    foreground=nord[6],
     padding=2,
 )
 extension_defaults = widget_defaults.copy()
@@ -42,32 +28,32 @@ extension_defaults = widget_defaults.copy()
 def init_widget_list():
     widget_list = [
         widget.Spacer(
-            background=colors[1],
+            background=nord[1],
             length=10,
         ),
         widget.Image(
-            background=colors[1],
+            background=nord[1],
             filename=assets + '/icons/icon_launch.png',
             margin=1,
             mouse_callbacks={"Button1": power},
         ),
         widget.Image(
-            background=colors[1],
+            background=nord[1],
             filename=assets + '/separators/sep_wave_rl.png',
         ),
         widget.GroupBox(
-            active=colors[5],
-            block_highlight_text_color=colors[5],
+            active=nord[5],
+            block_highlight_text_color=nord[5],
             borderwidth=3,
             disable_drag=True,
-            highlight_color=colors[2],
+            highlight_color=nord[2],
             highlight_method='line',
-            inactive=colors[4],
-            other_current_screen_border=colors[4],
-            other_screen_border=colors[4],
-            this_current_screen_border=colors[6],
-            this_screen_border=colors[6],
-            urgent_border=colors[1],
+            inactive=nord[4],
+            other_current_screen_border=nord[4],
+            other_screen_border=nord[4],
+            this_current_screen_border=nord[6],
+            this_screen_border=nord[6],
+            urgent_border=nord[1],
         ),
         widget.Spacer(
             length=8,
@@ -84,17 +70,17 @@ def init_widget_list():
             fontsize=14,
         ),
         widget.Image(
-            background=colors[1],
+            background=nord[1],
             filename=assets + '/separators/sep_wave_lr.png',
         ),
         widget.Image(
-            background=colors[1],
+            background=nord[1],
             filename=assets + '/icons/icon_search.png',
             margin=2,
             mouse_callbacks={"Button1": search},
         ),
         widget.TextBox(
-            background=colors[1],
+            background=nord[1],
             fmt='Search',
             font="Hack Nerd Font Mono Bold",
             fontsize=13,
@@ -112,14 +98,14 @@ def init_widget_list():
             filename=assets + '/separators/sep_circle_l.png',
         ),
         widget.Systray(
-            background=colors[1],
+            background=nord[1],
         ),
         widget.TextBox(
-            background=colors[1],
+            background=nord[1],
             text=' ',
         ),
         widget.Image(
-            background=colors[1],
+            background=nord[1],
             filename=assets + '/separators/sep_wave_rl.png',
         ),
         widget.Image(
@@ -176,16 +162,16 @@ def init_widget_list():
             filename=assets + '/separators/sep_wave_lr.png',
         ),
         widget.Image(
-            background=colors[1],
+            background=nord[1],
             filename=assets + '/icons/icon_clock.png',
             margin=5,
         ),
         widget.Clock(
-            background=colors[1],
+            background=nord[1],
             format="%H:%M:%S"
         ),
         widget.Spacer(
-            background=colors[1],
+            background=nord[1],
             length=10,
         ),
     ]

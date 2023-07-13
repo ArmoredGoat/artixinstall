@@ -2,7 +2,7 @@
 # import socket  # creating and using network sockets
 # import subprocess  # spawn new processes, connect to pipes, obtain return codes
 
-from colors import colors
+from colors import nord
 # K E Y B I N D S
 
 from keys import keys
