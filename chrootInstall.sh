@@ -828,9 +828,8 @@ install_pipewire () {
     chmod +x $homedir/.config/pipewire/.pipewire-start.sh
 }
 
-install_python () {
-    ### PYTHON
-        # python -
+install_pipx () {
+
         # python-pipx - 
     # https://pypa.github.io/pipx/
     # pipx is like pip a general-purpose package installer for Python and uses
@@ -843,13 +842,23 @@ install_python () {
     # pipx runs with regular user permissions and installs packages in 
     # ~/.local/bin, so make sure that it is on PATH by either add an export to
     # your .bashrc or by calling 'pipx ensurepath'.
-    pythonPackages="python python-setuptools python-virtualenv"
-    install_packages $pythonPackages
-
+    
     # Ensure pipx is on PATH before go further. On the finished system the 
     # PATH is set in ~/.bashrc
-    runuser -l "$username" -c "sudo pacman -Syu python-pipx && \
+    runuser -l "$username" -c "pip install pipx --break-system-packages && \
         pipx ensurepath"
+
+}
+
+install_python () {
+    ### PYTHON
+        # python -
+    pythonPackages="python python-pip python-setuptools python-virtualenv"
+    install_packages $pythonPackages
+
+    install_pipx
+
+
 }
 
 install_pywal () {
