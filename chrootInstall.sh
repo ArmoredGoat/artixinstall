@@ -569,6 +569,15 @@ configure_pacman () {
 }
 
 configure_shell () {
+    # T T Y
+    # Thanks to Rich Lewis, the TTYs and Ly's prompt also have a nordic theme
+    # https://github.com/lewisacidic/nord-tty
+    # Add the commands to change the colors of TTYs to start of /etc/issue 
+    # to run before the login prompt
+    cat $repoDirectory/dotfiles/themes/nord-tty.issue /etc/issue \
+        > /tmp/issue 
+    mv /tmp/issue /etc/issue
+
     # B A S H
 
     # Copy bash config files into user's home directory
