@@ -915,16 +915,15 @@ install_reflector () {
 }
 
 install_rofi () {
-    ### WINDOW SWITCHER
-
+    # Install rofi, dependencies and addiotional packages
     rofiPackages="rofi papirus-icon-theme"
-
     install_packages $rofiPackages
 
+    # Create directory for configuration files and scripts.
     create_directory $homedir/.config/rofi
-
-    cp $repoDirectory/dotfiles/rofi/config.rasi \
-        $homedir/.config/rofi/config.rasi
+    # Copy config files and scripts in directory.
+    cp -r $repoDirectory/dotfiles/rofi/* \
+        $homedir/.config/rofi/
 }
 
 install_trash_cli () {
