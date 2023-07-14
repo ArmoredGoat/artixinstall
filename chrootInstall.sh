@@ -906,7 +906,7 @@ install_qtile () {
     # 'bin/activate' inside. Then install psutil and iwlib with pip so qtile has
     # access to their functions. Afterwards, leave.
     runuser -l "$username" -c "virtualenv ~/.local/pipx/venvs/qtile && \
-        source virtualenv ~/.local/pipx/venvs/qtile/bin/activate && \
+        source ~/.local/pipx/venvs/qtile/bin/activate && \
         pip install psutil && \
         pip install iwlib && \
         deactivate"
