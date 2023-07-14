@@ -267,7 +267,7 @@ install_utiliy_packages () {
         # syslog-ng
         # syslog-ng-openrc
     ### SYSTEM INFORMARTION VIEWER
-        #
+        # fastfetch
     ### TASK MANAGER
         # bottom
     ### VERSION CONTROL SYSTEM
@@ -292,7 +292,7 @@ install_utiliy_packages () {
     configure_grub
     install_kitty
     install_virt_manager
-
+    install_fastfetch
     install_trash_cli
 }
 
@@ -639,6 +639,25 @@ install_yay () {
     runuser -l "$username" -c "yay -Y --devel --combinedupgrade \
         --batchinstall --save --noconfirm"
 }
+
+install_fastfetch () {
+    fastfetch_packages="chafa dbus dbus-openrc dconf ddcutil imagemagick libnm \
+        libpipewire libpulse libx11 libxrandr opencl-headers pciutils \
+        vulkan-headers zlib"
+    install_packages $fastfetch_packages
+
+    git clone https://github.com/fastfetch-cli/fastfetch $homedir/git/fastfetch
+
+    cd $homedir/git/fastfetch
+    mkdir -p $homedir/git/fastfetch/build
+    cd $homedir/git/fastfetch/build
+    cmake ..
+    cmake --build . --target fastfetch --target flashfetch
+    make install
+
+    create_directory $homedir/.config/fastfetch
+}
+
 
 install_git () {
     install_packages git
