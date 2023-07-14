@@ -656,6 +656,8 @@ install_fastfetch () {
     make install
 
     create_directory $homedir/.config/fastfetch
+    cp $repoDirectory/dotfiles/fastfetch/* \
+        $homedir/.config/fastfetch
 }
 
 
