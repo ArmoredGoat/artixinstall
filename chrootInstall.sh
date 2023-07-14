@@ -882,11 +882,12 @@ install_qtile () {
     #install_pip_package "git+https://github.com/qtile/qtile@master"
 
     # Create a virtual environment for qtile and enter it by sourcing it
-    # 'bin/activate' inside. Then install psutil with pip so qtile has access
-    # to its functions. Afterwards, leave.
+    # 'bin/activate' inside. Then install psutil and iwlib with pip so qtile has
+    # access to their functions. Afterwards, leave.
     runuser -l "$username" -c "virtualenv ~/.local/pipx/venvs/qtile && \
         source virtualenv ~/.local/pipx/venvs/qtile/bin/activate && \
         pip install psutil && \
+        pip install iwlib && \
         deactivate"
 
     create_directory $homedir/.config/qtile

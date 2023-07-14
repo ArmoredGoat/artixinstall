@@ -17,40 +17,31 @@ groups = [
     ),
     Group(
         name="2",
-        label="\uf120 ",
+        label="\uf269",
         layout="monadtall",
-        matches=[Match(wm_class=["nextcloud"])],
+        matches=[Match(wm_class=["firefox"])],
+        spawn=[browser]
     ),
     Group(
         name="3",
-        label="\uf269 ",
+        label="\uf120",
         layout="monadtall",
-        matches=[Match(wm_class=["firefox"])],
-        spawn=[browser,]
     ),
     Group(
         name="4",
-        label="\ueac4 ",
+        label="\ueac4",
         layout="monadtall",
-        matches=[Match(wm_class=[f"{fileManager}"])],
     ),
     Group(
         name="5",
-        label=" ",
+        label="󰙯", # \udb81\ude6f
         layout="monadtall",
         matches=[Match(wm_class=["discord"])],
         spawn=["discord"],
     ),
     Group(
         name="6",
-        label="\uf1b6 ",
-        layout="max",
-        matches=[Match(wm_class=["steam"])],
-        spawn=["steam"],
-    ),
-    Group(
-        name="7",
-        label="\uf001 ",
+        label="\uf001",
         layout="monadwide",
         spawn=[
             f"{terminal} -e cmus",
@@ -58,8 +49,15 @@ groups = [
         ],
     ),
     Group(
+        name="7",
+        label="\uf1b6",
+        layout="max",
+        matches=[Match(wm_class=["steam"])],
+        spawn=["steam"],
+    ),
+    Group(
         name="8",
-        label="\ueb06 ",
+        label="󰮂", # \udb82\udf82
         layout="monadtall",
     ),
 ]

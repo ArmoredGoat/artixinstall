@@ -8,16 +8,16 @@ config = os.path.expanduser('~/.config/qtile/')
 assets = os.path.expanduser('~/.config/qtile/assets/')
 
 def search():
-    qtile.cmd_spawn("rofi -show drun")
+    qtile.spawn("rofi -show drun")
 
 
 def power():
-    qtile.cmd_spawn("sh -c ~/.config/rofi/scripts/power")
+    qtile.spawn("sh -c ~/.config/rofi/scripts/power")
 
 
 widget_defaults = dict(
     background=nord[2],
-    font="Hack Nerd Font",
+    font="DejaVu Sans Mono Nerd Font",
     fontsize=16,
     foreground=nord[6],
     padding=2,
@@ -34,53 +34,59 @@ def init_widget_list():
         widget.Image(
             background=nord[1],
             filename=assets + '/icons/icon_launch.png',
-            margin=1,
+            margin=5,
             mouse_callbacks={"Button1": power},
         ),
         widget.Image(
-            background=nord[1],
-            filename=assets + '/separators/sep_wave_rl.png',
+            filename=assets + '/separators/sep_wave_rl_nord1_nord2.png',
         ),
         widget.GroupBox(
-            active=nord[5],
-            block_highlight_text_color=nord[5],
+            active=nord[4],
+            background=nord[2],
+            block_highlight_text_color=nord[4],
             borderwidth=3,
+            center_aligned=True,
             disable_drag=True,
-            highlight_color=nord[2],
-            highlight_method='line',
-            inactive=nord[4],
-            other_current_screen_border=nord[4],
-            other_screen_border=nord[4],
-            this_current_screen_border=nord[6],
-            this_screen_border=nord[6],
-            urgent_border=nord[1],
+            font="DejaVu Sans Mono Nerd Font",
+            fontsize=16,
+            highlight_method='block',
+            inactive=nord[10],
+            other_current_screen_border=nord[3],
+            other_screen_border=nord[3],
+            this_current_screen_border=nord[1],
+            this_screen_border=nord[1],
+            urgent_border=nord[11],
         ),
         widget.Spacer(
             length=8,
+            background=nord[2]
         ),
         widget.Image(
-            filename=assets + '/separators/sep_straight_lr.png',
+            filename=assets + '/separators/sep_straight_lr_nord2_nord1.png',
         ),
         widget.Image(
+            background=nord[1],
             filename=assets + '/icons/icon_layout.png',
         ),
         widget.CurrentLayout(
             fmt='{}',
+            background=nord[1],
             font="Hack Nerd Font Mono Bold",
-            fontsize=14,
+            fontsize=13,
+            foreground=nord[5],
         ),
         widget.Image(
-            background=nord[1],
-            filename=assets + '/separators/sep_wave_lr.png',
+            filename=assets + '/separators/sep_wave_lr_nord1_nord2.png',
         ),
         widget.Image(
-            background=nord[1],
+            background=nord[2],
             filename=assets + '/icons/icon_search.png',
             margin=2,
             mouse_callbacks={"Button1": search},
         ),
         widget.TextBox(
-            background=nord[1],
+            background=nord[2],
+            foreground=nord[5],
             fmt='Search',
             font="Hack Nerd Font Mono Bold",
             fontsize=13,
@@ -90,85 +96,99 @@ def init_widget_list():
             filename=assets + '/separators/sep_circle_r.png',
         ),
         widget.WindowName(
+            background=nord[1],
+            foreground=nord[5],
             empty_group_string="Desktop",
-            font="Hack Nerd Font Mono Bold",
+            font="DejaVu Sans Mono Nerd Font Bold",
             format="{name}",
         ),
         widget.Image(
             filename=assets + '/separators/sep_circle_l.png',
         ),
         widget.Systray(
-            background=nord[1],
+            background=nord[2],
         ),
         widget.TextBox(
-            background=nord[1],
+            background=nord[2],
             text=' ',
         ),
         widget.Image(
+            filename=assets + '/separators/sep_wave_rl_nord2_nord1.png',
+        ),
+        widget.Image(
             background=nord[1],
-            filename=assets + '/separators/sep_wave_rl.png',
-        ),
-        widget.Image(
-            filename=assets + '/icons/icon_cpu.png'
-        ),
-        widget.Spacer(
-            length=-5,
-        ),
-        widget.CPU(
-            format="{load_percent}%",
-            update_interval=5,
-        ),
-        widget.Image(
-            filename=assets + '/separators/sep_straight_rl.png',
-        ),
-        widget.Image(
-            filename=assets + '/icons/icon_ram.png',
-            margin=3,
-        ),
-        widget.Spacer(
-            length=-5,
-        ),
-        widget.Memory(
-            format="{MemPercent}%",
-            update_interval=5,
-        ),
-        widget.Image(
-            filename=assets + '/separators/sep_straight_rl.png',
-        ),
-        widget.Image(
             filename=assets + '/icons/icon_thermometer.png',
             margin=4,
         ),
         widget.Spacer(
+            background=nord[1],
             length=-2,
         ),
         widget.ThermalSensor(
+            background=nord[1],
             threshold=90,
             update_interval=5,
         ),
         widget.Image(
-            filename=assets + '/separators/sep_straight_rl.png',
+            filename=assets + '/separators/sep_straight_rl_nord1_nord2.png',
+        ),
+        widget.BatteryIcon(
+               background=nord[2], 
+               theme_path=assets + '/icons/battery/'
+                ),
+        widget.Battery(
+            background=nord[2],
+            font="DejaVu Sans Mono Nerd Font",
+            fontsize=14,
+            foreground=nord[5],
+                ),
+        widget.Image(
+            filename=assets + '/separators/sep_straight_rl_nord2_nord1.png',
+        ),
+        widget.Spacer(
+                background=nord[1],
+                length=5,
+                ),
+        widget.Wlan(
+            background=nord[1],
+            disconnected_message='Test',
+            foreground=nord[5],
+            format='{essid} Test',
+                ),
+        widget.Image(
+            filename=assets + '/separators/sep_straight_rl_nord1_nord2.png',
         ),
         widget.Volume(
-            theme_path=assets + '/volume/',
+            background=nord[2],
+            theme_path=assets + '/icons/volume/',
             emoji=True,
         ),
         widget.Spacer(
+            background=nord[2],
             length=-7,
         ),
         widget.Volume(
+            background=nord[2],
+            foreground=nord[5],
         ),
         widget.Image(
-            filename=assets + '/separators/sep_wave_lr.png',
+            filename=assets + '/separators/sep_wave_lr_nord2_nord1.png',
         ),
         widget.Image(
             background=nord[1],
             filename=assets + '/icons/icon_clock.png',
-            margin=5,
+            margin=4,
         ),
+        widget.Spacer(
+                background=nord[1],
+                length=-5,
+                ),
         widget.Clock(
             background=nord[1],
-            format="%H:%M:%S"
+            font="DejaVu Sans Mono Nerd Font",
+            fontsize=14,
+            foreground=nord[5],
+            format="%H:%M",
         ),
         widget.Spacer(
             background=nord[1],
