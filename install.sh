@@ -646,7 +646,7 @@ set_host_settings () {
     # Reset output color
     set_color $colorOff
 
-    printf "\n${squareYellow}\tSetting username...\n"
+    printf "\n${squareYellow}\tSetting hostname...\n"
 
     read -rp $'\nHostname: ' hostname
     delete_terminal_lines 4
