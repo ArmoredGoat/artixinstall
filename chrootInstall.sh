@@ -10,6 +10,9 @@ main () {
     # previously
     import_variables
 
+    pacman-key --refresh-keys
+    pacman -Syyu --noconfirm
+
     # Configure localization and clock with given timezone
     configure_localization
     configure_clock
@@ -555,9 +558,6 @@ configure_pacman () {
 
     # Uncomment every mirror temporarily to download reflector
     sed -i 's/^#Server/Server/' /etc/pacman.d/mirrorlist-arch
-
-    pacman-key --refresh-keys
-    pacman -Syyu
 
     # Install and enable support of Arch repositories
     install_packages artix-archlinux-support
