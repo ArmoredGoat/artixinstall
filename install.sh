@@ -29,6 +29,9 @@ main () {
     # Activate NTP daemon to synchronize computer's real-time clock
     start_service ntpd
 
+    pacman-key --refresh-keys
+    pacman -Syyu
+
     install_general_packages
 
     export_variables
