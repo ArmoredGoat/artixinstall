@@ -36,8 +36,8 @@ groups = [
         name="5",
         label="󰙯", # \udb81\ude6f
         layout="monadtall",
-        matches=[Match(wm_class=["discord"])],
-        spawn=["discord"],
+        matches=[Match(wm_class=["Vencord"])],
+        spawn=["vencord"],
     ),
     Group(
         name="6",

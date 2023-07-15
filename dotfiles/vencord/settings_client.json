@@ -1,0 +1,12 @@
+{
+    "minimizeToTray": "on",
+    "discordBranch": "stable",
+    "firstLaunch": false,
+    "staticTitle": true,
+    "windowBounds": {
+        "x": 645,
+        "y": 40,
+        "width": 628,
+        "height": 753
+    }
+}

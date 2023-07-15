@@ -132,7 +132,7 @@ install_internet_packages () {
     #### MULTI-PROTOCOL CLIENT
         # weechat -
     #### OTHER INSTANT MESSAGING CLIENTS
-        # discord -
+        # Vencord -
     ### NETWORK MANAGER
         # See install.sh. connman and wpa_supplicant are being used.
     ### VPN CLIENT
@@ -141,12 +141,13 @@ install_internet_packages () {
     ### WEB BROWSER
         # firefox-esr - 
 
-    internetPackages="nextcloud-client neomutt weechat discord wireguard-tools \
+    internetPackages="nextcloud-client neomutt weechat wireguard-tools \
         wireguard-openrc firefox"
 
     install_packages $internetPackages
+    install_vencord
 
-    add_service wireguard
+    #add_service wireguard
 }
 
 install_mulitmedia_packages () {
@@ -1004,6 +1005,22 @@ install_ufw () {
 
     cp $repoDirectory/dotfiles/ufw/* \
         /etc/ufw/
+}
+
+install_vencord () {
+    # https://github.com/Vendicated/Vencord
+    # Vencord is a modded Discord client (against TOS but rarely enforced) with
+    # support for custom css and themes, and hundreds of plugins to choose from.
+    # In addition, it is fairly lightweight and privacy friendly.
+    install_aur_packages vencord-desktop-git
+
+    # Make sure settings directories are present.
+    create_directory "$homedir/.config/VencordDesktop/VencordDesktop/settings"
+    # Copy both settings jsons into their corresponding directories.
+    cp $repoDirectory/dotfiles/vencord/settings_client.json \
+        $homedir/.config/VencordDesktop/VencordDesktop/settings.json
+    cp $repoDirectory/dotfiles/vencord/settings_client.json \
+        $homedir/.config/VencordDesktop/VencordDesktop/settings/settings.json
 }
 
 install_virt_manager () {
