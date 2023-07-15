@@ -851,11 +851,11 @@ install_picom () {
 
 install_pipewire () {
     # Remove jack2 as it creates conflicts with pipewire-jack
-    pacman -Rdd jack2 --noconfirm
+    pacman -Rdd jack2 pipewire-media-session --noconfirm
     # Install pipewire and related packages
     pacman -Syu pipewire lib32-pipewire pipewire-audio pipewire-alsa \
         pipewire-pulse pipewire-jack pipewire-docs wireplumber pavucontrol \
-        --needed --noconfirm
+        alsa-utils --needed --noconfirm
     # Create configuration directory
     create_directory $homedir/.config/pipewire
     # Copy configuration file into according directory

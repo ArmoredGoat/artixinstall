@@ -36,7 +36,7 @@ fi
 # Restore set wallpaper
 nitrogen --restore
 
-#sh ~/.config/pipewire/.pipewire-start.sh &
+sh ~/.config/pipewire/.pipewire-start.sh &
 
 # Start Qtile
 exec dbus-launch --exit-with-session /home/julius/.local/bin/qtile start
