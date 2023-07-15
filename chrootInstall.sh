@@ -571,7 +571,7 @@ configure_pacman () {
     " | pacman -Scc
     # Full system upgrade
     pacman -Syyu --noconfirm
-    
+
     # Install additional packages
     install_reflector
 
@@ -862,11 +862,15 @@ install_picom () {
 
 install_pipewire () {
     # Remove jack2 as it creates conflicts with pipewire-jack
-    pacman -Rdd jack2 pipewire-media-session --noconfirm
+    yes | pacman -S pipewire-jack
+    yes | pacman -S wireplumber
+
     # Install pipewire and related packages
-    pacman -Syu pipewire lib32-pipewire pipewire-audio pipewire-alsa \
+    pipewire_packages="pipewire lib32-pipewire pipewire-audio pipewire-alsa \
         pipewire-pulse pipewire-jack pipewire-docs wireplumber pavucontrol \
-        alsa-utils --needed --noconfirm
+        alsa-utils"
+    install_packages $pipewire_packages
+    
     # Create configuration directory
     create_directory $homedir/.config/pipewire
     # Copy configuration file into according directory
