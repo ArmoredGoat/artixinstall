@@ -10,9 +10,6 @@ main () {
     # previously
     import_variables
 
-    pacman-key --refresh-keys
-    pacman -Syyu --noconfirm
-
     # Configure localization and clock with given timezone
     configure_localization
     configure_clock
@@ -560,10 +557,21 @@ configure_pacman () {
     sed -i 's/^#Server/Server/' /etc/pacman.d/mirrorlist-arch
 
     # Install and enable support of Arch repositories
-    install_packages artix-archlinux-support
+    install_packages "artix-keyring archlinux-keyring artix-archlinux-support"
+    # Remove old an possibly expired, revoked or invalid keys
+    rm -r /etc/pacman.d/gnupg
+    # Initialize pacman keyring
+    pacman-key --init
     # Retrieve keys
-    pacman-key --populate archlinux
+    pacman-key --populate archlinux artix
 
+    # Clear out software from cache and unused repos.
+    echo "y
+    y
+    " | pacman -Scc
+    # Full system upgrade
+    pacman -Syyu --noconfirm
+    
     # Install additional packages
     install_reflector
 
