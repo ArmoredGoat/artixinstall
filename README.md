@@ -1,3 +1,23 @@
+# **PLEASE NOTE**
+
+This project is currently on hold.
+
+In the coming months, I will completely revamp this project. Instead of providing both a basic and a custom installation of Artix, this installer will only provide the former. This way, I can focus on a solid base installation process. The custom installation will move into another separate repository in which I will put an installation script for the packages and all my configuration files. This way, I can edit my config files without interfering with this repository.
+
+Eventually, this installer should provide
+
+- Encryption
+- BTRFS as root file system and subvolumes
+- Timeshift compatibility
+- Network connectivity
+- Base configuration
+  - Base packages for everyday use/development
+  - Senseful directory structure in home directory
+ 
+All in all, I aim to a solid but modern base installation from which someone can build in any desired direction.
+
+But first, I have to finish other task in life and research on stuff. Happy new year btw :)
+
 # ArtixInstall - an interactive Artix installation script
 
 (Work in progress)
